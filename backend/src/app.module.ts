@@ -12,6 +12,7 @@ import { ExportModule } from './export/export.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { DesignsModule } from './designs/designs.module';
 import { TracksModule } from './tracks/tracks.module';
+import { ContentModule } from './content/content.module';
 import { ExpiryService } from './tasks/expiry.service';
 
 @Module({
@@ -28,6 +29,7 @@ import { ExpiryService } from './tasks/expiry.service';
     UploadsModule,
     DesignsModule,
     TracksModule,
+    ContentModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],

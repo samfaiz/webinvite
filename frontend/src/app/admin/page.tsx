@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { AdminHeader } from "./AdminHeader";
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
@@ -16,7 +16,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 }
 
 export default function AdminPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<any>(null);
   const [invites, setInvites] = useState<any[]>([]);
@@ -42,16 +42,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f1ea]">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-4">
-          <span className="font-display text-lg uppercase tracking-[0.12em] text-[#2b3a67]">Eternal · Admin</span>
-          <Link href="/admin/designs" className="text-sm text-slate-500 hover:text-slate-800">Designs</Link>
-          <Link href="/admin/music" className="text-sm text-slate-500 hover:text-slate-800">Music</Link>
-          <Link href="/admin/settings" className="text-sm text-slate-500 hover:text-slate-800">Email settings</Link>
-          <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-800">My invitations</Link>
-        </div>
-        <button onClick={logout} className="text-sm text-rose-600 hover:underline">Log out</button>
-      </header>
+      <AdminHeader active="/admin" />
 
       <main className="mx-auto max-w-5xl px-6 py-10">
         {error ? <p className="mb-4 text-sm text-rose-600">{error}</p> : null}

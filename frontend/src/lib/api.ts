@@ -147,6 +147,22 @@ export const api = {
     return res.json();
   },
 
+  // CMS content (pages + blog posts)
+  listPosts: () => request<CmsDoc[]>("/blog"),
+  getPost: (slug: string) => request<CmsDoc>(`/blog/${slug}`),
+  listPages: () => request<CmsDoc[]>("/pages"),
+  getPage: (slug: string) => request<CmsDoc>(`/pages/${slug}`),
+  // CMS admin
+  adminListContent: (type: "page" | "post") => request<CmsDoc[]>(`/admin/content?type=${type}`, {}, true),
+  adminGetContent: (id: string) => request<CmsDoc>(`/admin/content/${id}`, {}, true),
+  createContent: (body: CmsInput) =>
+    request<CmsDoc>("/content", { method: "POST", body: JSON.stringify(body) }, true),
+  updateContent: (id: string, body: CmsInput) =>
+    request<CmsDoc>(`/content/${id}`, { method: "PUT", body: JSON.stringify(body) }, true),
+  publishContent: (id: string) => request<CmsDoc>(`/content/${id}/publish`, { method: "POST" }, true),
+  unpublishContent: (id: string) => request<CmsDoc>(`/content/${id}/unpublish`, { method: "POST" }, true),
+  deleteContent: (id: string) => request<{ ok: boolean }>(`/content/${id}`, { method: "DELETE" }, true),
+
   // music library
   listTracks: () => request<Track[]>("/tracks"),
   adminListTracks: () => request<Track[]>("/admin/tracks", {}, true),
@@ -210,4 +226,41 @@ export type TrackInput = {
   mood?: string;
   url: string;
   active?: boolean;
+};
+
+/** A CMS document (marketing page or blog post). `blocks` is present on
+ *  single-doc reads; list endpoints omit it. */
+export interface CmsDoc {
+  id: string;
+  type: "page" | "post";
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  tags: string[];
+  authorName?: string | null;
+  status: "draft" | "published";
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  ogImage?: string | null;
+  noindex: boolean;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  blocks?: unknown[];
+}
+
+export type CmsInput = {
+  type: "page" | "post";
+  slug: string;
+  title: string;
+  excerpt?: string;
+  coverImage?: string;
+  blocks?: unknown[];
+  tags?: string[];
+  authorName?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImage?: string;
+  noindex?: boolean;
 };

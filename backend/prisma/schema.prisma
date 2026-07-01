@@ -86,6 +86,32 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
+/// CMS content — marketing pages ("page") and blog posts ("post"). Body is a
+/// list of editor blocks stored as JSON; per-doc SEO fields feed the page's
+/// <head>. One row serves both types so the block editor/renderer are shared.
+model ContentDoc {
+  id             String    @id @default(cuid())
+  type           String // "page" | "post"
+  slug           String
+  title          String
+  excerpt        String? // short summary (blog cards, meta fallback)
+  coverImage     String? // hero/cover image URL
+  blocksJson     String    @default("[]") // Block[] as JSON
+  tagsJson       String    @default("[]") // string[] as JSON
+  authorName     String?
+  status         String    @default("draft") // "draft" | "published"
+  seoTitle       String?
+  seoDescription String?
+  ogImage        String?
+  noindex        Boolean   @default(false)
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([type, slug])
+  @@index([type, status])
+}
+
 /// Curated background-music library. Couples pick a track for their invitation;
 /// admins manage the list (upload/host the audio and set title + mood).
 model Track {
