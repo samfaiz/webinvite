@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  /* Theme tokens are injected at runtime by <ThemeProvider>; these are fallbacks. */
+  --c-bg: #eef2f6;
+  --c-surface: #fbf8f1;
+  --c-primary: #2b3a67;
+  --c-secondary: #3f5b8b;
+  --c-accent: #b08d57;
+  --c-text: #33414f;
+  --c-muted: #7c8aa0;
+  --c-grad-from: #dfe7f0;
+  --c-grad-to: #cdd9e8;
+
+  --f-display: var(--font-cinzel), serif;
+  --f-script: var(--font-greatvibes), cursive;
+  --f-body: var(--font-cormorant), serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS zooms in when focusing inputs smaller than 16px — force 16px on phones. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--c-accent) 35%, transparent);
+}
+
+/* Utility font helpers used across blocks */
+.font-display {
+  font-family: var(--f-display);
+  letter-spacing: 0.12em;
+}
+.font-script {
+  font-family: var(--f-script);
+}
+.font-body {
+  font-family: var(--f-body);
+}
+
+/* Shared keyframes */
+@keyframes float-up {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* WYSIWYG inline editing affordances (editor preview only) */
+.wysiwyg-editable {
+  outline: 1px dashed color-mix(in srgb, var(--c-accent) 55%, transparent);
+  outline-offset: 3px;
+  border-radius: 4px;
+  cursor: text;
+  transition: background 0.15s;
+}
+.wysiwyg-editable:hover {
+  background: color-mix(in srgb, var(--c-accent) 10%, transparent);
+}
+.wysiwyg-editable:focus {
+  outline: 2px solid var(--c-accent);
+  background: color-mix(in srgb, var(--c-accent) 6%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

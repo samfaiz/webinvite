@@ -1,0 +1,35 @@
+# Production stack for a single VPS. Host nginx (with certbot) terminates TLS
+# and reverse-proxies to these containers on 127.0.0.1. See DEPLOY.md.
+#
+#   NEXT_PUBLIC_API_URL is read from the root .env at build time.
+
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # SQLite lives on a persistent named volume, not the container layer
+      DATABASE_URL: "file:/data/prod.db"
+      PORT: "4000"
+    volumes:
+      - db:/data
+      - uploads:/app/uploads
+    ports:
+      - "127.0.0.1:4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL}"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  db:
+  uploads:

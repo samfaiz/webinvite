@@ -1,0 +1,39 @@
+# ---- dependencies ----
+node_modules/
+**/node_modules/
+
+# ---- builds / caches ----
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+.vercel/
+coverage/
+
+# ---- env / secrets (keep the .example templates) ----
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# ---- database: NEVER commit real data (SQLite) ----
+*.db
+*.db-journal
+*.sqlite
+backend/prisma/*.db*
+
+# ---- uploaded user media & generated exports ----
+backend/uploads/
+backend/exports/
+
+# ---- large media / reference recordings (not source) ----
+*.mp4
+*.mov
+
+# ---- os / editor ----
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

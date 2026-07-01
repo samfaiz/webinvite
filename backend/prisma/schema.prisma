@@ -1,0 +1,98 @@
+// Wedding-invitation SaaS data model.
+//
+// DEV uses SQLite (zero install). For PRODUCTION switch to PostgreSQL:
+//   1. change provider below to "postgresql"
+//   2. set DATABASE_URL to your Postgres connection string (e.g. Neon)
+//   3. delete prisma/migrations (SQLite-specific) and run `npx prisma migrate dev`
+// Content/theme are stored as JSON strings so the schema is identical on both.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String?
+  passwordHash String
+  role         String       @default("user") // "user" | "admin"
+  createdAt    DateTime     @default(now())
+  invitations  Invitation[]
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug        String?   @unique // null for drafts; set on publish
+  templateId  String
+  themeId     String
+  motifId     String
+  themeJson   String // custom Theme object as JSON
+  contentJson String // InvitationContent as JSON
+  status      String    @default("draft") // "draft" | "published" | "expired"
+  eventDate   DateTime?
+  expiryDate  DateTime?
+  ownerEmail  String?
+  views       Int       @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  rsvps       Rsvp[]
+
+  @@index([userId])
+}
+
+model Design {
+  id             String   @id @default(cuid())
+  name           String
+  community      String // motif community key
+  templateId     String // base layout
+  colorsJson     String // Theme.colors JSON
+  fontsJson      String // Theme.fonts JSON
+  particlesJson  String // Theme.particles JSON
+  backgroundsJson String // { hero?, families?, story?, schedule?, rsvp?, all? } image URLs
+  previewUrl     String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([community])
+}
+
+model Rsvp {
+  id           String     @id @default(cuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  guestName    String
+  attending    String // "accept" | "decline"
+  guests       Int        @default(1)
+  message      String?
+  createdAt    DateTime   @default(now())
+
+  @@index([invitationId])
+}
+
+/// Admin-configurable app settings, stored as a flat key→value map.
+/// Mail keys: mail.fromName, mail.fromEmail, mail.smtpHost, mail.smtpPort,
+/// mail.smtpUser, mail.smtpPass, mail.enabled.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Curated background-music library. Couples pick a track for their invitation;
+/// admins manage the list (upload/host the audio and set title + mood).
+model Track {
+  id        String   @id @default(cuid())
+  title     String
+  mood      String? // e.g. "Romantic", "Acoustic", "Cinematic"
+  url       String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
