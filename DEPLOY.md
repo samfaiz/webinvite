@@ -109,6 +109,107 @@ SQLite is fine for launch-level traffic. If writes grow heavy, switch to
 PostgreSQL: change the Prisma `provider` to `postgresql`, add a `db` service to
 compose, regenerate migrations, and point `DATABASE_URL` at it. Ask and I'll wire it.
 
+---
+
+# Alternative: CloudPanel (or any panel-managed server)
+
+If your site lives at `/home/<user>/htdocs/<domain>` (e.g.
+`/home/webinvite/htdocs/webinvite.co`), you're on **CloudPanel**. It already
+runs nginx + Let's Encrypt, so **skip Docker + host-nginx above** and run the two
+Node apps with **PM2**, then point CloudPanel's vhost at them.
+
+### 1. Create the site in CloudPanel
+Add a **Node.js** site for your domain (pick **Node 20+**). CloudPanel creates
+the user + `/home/<user>/htdocs/<domain>` and can issue the SSL cert (SSL/TLS tab).
+
+### 2. Get the code into the site dir
+SSH in, then (as root, or `su - <user>`):
+```bash
+cd /home/webinvite/htdocs/webinvite.co
+rm -f index.html            # remove CloudPanel's placeholder if present
+git clone https://github.com/<you>/<repo>.git .
+npm install -g pm2          # if not already installed
+```
+
+### 3. Backend
+```bash
+cd /home/webinvite/htdocs/webinvite.co/backend
+cp .env.example .env
+nano .env
+#   JWT_SECRET=<openssl rand -hex 32>
+#   FRONTEND_ORIGIN=https://webinvite.co
+#   DATABASE_URL="file:./prisma/prod.db"
+#   PORT=4000
+npm ci
+npx prisma migrate deploy
+npm run build
+```
+
+### 4. Frontend
+```bash
+cd /home/webinvite/htdocs/webinvite.co/frontend
+echo 'NEXT_PUBLIC_API_URL=https://webinvite.co/api' > .env.local
+npm ci
+npm run build
+```
+
+### 5. Start both with PM2
+```bash
+cd /home/webinvite/htdocs/webinvite.co
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup          # run the command it prints (as root) so they survive reboot
+pm2 status           # webinvite-api + webinvite-web should be "online"
+```
+
+### 6. Point CloudPanel's vhost at the apps
+Site → **Vhost** tab. Inside the `server { ... }` block, set the body-size limit
+and route the three paths (put `/api/` and `/uploads/` **before** the `/` block):
+```nginx
+client_max_body_size 100M;
+
+location /api/ {
+    proxy_pass http://127.0.0.1:4000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+location /uploads/ {
+    proxy_pass http://127.0.0.1:4000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+Save (CloudPanel reloads nginx), then enable **Let's Encrypt SSL** in the SSL/TLS tab.
+
+### 7. First admin
+```bash
+cd /home/webinvite/htdocs/webinvite.co/backend
+echo "UPDATE User SET role='admin' WHERE email='you@example.com';" \
+  | npx prisma db execute --schema prisma/schema.prisma --stdin
+```
+
+### Updating later
+```bash
+cd /home/webinvite/htdocs/webinvite.co && git pull
+cd backend  && npm ci && npx prisma migrate deploy && npm run build && pm2 restart webinvite-api
+cd ../frontend && npm ci && npm run build && pm2 restart webinvite-web
+```
+
+Uploads live at `backend/uploads/` and the DB at `backend/prisma/prod.db` — both
+on the normal filesystem, so back them up (and they survive redeploys).
+
+---
+
 ## Troubleshooting
 - **502 from nginx** → a container isn't up: `docker compose ps` / `logs`.
 - **Uploads/images 404 or wrong host** → confirm nginx passes `Host` and
