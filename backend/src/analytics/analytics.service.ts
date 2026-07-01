@@ -116,4 +116,23 @@ export class AnalyticsService {
       ga: await this.ga.summary().catch(() => ({ configured: false })),
     };
   }
+
+  /** Views per path (all paths) + total — consumed by the AI SEO layer so the
+   *  weekly audit can prioritise low-traffic pages and feed traffic to Claude. */
+  async pageStats(days = 30): Promise<{ days: number; totalViews: number; byPath: Record<string, number> }> {
+    const d = Math.min(365, Math.max(1, Math.floor(days) || 30));
+    const from = new Date(Date.now() - d * 86_400_000);
+    const rows = await this.prisma.pageView.groupBy({
+      by: ['path'],
+      where: { createdAt: { gte: from } },
+      _count: { path: true },
+    });
+    const byPath: Record<string, number> = {};
+    let totalViews = 0;
+    for (const r of rows) {
+      byPath[r.path] = r._count.path;
+      totalViews += r._count.path;
+    }
+    return { days: d, totalViews, byPath };
+  }
 }

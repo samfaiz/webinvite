@@ -19,6 +19,11 @@ export class SeoController {
     return this.svc.listProposals(status || 'pending');
   }
 
+  @Get('insights')
+  insights(@Query('days') days?: string) {
+    return this.svc.insights(days ? parseInt(days, 10) : 30);
+  }
+
   @Post('audit')
   audit() {
     return this.svc.runAudit();

@@ -10,6 +10,10 @@ import { ConfigService } from '@nestjs/config';
 import type { ContentDoc, SeoProposal } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
+import { AnalyticsService } from '../analytics/analytics.service';
+
+type PageStats = { days: number; totalViews: number; byPath: Record<string, number> };
+type Traffic = { views: number; days: number; note: string };
 
 type MemoryNote = { at: string; note: string; source: string };
 
@@ -32,6 +36,7 @@ export class SeoService {
     private prisma: PrismaService,
     private ai: AiService,
     private config: ConfigService,
+    private analytics: AnalyticsService,
   ) {}
 
   status() {
@@ -40,9 +45,29 @@ export class SeoService {
 
   /* --------------------------- text extraction --------------------------- */
 
+  private pathFor(doc: Pick<ContentDoc, 'type' | 'slug'>): string {
+    return `${doc.type === 'post' ? '/blog/' : '/p/'}${doc.slug}`;
+  }
+
   private urlFor(doc: Pick<ContentDoc, 'type' | 'slug'>): string {
     const origin = (this.config.get<string>('FRONTEND_ORIGIN') || 'https://webinvite.co').split(',')[0].trim();
-    return `${origin}${doc.type === 'post' ? '/blog/' : '/p/'}${doc.slug}`;
+    return `${origin}${this.pathFor(doc)}`;
+  }
+
+  /** Turn a doc's traffic into a human note the AI can reason about + prioritise. */
+  private trafficFor(doc: Pick<ContentDoc, 'type' | 'slug'>, stats: PageStats): Traffic {
+    const views = stats.byPath[this.pathFor(doc)] || 0;
+    const active = Object.keys(stats.byPath).length || 1;
+    const avg = stats.totalViews / active;
+    const rel =
+      views === 0
+        ? 'no recorded visits yet — needs discovery'
+        : views < avg * 0.5
+          ? 'well below the site average — a priority to improve'
+          : views > avg * 1.5
+            ? 'a top performer'
+            : 'around the site average';
+    return { views, days: stats.days, note: `${views} views in the last ${stats.days} days (${rel})` };
   }
 
   /** Flatten a doc's blocks into plain text for the model. */
@@ -79,7 +104,7 @@ export class SeoService {
 
   /* ----------------------------- generation ------------------------------ */
 
-  private async runSeo(doc: ContentDoc) {
+  private async runSeo(doc: ContentDoc, traffic?: Traffic) {
     const memory = (await this.getMemory(doc.id)).map((n) => n.note);
     return this.ai.generateSeo({
       title: doc.title,
@@ -88,19 +113,24 @@ export class SeoService {
       currentTitle: doc.seoTitle,
       currentDescription: doc.seoDescription,
       memory,
+      traffic,
     });
   }
 
   /** Editor "Suggest with AI" — returns a suggestion without persisting it. */
   async suggest(contentId: string) {
     const doc = await this.mustGetDoc(contentId);
-    return this.runSeo(doc);
+    const stats = await this.analytics.pageStats(30);
+    return this.runSeo(doc, this.trafficFor(doc, stats));
   }
 
-  /** Create a persisted proposal (queued for admin review). */
-  async proposeForContent(contentId: string, source: 'audit' | 'manual') {
+  /** Create a persisted proposal (queued for admin review). `stats` is passed in
+   *  during a full audit so we fetch traffic once, not per page. */
+  async proposeForContent(contentId: string, source: 'audit' | 'manual', stats?: PageStats) {
     const doc = await this.mustGetDoc(contentId);
-    const s = await this.runSeo(doc);
+    const s2 = stats ?? (await this.analytics.pageStats(30));
+    const traffic = this.trafficFor(doc, s2);
+    const s = await this.runSeo(doc, traffic);
     const row = await this.prisma.seoProposal.create({
       data: {
         contentId,
@@ -113,15 +143,22 @@ export class SeoService {
         rationale: s.rationale,
       },
     });
-    return this.proposalDto(row, doc);
+    // record the traffic snapshot + top issue so the AI has performance history next time
+    await this.appendMemory(contentId, `Audited — ${traffic.note}. Top issue: ${s.issues[0] ?? 'none'}`, source);
+    return this.proposalDto(row, doc, traffic.views);
   }
 
-  /** Audit every published doc that doesn't already have a pending proposal. */
+  /** Audit published docs, lowest-traffic first, skipping any with a pending
+   *  proposal. Traffic is fetched once and fed to Claude for prioritisation. */
   async runAudit() {
     if (!this.ai.isConfigured()) {
       throw new BadRequestException('AI is not configured. Set ANTHROPIC_API_KEY in the backend environment.');
     }
+    const stats = await this.analytics.pageStats(30);
     const docs = await this.prisma.contentDoc.findMany({ where: { status: 'published' } });
+    // underperformers (fewest views) first
+    docs.sort((a, b) => (stats.byPath[this.pathFor(a)] || 0) - (stats.byPath[this.pathFor(b)] || 0));
+
     let proposed = 0;
     let skipped = 0;
     for (const doc of docs) {
@@ -131,7 +168,7 @@ export class SeoService {
         continue;
       }
       try {
-        await this.proposeForContent(doc.id, 'audit');
+        await this.proposeForContent(doc.id, 'audit', stats);
         proposed++;
       } catch (e) {
         this.logger.error(`Audit failed for ${doc.id}: ${(e as Error).message}`);
@@ -144,12 +181,47 @@ export class SeoService {
   /* ------------------------------ review --------------------------------- */
 
   async listProposals(status = 'pending') {
-    const rows = await this.prisma.seoProposal.findMany({
-      where: { status },
-      orderBy: { createdAt: 'desc' },
-      include: { content: true },
-    });
-    return rows.map((r) => this.proposalDto(r, r.content));
+    const [rows, stats] = await Promise.all([
+      this.prisma.seoProposal.findMany({
+        where: { status },
+        orderBy: { createdAt: 'desc' },
+        include: { content: true },
+      }),
+      this.analytics.pageStats(30),
+    ]);
+    return rows.map((r) => this.proposalDto(r, r.content, stats.byPath[this.pathFor(r.content)] ?? 0));
+  }
+
+  /** Published pages ranked by traffic (lowest first) so the admin can see which
+   *  pages the AI should prioritise. Pure analytics — works without an AI key. */
+  async insights(days = 30) {
+    const stats = await this.analytics.pageStats(days);
+    const [docs, pending] = await Promise.all([
+      this.prisma.contentDoc.findMany({
+        where: { status: 'published' },
+        select: { id: true, title: true, type: true, slug: true },
+      }),
+      this.prisma.seoProposal.findMany({ where: { status: 'pending' }, select: { contentId: true } }),
+    ]);
+    const pendingSet = new Set(pending.map((p) => p.contentId));
+    const pages = docs
+      .map((d) => ({
+        contentId: d.id,
+        title: d.title,
+        type: d.type,
+        slug: d.slug,
+        path: this.pathFor(d),
+        views: stats.byPath[this.pathFor(d)] ?? 0,
+        pending: pendingSet.has(d.id),
+      }))
+      .sort((a, b) => a.views - b.views);
+    return {
+      days: stats.days,
+      siteViews: stats.totalViews,
+      avgViews: docs.length ? Math.round(stats.totalViews / docs.length) : 0,
+      configured: this.ai.isConfigured(),
+      pages,
+    };
   }
 
   async approve(id: string) {
@@ -220,7 +292,11 @@ export class SeoService {
     return doc;
   }
 
-  private proposalDto(p: SeoProposal, content: Pick<ContentDoc, 'title' | 'type' | 'slug' | 'seoTitle' | 'seoDescription'>) {
+  private proposalDto(
+    p: SeoProposal,
+    content: Pick<ContentDoc, 'title' | 'type' | 'slug' | 'seoTitle' | 'seoDescription'>,
+    views?: number,
+  ) {
     return {
       id: p.id,
       contentId: p.contentId,
@@ -232,6 +308,7 @@ export class SeoService {
       issues: safeParse<string[]>(p.issuesJson, []),
       rationale: p.rationale,
       content: { title: content.title, type: content.type, slug: content.slug },
+      traffic: views == null ? undefined : { views, days: 30 },
       createdAt: p.createdAt,
       reviewedAt: p.reviewedAt,
     };

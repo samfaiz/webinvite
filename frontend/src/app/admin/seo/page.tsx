@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { api, type SeoProposal } from "@/lib/api";
+import { api, type SeoProposal, type SeoInsights } from "@/lib/api";
 import { AdminHeader } from "../AdminHeader";
 
 function ScoreDot({ score }: { score?: number | null }) {
@@ -21,6 +22,7 @@ export default function AdminSeoPage() {
   const router = useRouter();
   const [status, setStatus] = useState<{ configured: boolean; model: string } | null>(null);
   const [proposals, setProposals] = useState<SeoProposal[] | null>(null);
+  const [insights, setInsights] = useState<SeoInsights | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [topic, setTopic] = useState("");
@@ -28,9 +30,10 @@ export default function AdminSeoPage() {
 
   const load = useCallback(async () => {
     try {
-      const [st, ps] = await Promise.all([api.seoStatus(), api.seoProposals("pending")]);
+      const [st, ps, ins] = await Promise.all([api.seoStatus(), api.seoProposals("pending"), api.seoInsights(30)]);
       setStatus(st);
       setProposals(ps);
+      setInsights(ins);
     } catch (e) {
       setMsg((e as Error).message);
       setProposals([]);
@@ -155,6 +158,35 @@ export default function AdminSeoPage() {
           </div>
         </section>
 
+        {/* pages ranked by traffic — the AI prioritises the quiet ones */}
+        {insights && insights.pages.length ? (
+          <section className="mb-8 rounded-xl border border-slate-200 bg-white p-5">
+            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Pages by traffic</h2>
+              <span className="text-xs text-slate-400">
+                {insights.siteViews.toLocaleString()} views · avg {insights.avgViews}/page · last {insights.days} days
+              </span>
+            </div>
+            <p className="mb-3 text-xs text-slate-400">Lowest-traffic first — the weekly audit optimises these before the rest.</p>
+            <div className="divide-y divide-slate-100">
+              {insights.pages.slice(0, 8).map((p) => (
+                <div key={p.contentId} className="flex items-center justify-between gap-3 py-2">
+                  <div className="min-w-0">
+                    <Link href={`/admin/content/${p.contentId}`} className="truncate text-sm font-medium text-slate-800 hover:text-[#2b3a67] hover:underline">
+                      {p.title}
+                    </Link>
+                    <span className="ml-2 text-xs text-slate-400">{p.path}</span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {p.pending ? <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">suggestion pending</span> : null}
+                    <span className="w-20 text-right text-sm text-slate-600">{p.views.toLocaleString()} views</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         {/* review queue */}
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">
           Pending suggestions {proposals ? `(${proposals.length})` : ""}
@@ -177,6 +209,9 @@ export default function AdminSeoPage() {
                     <span className="text-xs text-slate-400">/{p.content.type === "post" ? "blog" : "p"}/{p.content.slug}</span>
                   </div>
                   <div className="flex items-center gap-3">
+                    {p.traffic ? (
+                      <span className="text-xs text-slate-500">{p.traffic.views.toLocaleString()} views · {p.traffic.days}d</span>
+                    ) : null}
                     <ScoreDot score={p.score} />
                     <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] text-slate-400">{p.source}</span>
                   </div>

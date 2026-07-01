@@ -80,6 +80,7 @@ export class AiService {
     currentTitle?: string | null;
     currentDescription?: string | null;
     memory?: string[];
+    traffic?: { views: number; days: number; note: string };
   }): Promise<SeoSuggestion> {
     const system =
       'You are an expert SEO specialist for "Web Invite", a wedding-invitation website builder. ' +
@@ -88,6 +89,9 @@ export class AiService {
     const memoryBlock = input.memory?.length
       ? `Past SEO notes for this page (respect prior decisions):\n- ${input.memory.join('\n- ')}\n\n`
       : '';
+    const trafficBlock = input.traffic
+      ? `Recent traffic: ${input.traffic.note}. If traffic is low, be more compelling and keyword-focused to win clicks.\n\n`
+      : '';
     const user =
       `Optimise the SEO for this page.\n\n` +
       `URL: ${input.url}\n` +
@@ -95,6 +99,7 @@ export class AiService {
       `Current meta description: ${input.currentDescription || '(none)'}\n` +
       `Page title: ${input.title}\n` +
       `Page content (truncated):\n${input.body.slice(0, 4000)}\n\n` +
+      trafficBlock +
       memoryBlock +
       `Return JSON with exactly these keys: ` +
       `{"seoTitle": string (<= 60 characters, compelling, primary keyword near the front), ` +

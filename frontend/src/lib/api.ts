@@ -166,6 +166,7 @@ export const api = {
   // AI SEO (admin)
   seoStatus: () => request<{ configured: boolean; model: string }>("/admin/seo/status", {}, true),
   seoProposals: (status = "pending") => request<SeoProposal[]>(`/admin/seo/proposals?status=${status}`, {}, true),
+  seoInsights: (days = 30) => request<SeoInsights>(`/admin/seo/insights?days=${days}`, {}, true),
   seoRunAudit: () => request<{ proposed: number; skipped: number; total: number }>("/admin/seo/audit", { method: "POST" }, true),
   seoSuggest: (contentId: string) => request<SeoSuggestion>(`/admin/seo/content/${contentId}/suggest`, { method: "POST" }, true),
   seoApprove: (id: string) => request<SeoProposal>(`/admin/seo/proposals/${id}/approve`, { method: "POST" }, true),
@@ -297,8 +298,25 @@ export interface SeoProposal {
   issues: string[];
   rationale?: string | null;
   content: { title: string; type: "page" | "post"; slug: string };
+  traffic?: { views: number; days: number };
   createdAt?: string;
   reviewedAt?: string | null;
+}
+
+export interface SeoInsights {
+  days: number;
+  siteViews: number;
+  avgViews: number;
+  configured: boolean;
+  pages: {
+    contentId: string;
+    title: string;
+    type: "page" | "post";
+    slug: string;
+    path: string;
+    views: number;
+    pending: boolean;
+  }[];
 }
 
 export interface BlogDraft {
