@@ -62,6 +62,40 @@ const STEPS: Step[] = [
   { id: "finish", frame: "frame-rsvp", title: "Finish & publish", Comp: null },
 ];
 
+/* ---- media flush: keep base64 out of the saved invitation JSON ---- */
+
+/** True if the content still has any inline base64 media that should be uploaded. */
+function hasEmbeddedMedia(content: Draft["content"]): boolean {
+  const photos = content.story?.items ?? [];
+  if (photos.some((it) => typeof it.photo === "string" && it.photo.startsWith("data:"))) return true;
+  return typeof content.envelope?.videoUrl === "string" && content.envelope.videoUrl.startsWith("data:");
+}
+
+/** Convert a base64 data URL to a File for multipart upload. */
+async function dataUrlToFile(dataUrl: string, name: string): Promise<File> {
+  const blob = await (await fetch(dataUrl)).blob();
+  const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+  return new File([blob], `${name}.${ext}`, { type: blob.type || "image/jpeg" });
+}
+
+/** Upload any inline base64 media to /uploads/media and swap in the URLs.
+ *  Mutates `content`. Requires the user to be signed in (the upload is JWT-guarded). */
+async function flushEmbeddedMedia(content: Draft["content"]): Promise<void> {
+  const items = content.story?.items ?? [];
+  for (let i = 0; i < items.length; i++) {
+    const p = items[i].photo;
+    if (typeof p === "string" && p.startsWith("data:")) {
+      const { url } = await api.uploadMedia(await dataUrlToFile(p, `story-${i + 1}`));
+      items[i].photo = url;
+    }
+  }
+  const v = content.envelope?.videoUrl;
+  if (typeof v === "string" && v.startsWith("data:")) {
+    const { url } = await api.uploadMedia(await dataUrlToFile(v, "intro"));
+    content.envelope.videoUrl = url;
+  }
+}
+
 function Review({
   draft,
   user,
@@ -311,10 +345,20 @@ export default function CreateWizard() {
     setBusy(true);
     setMsg("");
     try {
+      // move any base64 photos/video out of the JSON into uploaded files, so the
+      // saved invitation stays small and published pages load fast
+      const flushed = structuredClone(draft);
+      if (hasEmbeddedMedia(flushed.content)) {
+        setMsg("Uploading photos…");
+        await flushEmbeddedMedia(flushed.content);
+        setDraft(flushed); // keep the URLs locally (autosaves, avoids re-upload)
+        setMsg("");
+      }
+
       let id = serverId;
-      if (id) await api.updateInvitation(id, buildBody(draft));
+      if (id) await api.updateInvitation(id, buildBody(flushed));
       else {
-        const inv = await api.createInvitation(buildBody(draft));
+        const inv = await api.createInvitation(buildBody(flushed));
         id = inv.id;
         setServerId(id);
       }
