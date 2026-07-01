@@ -163,6 +163,16 @@ export const api = {
   unpublishContent: (id: string) => request<CmsDoc>(`/content/${id}/unpublish`, { method: "POST" }, true),
   deleteContent: (id: string) => request<{ ok: boolean }>(`/content/${id}`, { method: "DELETE" }, true),
 
+  // AI SEO (admin)
+  seoStatus: () => request<{ configured: boolean; model: string }>("/admin/seo/status", {}, true),
+  seoProposals: (status = "pending") => request<SeoProposal[]>(`/admin/seo/proposals?status=${status}`, {}, true),
+  seoRunAudit: () => request<{ proposed: number; skipped: number; total: number }>("/admin/seo/audit", { method: "POST" }, true),
+  seoSuggest: (contentId: string) => request<SeoSuggestion>(`/admin/seo/content/${contentId}/suggest`, { method: "POST" }, true),
+  seoApprove: (id: string) => request<SeoProposal>(`/admin/seo/proposals/${id}/approve`, { method: "POST" }, true),
+  seoReject: (id: string) => request<SeoProposal>(`/admin/seo/proposals/${id}/reject`, { method: "POST" }, true),
+  seoBlogDraft: (topic: string, keywords?: string[]) =>
+    request<BlogDraft>("/admin/seo/blog-draft", { method: "POST", body: JSON.stringify({ topic, keywords }) }, true),
+
   // music library
   listTracks: () => request<Track[]>("/tracks"),
   adminListTracks: () => request<Track[]>("/admin/tracks", {}, true),
@@ -264,3 +274,33 @@ export type CmsInput = {
   ogImage?: string;
   noindex?: boolean;
 };
+
+export interface SeoSuggestion {
+  seoTitle: string;
+  seoDescription: string;
+  score: number;
+  issues: string[];
+  rationale: string;
+}
+
+export interface SeoProposal {
+  id: string;
+  contentId: string;
+  status: "pending" | "applied" | "rejected";
+  source: "audit" | "manual";
+  score?: number | null;
+  proposed: { seoTitle?: string | null; seoDescription?: string | null };
+  current: { seoTitle?: string | null; seoDescription?: string | null };
+  issues: string[];
+  rationale?: string | null;
+  content: { title: string; type: "page" | "post"; slug: string };
+  createdAt?: string;
+  reviewedAt?: string | null;
+}
+
+export interface BlogDraft {
+  title: string;
+  excerpt: string;
+  tags: string[];
+  blocks: unknown[];
+}

@@ -34,6 +34,8 @@ export default function ContentEditorPage() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [showDetails, setShowDetails] = useState(false);
+  const [aiBusy, setAiBusy] = useState<"seo" | "blog" | null>(null);
+  const [aiNote, setAiNote] = useState("");
   const ogInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -131,6 +133,41 @@ export default function ContentEditorPage() {
     }
   };
 
+  // AI: fill the meta title/description from Claude's suggestion (admin saves to apply)
+  const suggestSeo = async () => {
+    setAiBusy("seo");
+    setAiNote("");
+    try {
+      const s = await api.seoSuggest(id);
+      setForm((f) => (f ? { ...f, seoTitle: s.seoTitle, seoDescription: s.seoDescription } : f));
+      setAiNote(`AI rates the current SEO ${s.score}/100. ${s.rationale} — review and Save to apply.`);
+      setShowDetails(true);
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  // AI: draft the whole post body from a topic
+  const writeWithAi = async () => {
+    const topic = window.prompt("What should this post be about?", form && form.title !== "Untitled" ? form.title : "");
+    if (!topic || !topic.trim()) return;
+    if (blocks.length && !confirm("Replace the current content with the AI draft?")) return;
+    setAiBusy("blog");
+    setMsg("Writing with AI…");
+    try {
+      const draft = await api.seoBlogDraft(topic.trim());
+      setForm((f) => (f ? { ...f, title: draft.title, excerpt: draft.excerpt, tags: draft.tags.join(", ") } : f));
+      setBlocks(normalizeBlocks(draft.blocks));
+      setMsg("Draft ready — review, then Save/Publish.");
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
   if (loading || !user || user.role !== "admin" || !form) {
     return <div className="flex h-screen items-center justify-center text-slate-400">Loading…</div>;
   }
@@ -154,7 +191,10 @@ export default function ContentEditorPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {msg ? <span className="max-w-[36ch] truncate text-[11px] text-slate-500">{msg}</span> : null}
+          {msg ? <span className="max-w-[32ch] truncate text-[11px] text-slate-500">{msg}</span> : null}
+          <button onClick={writeWithAi} disabled={aiBusy === "blog"} className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:opacity-60">
+            {aiBusy === "blog" ? "Writing…" : "✨ Write with AI"}
+          </button>
           <button onClick={() => setShowDetails((v) => !v)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
             Details &amp; SEO
           </button>
@@ -200,7 +240,13 @@ export default function ContentEditorPage() {
               ) : null}
             </div>
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">SEO</p>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">SEO</p>
+                <button onClick={suggestSeo} disabled={aiBusy === "seo"} className="rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700 hover:bg-violet-100 disabled:opacity-60">
+                  {aiBusy === "seo" ? "Thinking…" : "✨ Suggest with AI"}
+                </button>
+              </div>
+              {aiNote ? <p className="mb-2 rounded-md bg-violet-50/70 px-2 py-1 text-[11px] text-violet-700">{aiNote}</p> : null}
               <label className="mb-2 block text-xs text-slate-500">Meta title <span className="text-slate-300">(defaults to the page title)</span>
                 <TextInput value={form.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} />
               </label>

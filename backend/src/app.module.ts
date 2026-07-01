@@ -13,6 +13,8 @@ import { UploadsModule } from './uploads/uploads.module';
 import { DesignsModule } from './designs/designs.module';
 import { TracksModule } from './tracks/tracks.module';
 import { ContentModule } from './content/content.module';
+import { AiModule } from './ai/ai.module';
+import { SeoModule } from './seo/seo.module';
 import { ExpiryService } from './tasks/expiry.service';
 
 @Module({
@@ -30,6 +32,8 @@ import { ExpiryService } from './tasks/expiry.service';
     DesignsModule,
     TracksModule,
     ContentModule,
+    AiModule,
+    SeoModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],

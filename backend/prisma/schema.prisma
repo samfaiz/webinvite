@@ -108,8 +108,40 @@ model ContentDoc {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  seoProposals SeoProposal[]
+  seoMemory    SeoMemory?
+
   @@unique([type, slug])
   @@index([type, status])
+}
+
+/// AI-generated SEO suggestion for a ContentDoc, awaiting admin review.
+/// Approving applies the proposed fields to the doc and appends to its memory.
+model SeoProposal {
+  id             String     @id @default(cuid())
+  contentId      String
+  content        ContentDoc @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  status         String     @default("pending") // pending | applied | rejected
+  source         String     @default("audit") // audit | manual
+  score          Int? // 0-100 SEO score at audit time
+  seoTitle       String?
+  seoDescription String?
+  issuesJson     String     @default("[]") // detected issues (string[])
+  rationale      String?
+  createdAt      DateTime   @default(now())
+  reviewedAt     DateTime?
+
+  @@index([status])
+  @@index([contentId])
+}
+
+/// Per-page SEO memory: an append-only history of decisions the AI reads before
+/// proposing, and writes to when a proposal is approved.
+model SeoMemory {
+  contentId String     @id
+  content   ContentDoc @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  notesJson String     @default("[]") // [{ at, note, source }]
+  updatedAt DateTime   @updatedAt
 }
 
 /// Curated background-music library. Couples pick a track for their invitation;
