@@ -16,12 +16,15 @@ import { ContentModule } from './content/content.module';
 import { AiModule } from './ai/ai.module';
 import { SeoModule } from './seo/seo.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { SecretsModule } from './secrets/secrets.module';
+import { IntegrationsModule } from './secrets/integrations.module';
 import { ExpiryService } from './tasks/expiry.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    SecretsModule,
     PrismaModule,
     AuthModule,
     InvitationsModule,
@@ -36,6 +39,7 @@ import { ExpiryService } from './tasks/expiry.service';
     AiModule,
     SeoModule,
     AnalyticsModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],

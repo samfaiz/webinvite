@@ -1,44 +1,46 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JWT } from 'google-auth-library';
+import { IntegrationsService } from '../secrets/integrations.service';
 
 /**
  * Google Analytics 4 reporting via the Data API (REST — no gRPC/native deps).
- * Enabled only when GA4_PROPERTY_ID and a service-account key
- * (GA_SERVICE_ACCOUNT_JSON) are set; otherwise reports { configured: false }.
+ * Property id + service account come from Admin → Integrations (or env). When
+ * unset, reports { configured: false }. The client rebuilds when the admin
+ * changes the credentials — no restart needed.
  */
 @Injectable()
 export class GaService {
   private readonly logger = new Logger(GaService.name);
-  private jwt: JWT | null = null;
-  private propertyId: string | null = null;
+  private cache: { fingerprint: string; jwt: JWT; propertyId: string } | null = null;
 
-  constructor(private config: ConfigService) {
-    const propId = this.config.get<string>('GA4_PROPERTY_ID');
-    const credsRaw = this.config.get<string>('GA_SERVICE_ACCOUNT_JSON');
-    if (propId && credsRaw) {
-      try {
-        const creds = JSON.parse(credsRaw) as { client_email: string; private_key: string };
-        this.jwt = new JWT({
-          email: creds.client_email,
-          key: creds.private_key,
-          scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
-        });
-        this.propertyId = propId.replace(/^properties\//, '');
-        this.logger.log('Google Analytics reporting enabled');
-      } catch {
-        this.logger.error('GA_SERVICE_ACCOUNT_JSON is not valid JSON — GA reporting disabled');
-      }
+  constructor(private integrations: IntegrationsService) {}
+
+  async isConfigured(): Promise<boolean> {
+    return !!(await this.integrations.getGaConfig());
+  }
+
+  private async getClient(): Promise<{ jwt: JWT; propertyId: string } | null> {
+    const cfg = await this.integrations.getGaConfig();
+    if (!cfg) {
+      this.cache = null;
+      return null;
     }
+    const fingerprint = `${cfg.propertyId}|${cfg.serviceAccountJson.length}`;
+    if (!this.cache || this.cache.fingerprint !== fingerprint) {
+      const creds = JSON.parse(cfg.serviceAccountJson) as { client_email: string; private_key: string };
+      const jwt = new JWT({
+        email: creds.client_email,
+        key: creds.private_key,
+        scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
+      });
+      this.cache = { fingerprint, jwt, propertyId: cfg.propertyId.replace(/^properties\//, '') };
+    }
+    return this.cache;
   }
 
-  isConfigured(): boolean {
-    return !!this.jwt;
-  }
-
-  private async runReport(body: Record<string, unknown>): Promise<any> {
-    const { token } = await this.jwt!.getAccessToken();
-    const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${this.propertyId}:runReport`, {
+  private async runReport(client: { jwt: JWT; propertyId: string }, body: Record<string, unknown>): Promise<any> {
+    const { token } = await client.jwt.getAccessToken();
+    const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${client.propertyId}:runReport`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -48,14 +50,20 @@ export class GaService {
   }
 
   async summary() {
-    if (!this.jwt) return { configured: false as const };
+    let client: { jwt: JWT; propertyId: string } | null;
+    try {
+      client = await this.getClient();
+    } catch {
+      return { configured: true as const, error: 'The service-account JSON is invalid.' };
+    }
+    if (!client) return { configured: false as const };
     try {
       const range = [{ startDate: '28daysAgo', endDate: 'today' }];
-      const totals = await this.runReport({
+      const totals = await this.runReport(client, {
         dateRanges: range,
         metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
       });
-      const top = await this.runReport({
+      const top = await this.runReport(client, {
         dateRanges: range,
         dimensions: [{ name: 'pagePath' }],
         metrics: [{ name: 'screenPageViews' }],
@@ -78,5 +86,13 @@ export class GaService {
       this.logger.error(`GA report failed: ${(e as Error).message}`);
       return { configured: true as const, error: (e as Error).message };
     }
+  }
+
+  /** For the "Test" button — returns ok/error. */
+  async test(): Promise<{ ok: boolean; error?: string }> {
+    const s = await this.summary();
+    if (!s.configured) return { ok: false, error: 'Property id and/or service account not set' };
+    if ('error' in s && s.error) return { ok: false, error: s.error };
+    return { ok: true };
   }
 }

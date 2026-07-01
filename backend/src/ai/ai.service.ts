@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { IntegrationsService } from '../secrets/integrations.service';
 
 export type SeoSuggestion = {
   seoTitle: string;
@@ -26,35 +26,43 @@ export type BlogDraft = {
 export class AiService {
   private readonly logger = new Logger(AiService.name);
   private client: Anthropic | null = null;
-  private readonly model: string;
+  private cachedKey: string | null = null;
 
-  constructor(private config: ConfigService) {
-    const key = this.config.get<string>('ANTHROPIC_API_KEY');
-    this.model = this.config.get<string>('ANTHROPIC_MODEL') || 'claude-sonnet-4-6';
-    if (key) {
-      this.client = new Anthropic({ apiKey: key });
-      this.logger.log(`AI enabled (model: ${this.model})`);
-    } else {
-      this.logger.warn('AI disabled — set ANTHROPIC_API_KEY to enable SEO/content generation');
+  constructor(private integrations: IntegrationsService) {}
+
+  async isConfigured(): Promise<boolean> {
+    return !!(await this.integrations.getAiKey());
+  }
+
+  async getModel(): Promise<string> {
+    return this.integrations.getAiModel();
+  }
+
+  /** Build (or reuse) the client for the currently-configured key. Rebuilds
+   *  automatically when the admin changes the key — no restart needed. */
+  private async getClient(): Promise<Anthropic | null> {
+    const key = await this.integrations.getAiKey();
+    if (!key) {
+      this.client = null;
+      this.cachedKey = null;
+      return null;
     }
-  }
-
-  isConfigured(): boolean {
-    return !!this.client;
-  }
-
-  getModel(): string {
-    return this.model;
+    if (key !== this.cachedKey) {
+      this.client = new Anthropic({ apiKey: key });
+      this.cachedKey = key;
+    }
+    return this.client;
   }
 
   private async complete(system: string, user: string, maxTokens: number): Promise<string> {
-    if (!this.client) {
+    const client = await this.getClient();
+    if (!client) {
       throw new ServiceUnavailableException(
-        'AI is not configured. Set ANTHROPIC_API_KEY in the backend environment to enable this.',
+        'AI is not configured. Add an Anthropic API key in Admin → Integrations (or set ANTHROPIC_API_KEY).',
       );
     }
-    const res = await this.client.messages.create({
-      model: this.model,
+    const res = await client.messages.create({
+      model: await this.integrations.getAiModel(),
       max_tokens: maxTokens,
       system,
       messages: [{ role: 'user', content: user }],
@@ -63,6 +71,22 @@ export class AiService {
       .map((b) => (b.type === 'text' ? b.text : ''))
       .join('')
       .trim();
+  }
+
+  /** Cheap liveness check for the "Test" button in Admin → Integrations. */
+  async ping(): Promise<{ ok: boolean; error?: string }> {
+    const client = await this.getClient();
+    if (!client) return { ok: false, error: 'No API key configured' };
+    try {
+      await client.messages.create({
+        model: await this.integrations.getAiModel(),
+        max_tokens: 8,
+        messages: [{ role: 'user', content: 'Reply with OK.' }],
+      });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: (e as Error).message };
+    }
   }
 
   /** Extract the first JSON object from a text blob (models sometimes wrap it). */

@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/admin/seo", label: "AI SEO" },
   { href: "/admin/designs", label: "Designs" },
   { href: "/admin/music", label: "Music" },
+  { href: "/admin/integrations", label: "Integrations" },
   { href: "/admin/settings", label: "Email settings" },
   { href: "/dashboard", label: "My invitations" },
 ];

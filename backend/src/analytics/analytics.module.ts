@@ -6,6 +6,6 @@ import { GaService } from './ga.service';
 @Module({
   controllers: [AnalyticsController],
   providers: [AnalyticsService, GaService],
-  exports: [AnalyticsService],
+  exports: [AnalyticsService, GaService],
 })
 export class AnalyticsModule {}

@@ -177,6 +177,13 @@ export const api = {
   // analytics (admin)
   adminAnalytics: (days = 30) => request<AnalyticsSummary>(`/admin/analytics/summary?days=${days}`, {}, true),
 
+  // integrations (admin) — API keys & GA config, secrets encrypted at rest
+  getIntegrations: () => request<IntegrationsStatus>("/admin/integrations", {}, true),
+  saveIntegrations: (body: IntegrationsUpdate) =>
+    request<IntegrationsStatus>("/admin/integrations", { method: "PUT", body: JSON.stringify(body) }, true),
+  testAiKey: () => request<{ ok: boolean; error?: string }>("/admin/integrations/test-ai", { method: "POST" }, true),
+  testGa: () => request<{ ok: boolean; error?: string }>("/admin/integrations/test-ga", { method: "POST" }, true),
+
   // music library
   listTracks: () => request<Track[]>("/tracks"),
   adminListTracks: () => request<Track[]>("/admin/tracks", {}, true),
@@ -324,6 +331,30 @@ export interface BlogDraft {
   excerpt: string;
   tags: string[];
   blocks: unknown[];
+}
+
+export interface IntegrationsStatus {
+  encryption: { dedicatedKey: boolean };
+  ai: { model: string; hasKey: boolean; keyPreview: string; source: "admin" | "env" | null };
+  seo: { auditCron: boolean };
+  ga: {
+    measurementId: string;
+    propertyId: string;
+    hasServiceAccount: boolean;
+    serviceAccountPreview: string;
+    source: "admin" | "env" | null;
+  };
+}
+
+export interface IntegrationsUpdate {
+  aiApiKey?: string;
+  clearAiApiKey?: boolean;
+  aiModel?: string;
+  auditCron?: boolean;
+  gaMeasurementId?: string;
+  gaPropertyId?: string;
+  gaServiceAccountJson?: string;
+  clearGaServiceAccount?: boolean;
 }
 
 export interface AnalyticsSummary {

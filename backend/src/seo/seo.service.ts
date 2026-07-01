@@ -11,6 +11,7 @@ import type { ContentDoc, SeoProposal } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { IntegrationsService } from '../secrets/integrations.service';
 
 type PageStats = { days: number; totalViews: number; byPath: Record<string, number> };
 type Traffic = { views: number; days: number; note: string };
@@ -37,10 +38,11 @@ export class SeoService {
     private ai: AiService,
     private config: ConfigService,
     private analytics: AnalyticsService,
+    private integrations: IntegrationsService,
   ) {}
 
-  status() {
-    return { configured: this.ai.isConfigured(), model: this.ai.getModel() };
+  async status() {
+    return { configured: await this.ai.isConfigured(), model: await this.ai.getModel() };
   }
 
   /* --------------------------- text extraction --------------------------- */
@@ -151,8 +153,8 @@ export class SeoService {
   /** Audit published docs, lowest-traffic first, skipping any with a pending
    *  proposal. Traffic is fetched once and fed to Claude for prioritisation. */
   async runAudit() {
-    if (!this.ai.isConfigured()) {
-      throw new BadRequestException('AI is not configured. Set ANTHROPIC_API_KEY in the backend environment.');
+    if (!(await this.ai.isConfigured())) {
+      throw new BadRequestException('AI is not configured. Add an Anthropic API key in Admin → Integrations.');
     }
     const stats = await this.analytics.pageStats(30);
     const docs = await this.prisma.contentDoc.findMany({ where: { status: 'published' } });
@@ -219,7 +221,7 @@ export class SeoService {
       days: stats.days,
       siteViews: stats.totalViews,
       avgViews: docs.length ? Math.round(stats.totalViews / docs.length) : 0,
-      configured: this.ai.isConfigured(),
+      configured: await this.ai.isConfigured(),
       pages,
     };
   }
@@ -275,8 +277,8 @@ export class SeoService {
   // Every Monday 03:00 — proposes (never applies) so nothing changes without review.
   @Cron('0 3 * * 1')
   async weeklyAudit() {
-    if (!this.ai.isConfigured()) return;
-    if ((this.config.get<string>('SEO_AUDIT_CRON') || 'on').toLowerCase() === 'off') return;
+    if (!(await this.ai.isConfigured())) return;
+    if (!(await this.integrations.getAuditCronEnabled())) return;
     try {
       await this.runAudit();
     } catch (e) {

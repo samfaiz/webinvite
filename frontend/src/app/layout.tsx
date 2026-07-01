@@ -10,14 +10,12 @@ import {
   Dancing_Script,
   Parisienne,
 } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { SITE, organizationLd, websiteLd, softwareApplicationLd } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-
-const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -115,14 +113,7 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <JsonLd data={[organizationLd(), websiteLd(), softwareApplicationLd()]} />
-        {GA4_ID ? (
-          <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} strategy="afterInteractive" />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');`}
-            </Script>
-          </>
-        ) : null}
+        <GoogleAnalytics />
         <AnalyticsTracker />
         <AuthProvider>{children}</AuthProvider>
       </body>
