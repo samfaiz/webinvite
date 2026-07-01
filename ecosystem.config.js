@@ -3,7 +3,7 @@
 // repo root (e.g. /home/webinvite/htdocs/webinvite.co).
 //
 //   backend  → NestJS API on 127.0.0.1:4000 (reads backend/.env)
-//   frontend → Next.js on 127.0.0.1:3000
+//   frontend → Next.js on 127.0.0.1:3007
 
 module.exports = {
   apps: [
@@ -18,7 +18,7 @@ module.exports = {
       cwd: "frontend",
       script: "node_modules/next/dist/bin/next",
       args: "start",
-      env: { NODE_ENV: "production", PORT: "3000" },
+      env: { NODE_ENV: "production", PORT: "3007" },
     },
   ],
 };
