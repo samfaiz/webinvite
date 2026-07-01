@@ -14,6 +14,7 @@ import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { EnvelopeIntro } from "@/blocks/EnvelopeIntro";
 import { VideoIntro } from "@/blocks/VideoIntro";
 import { resolveSeal } from "@/lib/initials";
+import { StyleOverrides } from "@/components/StyleOverrides";
 import { HeroClassic } from "@/blocks/HeroClassic";
 import { Countdown } from "@/blocks/Countdown";
 import { Families } from "@/blocks/Families";
@@ -51,6 +52,7 @@ export function RoyalOrnateTemplate({
       className={`relative overflow-x-hidden ${snap ? "h-svh snap-y snap-mandatory overflow-y-auto" : "min-h-screen"}`}
     >
       {snap ? null : <SmoothScroll />}
+      <StyleOverrides content={content} />
       <ParticleField type={theme.particles.type} color={theme.particles.color} />
 
       <AnimatePresence>

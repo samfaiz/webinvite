@@ -14,7 +14,9 @@ import {
   RsvpFields,
   CoverFields,
   SettingsPanel,
+  FormatPanel,
   type PanelProps,
+  type SelectedText,
 } from "@/studio/panels";
 import { getTheme } from "@/themes";
 import { getMotif } from "@/motifs";
@@ -180,6 +182,7 @@ export default function CreateWizard() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [publishedUrl, setPublishedUrl] = useState("");
+  const [selected, setSelected] = useState<SelectedText | null>(null);
 
   // initial routing: ?design / ?preset jump straight to build; else start at caste
   useEffect(() => {
@@ -243,6 +246,9 @@ export default function CreateWizard() {
           next.content.offsets = { ...(next.content.offsets || {}), [e.data.key]: e.data.value };
           return next;
         });
+      }
+      if (e.data?.type === "select" && e.data.path) {
+        setSelected({ path: e.data.path, current: e.data.current });
       }
     }
     window.addEventListener("message", onMsg);
@@ -557,6 +563,12 @@ export default function CreateWizard() {
           ) : null}
         </aside>
       </div>
+
+      {selected ? (
+        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 lg:left-auto lg:right-[420px] lg:translate-x-0">
+          <FormatPanel draft={draft} update={update} selected={selected} onClose={() => setSelected(null)} />
+        </div>
+      ) : null}
     </div>
   );
 }

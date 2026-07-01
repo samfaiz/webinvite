@@ -12,6 +12,13 @@ type RenderPayload = {
   content: any;
 };
 
+/** "rgb(43, 58, 103)" → "#2b3a67" (for seeding the colour picker). */
+function rgbToHex(rgb: string): string {
+  const m = rgb.match(/\d+/g);
+  if (!m || m.length < 3) return "#000000";
+  return "#" + m.slice(0, 3).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+}
+
 /**
  * Render target loaded inside the editor's <iframe>. Because it's a real iframe
  * viewport, svh + scroll-snap behave like a phone (one screen at a time). With
@@ -57,6 +64,27 @@ export default function StudioEmbed() {
         el.blur();
       }
     }
+    // when a text element is focused, tell the parent so it can show the format panel
+    function onFocusIn(e: FocusEvent) {
+      if (!edit) return;
+      const el = (e.target as HTMLElement)?.closest?.("[data-edit]") as HTMLElement | null;
+      if (!el) return;
+      const cs = getComputedStyle(el);
+      window.parent?.postMessage(
+        {
+          type: "select",
+          path: el.dataset.edit,
+          current: {
+            fontSize: Math.round(parseFloat(cs.fontSize) || 16),
+            color: rgbToHex(cs.color),
+            bold: (parseInt(cs.fontWeight, 10) || 400) >= 600,
+            italic: cs.fontStyle === "italic",
+            align: (cs.textAlign === "start" ? "left" : cs.textAlign) || "left",
+          },
+        },
+        "*",
+      );
+    }
 
     // drag-to-reposition: nudge a [data-move] block up/down within its section.
     // A small movement is treated as a click (so inner text stays editable);
@@ -91,6 +119,7 @@ export default function StudioEmbed() {
     window.addEventListener("message", onMsg);
     document.addEventListener("input", onInput);
     document.addEventListener("keydown", onKeydown);
+    document.addEventListener("focusin", onFocusIn);
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
@@ -104,6 +133,7 @@ export default function StudioEmbed() {
       window.removeEventListener("message", onMsg);
       document.removeEventListener("input", onInput);
       document.removeEventListener("keydown", onKeydown);
+      document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerup", onPointerUp);

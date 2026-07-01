@@ -13,7 +13,9 @@ import {
   ColorsPanel,
   PhotosPanel,
   SettingsPanel,
+  FormatPanel,
   type PanelProps,
+  type SelectedText,
 } from "@/studio/panels";
 
 const TABS: { id: string; label: string; Comp: (p: PanelProps) => React.ReactNode }[] = [
@@ -35,6 +37,7 @@ export default function StudioPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const suppressPost = useRef(false);
   const [embedReady, setEmbedReady] = useState(false);
+  const [selected, setSelected] = useState<SelectedText | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -86,6 +89,9 @@ export default function StudioPage() {
           return next;
         });
       }
+      if (e.data?.type === "select" && e.data.path) {
+        setSelected({ path: e.data.path, current: e.data.current });
+      }
     }
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
@@ -111,6 +117,16 @@ export default function StudioPage() {
       "*",
     );
   }, [draft, embedReady]);
+
+  // expanding a section group scrolls the preview to that section
+  useEffect(() => {
+    function onScroll(e: Event) {
+      const frame = (e as CustomEvent).detail;
+      if (frame) iframeRef.current?.contentWindow?.postMessage({ type: "scrollTo", frame }, "*");
+    }
+    window.addEventListener("preview:scrollTo", onScroll);
+    return () => window.removeEventListener("preview:scrollTo", onScroll);
+  }, []);
 
   if (!draft) {
     return <div className="flex h-screen items-center justify-center text-slate-400">Loading Studio…</div>;
@@ -266,6 +282,12 @@ export default function StudioPage() {
           </div>
         </main>
       </div>
+
+      {selected ? (
+        <div className="fixed right-5 top-16 z-50">
+          <FormatPanel draft={draft} update={update} selected={selected} onClose={() => setSelected(null)} />
+        </div>
+      ) : null}
     </div>
   );
 }

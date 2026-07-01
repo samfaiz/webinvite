@@ -1,5 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, Cormorant_Garamond, Great_Vibes, Jost } from "next/font/google";
+import {
+  Cinzel,
+  Cormorant_Garamond,
+  Great_Vibes,
+  Jost,
+  Playfair_Display,
+  Marcellus,
+  EB_Garamond,
+  Dancing_Script,
+  Parisienne,
+} from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 
@@ -34,6 +44,17 @@ const jost = Jost({
   weight: ["300", "400", "500"],
 });
 
+// Additional display/body fonts offered in the Studio text Format panel.
+const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["latin"], weight: ["400", "700"] });
+const marcellus = Marcellus({ variable: "--font-marcellus", subsets: ["latin"], weight: ["400"] });
+const ebGaramond = EB_Garamond({ variable: "--font-ebgaramond", subsets: ["latin"], weight: ["400", "600"] });
+const dancing = Dancing_Script({ variable: "--font-dancing", subsets: ["latin"], weight: ["400", "700"] });
+const parisienne = Parisienne({ variable: "--font-parisienne", subsets: ["latin"], weight: ["400"] });
+
+const fontVars = [cinzel, cormorant, greatVibes, jost, playfair, marcellus, ebGaramond, dancing, parisienne]
+  .map((f) => f.variable)
+  .join(" ");
+
 export const metadata: Metadata = {
   title: "Eternal — Wedding Invitations",
   description:
@@ -48,7 +69,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${cormorant.variable} ${greatVibes.variable} ${jost.variable} h-full antialiased`}
+      className={`${fontVars} h-full antialiased`}
     >
       <body className="min-h-full">
         <AuthProvider>{children}</AuthProvider>

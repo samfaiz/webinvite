@@ -58,6 +58,16 @@ export interface MapPoint {
 
 export type SectionKey = "families" | "story" | "schedule" | "rsvp";
 
+/** Per-element text formatting override (applied by data-edit path). */
+export interface TextStyle {
+  fontFamily?: string;
+  fontSize?: number; // px
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  align?: "left" | "center" | "right";
+}
+
 export interface InvitationContent {
   meta: {
     slug: string;
@@ -70,6 +80,8 @@ export interface InvitationContent {
   /** per-block vertical nudge (px), keyed by block id — lets couples drag a text
    *  block up/down within its section to sit nicely over the background art. */
   offsets?: Record<string, number>;
+  /** per-element text formatting overrides, keyed by the element's data-edit path. */
+  styles?: Record<string, TextStyle>;
   couple: Couple;
   /** the sealed-envelope intro */
   envelope: {

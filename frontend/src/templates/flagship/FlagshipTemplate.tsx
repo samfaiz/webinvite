@@ -13,6 +13,7 @@ import { MusicToggle } from "@/components/MusicToggle";
 import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { EnvelopeIntro } from "@/blocks/EnvelopeIntro";
 import { VideoIntro } from "@/blocks/VideoIntro";
+import { StyleOverrides } from "@/components/StyleOverrides";
 import { resolveSeal } from "@/lib/initials";
 import { Hero } from "@/blocks/Hero";
 import { Families } from "@/blocks/Families";
@@ -53,6 +54,7 @@ export function FlagshipTemplate({
       className={`relative overflow-x-hidden ${snap ? "h-svh snap-y snap-mandatory overflow-y-auto" : "min-h-screen"}`}
     >
       {snap ? null : <SmoothScroll />}
+      <StyleOverrides content={content} />
       <ParticleField type={theme.particles.type} color={theme.particles.color} />
 
       <AnimatePresence>

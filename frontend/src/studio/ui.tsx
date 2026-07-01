@@ -106,13 +106,32 @@ export function Group({
   title,
   children,
   open = false,
+  frame,
 }: {
   title: string;
   children: ReactNode;
   open?: boolean;
+  /** when set, opening this group scrolls the live preview to that section frame */
+  frame?: string;
 }) {
   return (
-    <details open={open} className="mb-2 rounded-lg border border-slate-200 bg-slate-50/60">
+    <details
+      open={open}
+      onToggle={
+        frame
+          ? (e) => {
+              if ((e.currentTarget as HTMLDetailsElement).open) {
+                try {
+                  window.dispatchEvent(new CustomEvent("preview:scrollTo", { detail: frame }));
+                } catch {
+                  /* ignore */
+                }
+              }
+            }
+          : undefined
+      }
+      className="mb-2 rounded-lg border border-slate-200 bg-slate-50/60"
+    >
       <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-slate-700">
         {title}
       </summary>

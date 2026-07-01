@@ -9,7 +9,7 @@ import { themeList, getTheme } from "@/themes";
 import { motifList, getMotif } from "@/motifs";
 import { googleMapsUrl, targetFromEvent } from "@/lib/maps";
 import { sealInitials } from "@/lib/initials";
-import { orderedSections, type SectionKey } from "@/engine/types";
+import { orderedSections, type SectionKey, type TextStyle } from "@/engine/types";
 import { api, type Track } from "@/lib/api";
 
 export type PanelProps = {
@@ -592,17 +592,82 @@ export function RsvpFields({ draft, update }: PanelProps) {
   );
 }
 
+/* ------------------------ per-element text formatting ------------------------ */
+
+export type SelectedText = {
+  path: string;
+  current: { fontSize: number; color: string; bold: boolean; italic: boolean; align: "left" | "center" | "right" };
+};
+
+/** Floating formatting toolbar for the text element the user clicked on the preview. */
+export function FormatPanel({
+  draft,
+  update,
+  selected,
+  onClose,
+}: PanelProps & { selected: SelectedText; onClose: () => void }) {
+  const s = draft.content.styles?.[selected.path] ?? {};
+  const cur = selected.current;
+  const setStyle = (patch: Partial<TextStyle>) =>
+    update((d) => {
+      d.content.styles = d.content.styles || {};
+      d.content.styles[selected.path] = { ...(d.content.styles[selected.path] || {}), ...patch };
+    });
+  const reset = () =>
+    update((d) => {
+      if (d.content.styles) delete d.content.styles[selected.path];
+    });
+
+  const size = s.fontSize ?? cur.fontSize;
+  const color = s.color ?? cur.color;
+  const bold = s.bold ?? cur.bold;
+  const italic = s.italic ?? cur.italic;
+  const align = s.align ?? cur.align;
+  const label = selected.path.split(".").slice(-1)[0];
+  const btn = (active: boolean) =>
+    `grid h-8 w-8 place-items-center rounded border text-sm ${active ? "border-[#2b3a67] bg-[#2b3a67] text-white" : "border-slate-200 text-slate-700 hover:bg-slate-50"}`;
+
+  return (
+    <div className="w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-2xl">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Format · {label}</span>
+        <button onClick={onClose} aria-label="Close" className="text-slate-400 hover:text-slate-700">✕</button>
+      </div>
+      <Field label="Font">
+        <Select value={s.fontFamily ?? ""} onChange={(v) => setStyle({ fontFamily: v || undefined })} options={[{ value: "", label: "Default" }, ...FONTS]} />
+      </Field>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label={`Size · ${size}px`}>
+          <input type="range" min={10} max={80} value={size} onChange={(e) => setStyle({ fontSize: Number(e.target.value) })} className="w-full" />
+        </Field>
+        <Field label="Colour"><ColorInput value={color} onChange={(v) => setStyle({ color: v })} /></Field>
+      </div>
+      <div className="mt-1 flex items-center gap-1">
+        <button onClick={() => setStyle({ bold: !bold })} className={`${btn(!!bold)} font-bold`}>B</button>
+        <button onClick={() => setStyle({ italic: !italic })} className={`${btn(!!italic)} italic`}>I</button>
+        <span className="mx-1 h-5 w-px bg-slate-200" />
+        {(["left", "center", "right"] as const).map((a) => (
+          <button key={a} onClick={() => setStyle({ align: a })} className={btn(align === a)} title={a}>
+            {a === "left" ? "⯇" : a === "center" ? "≡" : "⯈"}
+          </button>
+        ))}
+        <button onClick={reset} className="ml-auto text-[11px] text-slate-500 underline hover:text-slate-800">Reset</button>
+      </div>
+    </div>
+  );
+}
+
 /** All content groups in one scroll (used by the advanced Studio). */
 export function ContentPanel({ draft, update }: PanelProps) {
   return (
     <div>
-      <Group title="Envelope & Intro" open><EnvelopeFields draft={draft} update={update} /></Group>
-      <Group title="Couple"><CoupleFields draft={draft} update={update} /></Group>
-      <Group title="Families"><FamilyFields draft={draft} update={update} /></Group>
-      <Group title="Save the date"><SaveDateFields draft={draft} update={update} /></Group>
-      <Group title="Our Story"><StoryFields draft={draft} update={update} /></Group>
-      <Group title="Schedule of Events"><ScheduleFields draft={draft} update={update} /></Group>
-      <Group title="RSVP"><RsvpFields draft={draft} update={update} /></Group>
+      <Group title="Envelope & Intro" frame="frame-couple" open><EnvelopeFields draft={draft} update={update} /></Group>
+      <Group title="Couple" frame="frame-couple"><CoupleFields draft={draft} update={update} /></Group>
+      <Group title="Families" frame="frame-families"><FamilyFields draft={draft} update={update} /></Group>
+      <Group title="Save the date" frame="frame-couple"><SaveDateFields draft={draft} update={update} /></Group>
+      <Group title="Our Story" frame="frame-story"><StoryFields draft={draft} update={update} /></Group>
+      <Group title="Schedule of Events" frame="frame-schedule"><ScheduleFields draft={draft} update={update} /></Group>
+      <Group title="RSVP" frame="frame-rsvp"><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
     </div>
   );
@@ -610,10 +675,15 @@ export function ContentPanel({ draft, update }: PanelProps) {
 
 /* ------------------------------ COLORS ------------------------------ */
 
-const FONTS = [
+export const FONTS = [
   { value: "var(--font-cinzel)", label: "Cinzel (serif caps)" },
+  { value: "var(--font-marcellus)", label: "Marcellus (serif caps)" },
+  { value: "var(--font-playfair)", label: "Playfair Display (serif)" },
   { value: "var(--font-cormorant)", label: "Cormorant (serif)" },
+  { value: "var(--font-ebgaramond)", label: "EB Garamond (serif)" },
   { value: "var(--font-greatvibes)", label: "Great Vibes (script)" },
+  { value: "var(--font-dancing)", label: "Dancing Script (script)" },
+  { value: "var(--font-parisienne)", label: "Parisienne (script)" },
   { value: "var(--font-jost)", label: "Jost (sans)" },
 ];
 
