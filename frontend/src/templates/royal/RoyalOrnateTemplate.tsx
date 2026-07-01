@@ -101,7 +101,7 @@ export function RoyalOrnateTemplate({
           return <FrameBg key={key} id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>;
         })}
 
-        <footer className="px-6 pb-24 pt-6 text-center">
+        <footer className="flex min-h-svh snap-start flex-col items-center justify-center px-6 py-16 text-center">
           <MonogramCrest monogram={content.couple.monogram} size={72} />
           <p className="font-script mt-3 text-3xl" style={{ color: "var(--c-primary)" }}>
             {content.couple.partner1.name} &amp; {content.couple.partner2.name}

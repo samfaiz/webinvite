@@ -69,7 +69,7 @@ export function MinimalModernTemplate({
           <TimelineSchedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
           <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>
 
-          <footer className="px-6 pb-24 pt-6 text-center">
+          <footer className="flex min-h-svh snap-start flex-col items-center justify-center px-6 py-16 text-center">
             <p
               className="text-2xl"
               style={{ fontFamily: "var(--font-jost)", fontWeight: 300, color: "var(--c-primary)" }}
