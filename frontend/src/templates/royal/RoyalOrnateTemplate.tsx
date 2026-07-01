@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
-import { backgroundFor } from "@/engine/types";
+import { backgroundFor, orderedSections } from "@/engine/types";
 import { FrameBg } from "@/components/FrameBg";
 import { PreviewContext } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -91,10 +91,15 @@ export function RoyalOrnateTemplate({
             />
           </FrameBg>
         </FrameBg>
-        <FrameBg id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>
-        <FrameBg id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryGrid content={content} /></FrameBg>
-        <TimelineSchedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
-        <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>
+        {orderedSections(content.sectionOrder).map((key) => {
+          if (key === "families")
+            return <FrameBg key={key} id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>;
+          if (key === "story")
+            return <FrameBg key={key} id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryGrid content={content} /></FrameBg>;
+          if (key === "schedule")
+            return <TimelineSchedule key={key} content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />;
+          return <FrameBg key={key} id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>;
+        })}
 
         <footer className="px-6 pb-24 pt-6 text-center">
           <MonogramCrest monogram={content.couple.monogram} size={72} />

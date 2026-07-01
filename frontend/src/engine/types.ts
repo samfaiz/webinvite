@@ -56,12 +56,17 @@ export interface MapPoint {
   mapUrl?: string;
 }
 
+export type SectionKey = "families" | "story" | "schedule" | "rsvp";
+
 export interface InvitationContent {
   meta: {
     slug: string;
     community: string; // motif community key, e.g. "kerala-christian"
     language?: string;
   };
+  /** order of the middle sections (the opening scene stays first). Defaults to
+   *  families → story → schedule → rsvp when unset. */
+  sectionOrder?: SectionKey[];
   couple: Couple;
   /** the sealed-envelope intro */
   envelope: {
@@ -164,6 +169,16 @@ export interface Theme {
 }
 
 export type FrameKey = "hero" | "families" | "story" | "schedule" | "rsvp";
+
+export const DEFAULT_SECTION_ORDER: SectionKey[] = ["families", "story", "schedule", "rsvp"];
+
+/** A complete, valid section order: the saved order (dropping unknown keys) plus
+ *  any missing sections appended — so every section always renders exactly once. */
+export function orderedSections(order?: SectionKey[]): SectionKey[] {
+  const base = (order ?? []).filter((k) => DEFAULT_SECTION_ORDER.includes(k));
+  const seen = new Set(base);
+  return [...base, ...DEFAULT_SECTION_ORDER.filter((k) => !seen.has(k))];
+}
 
 /** Resolve the background image for a section (per-section, else `all`). */
 export function backgroundFor(theme: Theme, key: FrameKey): string | undefined {

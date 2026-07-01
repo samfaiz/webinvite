@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
-import { backgroundFor } from "@/engine/types";
+import { backgroundFor, orderedSections } from "@/engine/types";
 import { FrameBg } from "@/components/FrameBg";
 import { PreviewContext } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -86,14 +86,21 @@ export function FlagshipTemplate({
           transition: "opacity 1.2s ease",
         }}
       >
-        {/* Section 1: full opening scene (names + save-the-date + countdown) on one contained background */}
+        {/* Section 1: full opening scene (names + save-the-date + countdown) — always first */}
         <FrameBg id="frame-couple" src={backgroundFor(theme, "hero")}>
           <Hero content={content} theme={theme} />
         </FrameBg>
-        <FrameBg id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>
-        <FrameBg id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryCarousel content={content} /></FrameBg>
-        <Schedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
-        <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>
+
+        {/* middle sections in the couple's chosen order */}
+        {orderedSections(content.sectionOrder).map((key) => {
+          if (key === "families")
+            return <FrameBg key={key} id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>;
+          if (key === "story")
+            return <FrameBg key={key} id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryCarousel content={content} /></FrameBg>;
+          if (key === "schedule")
+            return <Schedule key={key} content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />;
+          return <FrameBg key={key} id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>;
+        })}
 
         <footer className="px-6 pb-24 pt-6 text-center">
           <MonogramCrest monogram={content.couple.monogram} size={72} />

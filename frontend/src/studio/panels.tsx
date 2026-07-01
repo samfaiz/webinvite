@@ -9,6 +9,7 @@ import { themeList, getTheme } from "@/themes";
 import { motifList, getMotif } from "@/motifs";
 import { googleMapsUrl, targetFromEvent } from "@/lib/maps";
 import { sealInitials } from "@/lib/initials";
+import { orderedSections, type SectionKey } from "@/engine/types";
 import { api, type Track } from "@/lib/api";
 
 export type PanelProps = {
@@ -82,7 +83,56 @@ export function DesignPanel({ draft, update }: PanelProps) {
         />
       </Field>
 
+      <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        Section order
+      </p>
+      <SectionOrderFields draft={draft} update={update} />
+
       <ThemeSwatches draft={draft} update={update} />
+    </div>
+  );
+}
+
+const SECTION_LABELS: Record<SectionKey, string> = {
+  families: "Introducing the Families",
+  story: "Our Story",
+  schedule: "Schedule of Events",
+  rsvp: "RSVP",
+};
+
+/** Drag-to-reorder the middle sections (opening scene always stays first). */
+export function SectionOrderFields({ draft, update }: PanelProps) {
+  const order = orderedSections(draft.content.sectionOrder);
+  const dragIndex = useRef<number | null>(null);
+  return (
+    <div>
+      <p className="mb-2 text-[11px] text-slate-400">
+        Drag to reorder. The opening screen (couple &amp; save-the-date) always stays first.
+      </p>
+      {order.map((key, i) => (
+        <div
+          key={key}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
+            const from = dragIndex.current;
+            dragIndex.current = null;
+            if (from == null || from === i) return;
+            update((d) => { d.content.sectionOrder = moveItem(orderedSections(d.content.sectionOrder), from, i); });
+          }}
+          className="mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2.5"
+        >
+          <span
+            draggable
+            onDragStart={() => { dragIndex.current = i; }}
+            onDragEnd={() => { dragIndex.current = null; }}
+            title="Drag to reorder"
+            className="cursor-grab select-none text-slate-400 active:cursor-grabbing hover:text-slate-600"
+          >
+            ⠿
+          </span>
+          <span className="text-sm font-medium text-slate-700">{i + 1}. {SECTION_LABELS[key]}</span>
+        </div>
+      ))}
     </div>
   );
 }
