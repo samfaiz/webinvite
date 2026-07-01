@@ -166,7 +166,7 @@ pm2 status           # webinvite-api + webinvite-web should be "online"
 Site → **Vhost** tab. Inside the `server { ... }` block, set the body-size limit
 and route the three paths (put `/api/` and `/uploads/` **before** the `/` block):
 ```nginx
-client_max_body_size 100M;
+client_max_body_size 300M;
 
 location /api/ {
     proxy_pass http://127.0.0.1:4000;
