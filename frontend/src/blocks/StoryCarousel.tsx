@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { InvitationContent } from "@/engine/types";
 import { Divider } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
 import { Movable } from "@/components/Movable";
+import { usePreview } from "@/components/PreviewContext";
 
 /**
  * Polaroid story carousel — swipe/drag or use the arrows. Postcard-style framing
@@ -14,12 +15,25 @@ import { Movable } from "@/components/Movable";
  */
 export function StoryCarousel({ content }: { content: InvitationContent }) {
   const items = content.story.items;
+  const count = items.length;
   const [[index, dir], setState] = useState<[number, number]>([0, 0]);
+  const { editing } = usePreview();
+  const reduce = useReducedMotion();
+  const [paused, setPaused] = useState(false);
 
-  if (!items.length) return null;
+  // auto-advance ~every 4.5s; paused on hover/touch, while editing, when there's
+  // only one photo, or for reduced-motion. Changing `index` resets the timer, so
+  // manual navigation won't cause an immediate jump.
+  useEffect(() => {
+    if (reduce || editing || paused || count <= 1) return;
+    const id = window.setTimeout(() => setState(([p]) => [(p + 1) % count, 1]), 4500);
+    return () => window.clearTimeout(id);
+  }, [index, paused, editing, reduce, count]);
+
+  if (!count) return null;
 
   const paginate = (d: number) =>
-    setState(([prev]) => [(prev + d + items.length) % items.length, d]);
+    setState(([prev]) => [(prev + d + count) % count, d]);
 
   const item = items[index];
 
@@ -43,7 +57,11 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
         </Reveal>
       </Movable>
 
-      <div className="relative mx-auto flex max-w-[340px] items-center justify-center">
+      <div
+        className="relative mx-auto flex max-w-[340px] items-center justify-center"
+        onPointerEnter={() => setPaused(true)}
+        onPointerLeave={() => setPaused(false)}
+      >
         <CarouselArrow
           side="left"
           onClick={() => paginate(-1)}
