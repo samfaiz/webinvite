@@ -14,6 +14,8 @@ import { WaxHeartSeal } from "@/components/WaxHeartSeal";
  */
 export function EnvelopeIntro({
   monogram = "S | L",
+  logo,
+  logoScale,
   tagline,
   seal = "S L",
   sceneUrl,
@@ -22,6 +24,10 @@ export function EnvelopeIntro({
   onOpening,
 }: {
   monogram?: string;
+  /** custom crest/logo image (data URL) — replaces the drawn monogram crest */
+  logo?: string;
+  /** crest/logo scale multiplier (default 1) */
+  logoScale?: number;
   tagline?: string;
   seal?: string;
   /** the design's hero image — shown as the "letter" / scene */
@@ -91,7 +97,7 @@ export function EnvelopeIntro({
           animate={opening ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease }}
         >
-          <MonogramCrest monogram={monogram} size={118} />
+          <MonogramCrest monogram={monogram} logo={logo} scale={logoScale} size={118} />
           <div className="-mt-1 text-lg" style={{ color: "var(--c-accent)" }} aria-hidden>
             ♥
           </div>

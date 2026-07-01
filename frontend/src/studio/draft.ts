@@ -99,12 +99,17 @@ export function loadDraft(): Draft {
   return defaultDraft();
 }
 
-export function saveDraft(d: Draft) {
-  if (typeof window === "undefined") return;
+/** Persist the working draft. Returns false if the browser refused the write
+ *  (usually a localStorage quota overflow from large embedded photos/logo), so
+ *  the caller can warn the couple instead of losing edits silently. */
+export function saveDraft(d: Draft): boolean {
+  if (typeof window === "undefined") return true;
   try {
     localStorage.setItem(KEY, JSON.stringify(d));
+    return true;
   } catch {
-    /* quota or serialization issue — ignore for Phase 3 */
+    /* quota exceeded or serialization issue — report so the UI can react */
+    return false;
   }
 }
 

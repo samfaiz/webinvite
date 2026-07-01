@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { InvitationContent } from "@/engine/types";
 import { usePreview } from "@/components/PreviewContext";
+import { MonogramCrest } from "@/components/Ornaments";
 
 /**
  * Clean, contemporary hero (used by the Minimal Modern template). Sans display
@@ -13,6 +14,18 @@ export function HeroMinimal({ content }: { content: InvitationContent }) {
   const { compact } = usePreview();
   return (
     <section className={`relative flex ${compact ? "py-16" : "min-h-svh"} flex-col items-center justify-center px-6 text-center`}>
+      {/* a custom crest/logo is honoured here; the default minimal hero stays crest-free */}
+      {couple.logo ? (
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={72} />
+        </motion.div>
+      ) : null}
+
       <motion.p
         className="text-xs uppercase tracking-[0.5em]"
         style={{ color: "var(--c-accent)", fontFamily: "var(--font-jost)" }}

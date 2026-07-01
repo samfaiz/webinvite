@@ -65,7 +65,7 @@ export function HeroClassic({
         <DecorativeFrame variant={variant} inset={6} />
 
         <div className="flex flex-col items-center">
-          <MonogramCrest monogram={couple.monogram} size={110} />
+          <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={110} />
 
           <h1 className="mt-6">
             <span className="font-script block text-5xl sm:text-7xl" style={{ color: "var(--c-primary)" }}>

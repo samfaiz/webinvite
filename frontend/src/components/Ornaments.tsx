@@ -43,22 +43,56 @@ export function Divider({
  * Monogram crest (e.g. "S | L") inside a decorative gold laurel frame.
  * Uses the PNG frame at /ornaments/laurel-frame.png; if that image is missing it
  * falls back to a simple drawn laurel so nothing looks broken.
+ *
+ * When `logo` (a data/URL image) is supplied it replaces the drawn crest entirely
+ * — couples can upload their own icon/logo. `scale` multiplies the base `size`
+ * so either the default crest or an uploaded logo can be resized consistently
+ * at every place the crest appears.
  */
 export function MonogramCrest({
   monogram = "S | L",
   size = 96,
+  scale = 1,
+  logo,
   style,
 }: {
   monogram?: string;
   size?: number;
+  scale?: number;
+  logo?: string;
   style?: CSSProperties;
 }) {
   const [frameFailed, setFrameFailed] = useState(false);
+  // clamp so an extreme saved value can never blow out the layout
+  const s = Math.round(size * Math.min(3, Math.max(0.3, scale || 1)));
+
+  // Custom uploaded logo: render it on its own (no laurel frame / initials).
+  // Height-driven so `s` controls the on-screen size; a wide/tall logo keeps its
+  // aspect ratio and extends horizontally (capped) instead of being squashed
+  // into a square box.
+  if (logo) {
+    return (
+      <div
+        className="relative inline-flex items-center justify-center"
+        style={{ height: s, maxWidth: "100%", ...style }}
+        aria-hidden
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logo}
+          alt=""
+          draggable={false}
+          className="pointer-events-none block object-contain"
+          style={{ height: s, width: "auto", maxWidth: Math.round(s * 3) }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
       className="relative inline-flex items-center justify-center"
-      style={{ width: size, height: size, color: "var(--c-accent)", ...style }}
+      style={{ width: s, height: s, color: "var(--c-accent)", ...style }}
       aria-hidden
     >
       {frameFailed ? (
@@ -90,7 +124,7 @@ export function MonogramCrest({
           top: "46%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          fontSize: size * (frameFailed ? 0.26 : 0.2),
+          fontSize: s * (frameFailed ? 0.26 : 0.2),
           color: "var(--c-primary)",
           letterSpacing: "0.05em",
           whiteSpace: "nowrap",

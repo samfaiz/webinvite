@@ -71,6 +71,8 @@ export function FlagshipTemplate({
             <EnvelopeIntro
               key="intro"
               monogram={content.couple.monogram}
+              logo={content.couple.logo}
+              logoScale={content.couple.logoScale}
               tagline={content.envelope.tagline}
               seal={resolveSeal(content.envelope.seal, content.couple.partner1?.name, content.couple.partner2?.name)}
               sceneUrl={backgroundFor(theme, "hero")}
@@ -105,7 +107,7 @@ export function FlagshipTemplate({
         })}
 
         <footer className="flex min-h-svh snap-start flex-col items-center justify-center px-6 py-16 text-center">
-          <MonogramCrest monogram={content.couple.monogram} size={72} />
+          <MonogramCrest monogram={content.couple.monogram} logo={content.couple.logo} scale={content.couple.logoScale} size={72} />
           <p className="font-script mt-3 text-3xl" style={{ color: "var(--c-primary)" }}>
             {content.couple.partner1.name} &amp; {content.couple.partner2.name}
           </p>

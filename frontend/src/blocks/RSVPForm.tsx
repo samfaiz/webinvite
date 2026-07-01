@@ -63,7 +63,7 @@ export function RSVPForm({
       <Reveal>
         <ArchedCard>
           <div className="flex flex-col items-center">
-            <MonogramCrest monogram={couple.monogram} size={70} />
+            <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={70} />
             <h2
               data-edit="rsvp.heading"
               className="font-display mt-3 text-xl uppercase tracking-[0.3em]"

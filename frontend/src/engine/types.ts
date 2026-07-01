@@ -25,8 +25,14 @@ export interface Couple {
   partner2: Person;
   /** word shown between the two names, e.g. "weds" */
   connector?: string;
-  /** short monogram, e.g. "S | L" */
+  /** short monogram, e.g. "S | L" — shown in the crest when no custom logo is set */
   monogram?: string;
+  /** custom crest/logo image (data URL). When set it replaces the drawn monogram
+   *  crest everywhere the crest appears (hero, families, RSVP, envelope, footer). */
+  logo?: string;
+  /** crest/logo scale multiplier (≈0.5–2.5, default 1) applied to every crest
+   *  instance so the default monogram or an uploaded logo can be resized. */
+  logoScale?: number;
 }
 
 export interface StoryItem {

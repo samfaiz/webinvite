@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Draft } from "@/studio/draft";
 import { loadDraft, saveDraft, defaultDraft, draftFromPreset, setByPath } from "@/studio/draft";
+import { hasEmbeddedMedia, flushEmbeddedMedia } from "@/studio/media";
 import { getPreset } from "@/templates/registry";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
@@ -65,7 +66,9 @@ export default function StudioPage() {
     })();
   }, []);
   useEffect(() => {
-    if (draft) saveDraft(draft);
+    if (draft && !saveDraft(draft)) {
+      setMsg("⚠ This browser's storage is full — recent changes aren't auto-saved. Save or publish to keep them.");
+    }
   }, [draft]);
 
   // messages from the editable preview: ready + inline (WYSIWYG) edits
@@ -158,15 +161,29 @@ export default function StudioPage() {
     ownerEmail: d.ownerEmail || undefined,
   });
 
+  // upload any inline base64 media (photos / intro video / crest logo) and keep
+  // the returned URLs locally so the saved invitation JSON stays small.
+  const flushMedia = async (): Promise<Draft> => {
+    const flushed = structuredClone(draft!);
+    if (hasEmbeddedMedia(flushed.content)) {
+      setMsg("Uploading media…");
+      await flushEmbeddedMedia(flushed.content);
+      setDraft(flushed);
+      setMsg("");
+    }
+    return flushed;
+  };
+
   const save = async () => {
     if (!draft) return;
     setSaving(true);
     setMsg("");
     try {
+      const flushed = await flushMedia();
       if (serverId) {
-        await api.updateInvitation(serverId, buildBody(draft));
+        await api.updateInvitation(serverId, buildBody(flushed));
       } else {
-        const inv = await api.createInvitation(buildBody(draft));
+        const inv = await api.createInvitation(buildBody(flushed));
         setServerId(inv.id);
         window.history.replaceState(null, "", `/studio?id=${inv.id}`);
       }
@@ -183,11 +200,12 @@ export default function StudioPage() {
     setSaving(true);
     setMsg("");
     try {
+      const flushed = await flushMedia();
       let id = serverId;
       if (id) {
-        await api.updateInvitation(id, buildBody(draft));
+        await api.updateInvitation(id, buildBody(flushed));
       } else {
-        const inv = await api.createInvitation(buildBody(draft));
+        const inv = await api.createInvitation(buildBody(flushed));
         id = inv.id;
         setServerId(id);
         window.history.replaceState(null, "", `/studio?id=${id}`);

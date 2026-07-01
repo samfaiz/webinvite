@@ -29,12 +29,18 @@ function moveItem<T>(arr: T[], from: number, to: number): T[] {
 }
 
 /**
- * Read an image File and return a downscaled JPEG data URL. Couples upload phone
+ * Read an image File and return a downscaled data URL. Couples upload phone
  * photos (often 3–5 MB each) and several at once; raw base64 would overflow
  * localStorage and bloat the saved invitation, so we cap the longest edge and
- * re-encode before storing.
+ * re-encode before storing. Photos default to JPEG; pass mime "image/png" for
+ * logos/crests so a transparent background is preserved.
  */
-function fileToScaledDataUrl(file: File, maxDim = 1280, quality = 0.82): Promise<string> {
+function fileToScaledDataUrl(
+  file: File,
+  maxDim = 1280,
+  quality = 0.82,
+  mime: "image/jpeg" | "image/png" = "image/jpeg",
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Could not read the file"));
@@ -43,6 +49,7 @@ function fileToScaledDataUrl(file: File, maxDim = 1280, quality = 0.82): Promise
       img.onerror = () => reject(new Error("That file isn't a valid image"));
       img.onload = () => {
         let { width, height } = img;
+        if (!width || !height) return reject(new Error("That image has no size — try a PNG or JPG"));
         if (Math.max(width, height) > maxDim) {
           const s = maxDim / Math.max(width, height);
           width = Math.round(width * s);
@@ -54,7 +61,7 @@ function fileToScaledDataUrl(file: File, maxDim = 1280, quality = 0.82): Promise
         const ctx = canvas.getContext("2d");
         if (!ctx) return resolve(String(reader.result));
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        resolve(canvas.toDataURL(mime, quality));
       };
       img.src = String(reader.result);
     };
@@ -172,6 +179,27 @@ export function ThemeSwatches({ draft, update }: PanelProps) {
 
 export function CoupleFields({ draft, update }: PanelProps) {
   const c = draft.content;
+  const logo = c.couple.logo;
+  const scale = c.couple.logoScale ?? 1;
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [logoErr, setLogoErr] = useState("");
+
+  const setLogo = async (file?: File) => {
+    if (!file) return;
+    setLogoErr("");
+    setLogoBusy(true);
+    try {
+      // keep transparency (PNG) and a modest size — a crest is small on screen,
+      // so cap it tight to keep the base64 out of the localStorage quota
+      const url = await fileToScaledDataUrl(file, 384, 0.92, "image/png");
+      update((d) => { d.content.couple.logo = url; });
+    } catch (e) {
+      setLogoErr((e as Error).message);
+    } finally {
+      setLogoBusy(false);
+    }
+  };
+
   return (
     <div>
       <Field label="Name 1">
@@ -185,6 +213,59 @@ export function CoupleFields({ draft, update }: PanelProps) {
         <Field label="Monogram"><TextInput value={c.couple.monogram ?? ""} onChange={(e) => update((d) => { d.content.couple.monogram = e.target.value; })} /></Field>
       </div>
       <Field label="Marriage line"><TextInput value={c.hero.marriageText} onChange={(e) => update((d) => { d.content.hero.marriageText = e.target.value; })} /></Field>
+
+      {/* Crest / logo — keep the default monogram crest, or upload a custom icon. */}
+      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Crest / Logo</p>
+        <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+          {logo ? "Your logo replaces the monogram crest everywhere." : "Using the default monogram crest. Upload a logo to replace it."}
+        </p>
+        <div className="flex items-center gap-3">
+          <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-slate-200 bg-white">
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="Crest logo preview" className="h-full w-full object-contain p-1" />
+            ) : (
+              <span className="font-display text-sm text-slate-500">{c.couple.monogram || "S | L"}</span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap gap-2">
+              <label className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium text-white ${logoBusy ? "bg-slate-400" : "bg-[#2b3a67] hover:bg-[#23315a]"}`}>
+                {logoBusy ? "Adding…" : logo ? "Change logo" : "+ Add logo"}
+                <input type="file" accept="image/png,image/webp,image/jpeg,image/*" className="hidden" disabled={logoBusy} onChange={(e) => { setLogo(e.target.files?.[0]); e.target.value = ""; }} />
+              </label>
+              {logo ? (
+                <button
+                  type="button"
+                  onClick={() => update((d) => { d.content.couple.logo = undefined; })}
+                  className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                >
+                  Use default
+                </button>
+              ) : null}
+            </div>
+            <p className="mt-1 text-[10px] text-slate-400">PNG with a transparent background looks best.</p>
+          </div>
+        </div>
+        {logoErr ? <p className="mt-1.5 text-[11px] text-rose-600">{logoErr}</p> : null}
+
+        <label className="mt-3 block">
+          <span className="mb-1 flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+            <span>Crest size</span>
+            <span className="text-slate-400">×{scale.toFixed(2)}</span>
+          </span>
+          <input
+            type="range"
+            min={0.5}
+            max={2.5}
+            step={0.05}
+            value={scale}
+            onChange={(e) => update((d) => { d.content.couple.logoScale = Number(e.target.value); })}
+            className="w-full"
+          />
+        </label>
+      </div>
     </div>
   );
 }

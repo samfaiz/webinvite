@@ -80,7 +80,7 @@ export function Families({ content }: { content: InvitationContent }) {
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-4">
             <FamilyColumn person={couple.partner1} align="left" basePath="couple.partner1" />
             <div className="flex shrink-0 items-center justify-center px-2">
-              <MonogramCrest monogram={couple.monogram} size={84} />
+              <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={84} />
             </div>
             <FamilyColumn person={couple.partner2} align="right" basePath="couple.partner2" />
           </div>

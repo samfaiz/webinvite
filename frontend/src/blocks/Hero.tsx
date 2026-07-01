@@ -66,7 +66,7 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
-          <MonogramCrest monogram={couple.monogram} size={66} />
+          <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={66} />
         </motion.div>
 
         <motion.h1
