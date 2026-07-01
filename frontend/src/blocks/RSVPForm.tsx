@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { InvitationContent } from "@/engine/types";
 import { MonogramCrest } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
+import { usePreview } from "@/components/PreviewContext";
 import { VenueMap } from "./VenueMap";
 import { ArchedCard } from "@/components/ArchedCard";
 import { DirectionsLink } from "@/components/DirectionsLink";
-import { hasMapTarget } from "@/lib/maps";
+import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { api } from "@/lib/api";
 
 /**
@@ -24,6 +25,7 @@ export function RSVPForm({
   live?: boolean;
 }) {
   const { rsvp, couple, map } = content;
+  const { editing } = usePreview();
   const [name, setName] = useState("");
   const [attending, setAttending] = useState<"accept" | "decline" | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -63,6 +65,7 @@ export function RSVPForm({
           <div className="flex flex-col items-center">
             <MonogramCrest monogram={couple.monogram} size={70} />
             <h2
+              data-edit="rsvp.heading"
               className="font-display mt-3 text-xl uppercase tracking-[0.3em]"
               style={{ color: "var(--c-primary)" }}
             >
@@ -90,7 +93,7 @@ export function RSVPForm({
             ) : (
               <motion.form
                 key="form"
-                onSubmit={submit}
+                onSubmit={editing ? (e) => e.preventDefault() : submit}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -115,6 +118,7 @@ export function RSVPForm({
                 />
 
                 <p
+                  data-edit="rsvp.prompt"
                   className="font-display text-[11px] uppercase tracking-[0.18em]"
                   style={{ color: "var(--c-muted)" }}
                 >
@@ -123,16 +127,16 @@ export function RSVPForm({
                 <div className="mt-2 grid grid-cols-2 gap-3">
                   {(
                     [
-                      ["accept", rsvp.acceptLabel],
-                      ["decline", rsvp.declineLabel],
+                      ["accept", rsvp.acceptLabel, "rsvp.acceptLabel"],
+                      ["decline", rsvp.declineLabel, "rsvp.declineLabel"],
                     ] as const
-                  ).map(([val, label]) => {
+                  ).map(([val, label, path]) => {
                     const active = attending === val;
                     return (
                       <button
                         key={val}
                         type="button"
-                        onClick={() => setAttending(val)}
+                        onClick={editing ? undefined : () => setAttending(val)}
                         className="font-body rounded-lg px-3 py-3 text-sm transition-all"
                         style={{
                           background: active ? "var(--c-primary)" : "transparent",
@@ -140,7 +144,7 @@ export function RSVPForm({
                           border: `1px solid ${active ? "var(--c-primary)" : "color-mix(in srgb, var(--c-accent) 35%, transparent)"}`,
                         }}
                       >
-                        {label}
+                        <span data-edit={path}>{label}</span>
                       </button>
                     );
                   })}
@@ -160,7 +164,7 @@ export function RSVPForm({
                   className="font-display mt-6 w-full rounded-lg py-3 text-sm uppercase tracking-[0.2em] disabled:opacity-70"
                   style={{ background: "var(--c-primary)", color: "#fff" }}
                 >
-                  ✦ {busy ? "Sending…" : rsvp.submitLabel}
+                  ✦ {busy ? "Sending…" : <span data-edit="rsvp.submitLabel">{rsvp.submitLabel}</span>}
                 </motion.button>
               </motion.form>
             )}
@@ -175,6 +179,7 @@ export function RSVPForm({
       {rsvp.footer ? (
         <Reveal delay={0.1}>
           <p
+            data-edit="rsvp.footer"
             className="font-script mt-10 text-center text-3xl"
             style={{ color: "var(--c-secondary)" }}
           >
@@ -184,11 +189,10 @@ export function RSVPForm({
       ) : null}
 
       {(() => {
-        const first = map.points?.[0];
-        const target = {
-          query: first ? [first.label, first.address].filter(Boolean).join(", ") : undefined,
-          url: map.directionsUrl,
-        };
+        // directions to the primary (first) event venue; an explicit map link overrides
+        const firstEv = content.schedule.events[0];
+        const target = firstEv ? targetFromEvent(firstEv) : { url: map.directionsUrl };
+        if (map.directionsUrl) target.url = map.directionsUrl;
         if (!hasMapTarget(target)) return null;
         return (
           <div className="mt-6 text-center">
