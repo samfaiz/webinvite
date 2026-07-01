@@ -4,15 +4,29 @@ import type { InvitationContent, Person } from "@/engine/types";
 import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
 
-function FamilyColumn({ person, align }: { person: Person; align: "left" | "right" }) {
+function FamilyColumn({
+  person,
+  align,
+  basePath,
+}: {
+  person: Person;
+  align: "left" | "right";
+  basePath: string;
+}) {
   return (
     <div className={`flex-1 ${align === "left" ? "sm:text-right" : "sm:text-left"} text-center`}>
-      <h3 className="font-script text-4xl" style={{ color: "var(--c-primary)" }}>
+      <h3 data-edit={`${basePath}.name`} className="font-script text-4xl" style={{ color: "var(--c-primary)" }}>
         {person.name}
       </h3>
-      <p className="mt-2 text-sm" style={{ color: "var(--c-muted)" }}>
-        {person.father ? "S/D of" : null}
-      </p>
+      {person.father || person.mother ? (
+        <p
+          data-edit={`${basePath}.parentsPrefix`}
+          className="mt-2 text-sm"
+          style={{ color: "var(--c-muted)" }}
+        >
+          {person.parentsPrefix ?? "S/D of"}
+        </p>
+      ) : null}
       <p className="font-display text-xs uppercase tracking-[0.16em]" style={{ color: "var(--c-secondary)" }}>
         {[person.father, person.mother].filter(Boolean).join(" & ")}
       </p>
@@ -49,11 +63,11 @@ export function Families({ content }: { content: InvitationContent }) {
 
       <Reveal delay={0.1}>
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-4">
-          <FamilyColumn person={couple.partner1} align="left" />
+          <FamilyColumn person={couple.partner1} align="left" basePath="couple.partner1" />
           <div className="flex shrink-0 items-center justify-center px-2">
             <MonogramCrest monogram={couple.monogram} size={84} />
           </div>
-          <FamilyColumn person={couple.partner2} align="right" />
+          <FamilyColumn person={couple.partner2} align="right" basePath="couple.partner2" />
         </div>
       </Reveal>
 

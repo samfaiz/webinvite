@@ -16,6 +16,8 @@ export interface Person {
   father?: string;
   mother?: string;
   siblings?: string[];
+  /** relation label before the parents, e.g. "S/D of", "S/O", "D/O" (default "S/D of") */
+  parentsPrefix?: string;
 }
 
 export interface Couple {

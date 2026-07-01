@@ -141,6 +141,9 @@ export function FamilyFields({ draft, update }: PanelProps) {
           onChange={(e) => update((d) => { const [f, m] = splitList(e.target.value); d.content.couple.partner1.father = f ?? ""; d.content.couple.partner1.mother = m ?? ""; })}
         />
       </Field>
+      <Field label={`${c.couple.partner1.name || "Name 1"} — relation label`}>
+        <TextInput value={c.couple.partner1.parentsPrefix ?? ""} placeholder="S/D of" onChange={(e) => update((d) => { d.content.couple.partner1.parentsPrefix = e.target.value; })} />
+      </Field>
       <Field label={`${c.couple.partner1.name || "Name 1"} — siblings (comma separated)`}>
         <TextInput value={(c.couple.partner1.siblings ?? []).join(", ")} onChange={(e) => update((d) => { d.content.couple.partner1.siblings = splitList(e.target.value); })} />
       </Field>
@@ -149,6 +152,9 @@ export function FamilyFields({ draft, update }: PanelProps) {
           value={[c.couple.partner2.father, c.couple.partner2.mother].filter(Boolean).join(", ")}
           onChange={(e) => update((d) => { const [f, m] = splitList(e.target.value); d.content.couple.partner2.father = f ?? ""; d.content.couple.partner2.mother = m ?? ""; })}
         />
+      </Field>
+      <Field label={`${c.couple.partner2.name || "Name 2"} — relation label`}>
+        <TextInput value={c.couple.partner2.parentsPrefix ?? ""} placeholder="S/D of" onChange={(e) => update((d) => { d.content.couple.partner2.parentsPrefix = e.target.value; })} />
       </Field>
       <Field label={`${c.couple.partner2.name || "Name 2"} — siblings (comma separated)`}>
         <TextInput value={(c.couple.partner2.siblings ?? []).join(", ")} onChange={(e) => update((d) => { d.content.couple.partner2.siblings = splitList(e.target.value); })} />
