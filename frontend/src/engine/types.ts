@@ -67,6 +67,9 @@ export interface InvitationContent {
   /** order of the middle sections (the opening scene stays first). Defaults to
    *  families → story → schedule → rsvp when unset. */
   sectionOrder?: SectionKey[];
+  /** per-block vertical nudge (px), keyed by block id — lets couples drag a text
+   *  block up/down within its section to sit nicely over the background art. */
+  offsets?: Record<string, number>;
   couple: Couple;
   /** the sealed-envelope intro */
   envelope: {

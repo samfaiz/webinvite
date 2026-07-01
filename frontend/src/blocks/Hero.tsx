@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import type { InvitationContent, Theme } from "@/engine/types";
 import { backgroundFor } from "@/engine/types";
 import { MonogramCrest, Divider } from "@/components/Ornaments";
+import { Movable } from "@/components/Movable";
 import { usePreview } from "@/components/PreviewContext";
 import { ScratchCard } from "./ScratchCard";
 import { Countdown } from "./Countdown";
@@ -58,6 +59,7 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
         </motion.div>
       ) : null}
 
+      <Movable moveKey="hero.block" offsetY={content.offsets?.["hero.block"] ?? 0} className="flex w-full flex-col items-center">
       <motion.div style={{ y: contentY }} className="flex w-full flex-col items-center">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -134,6 +136,7 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
           ) : null}
         </AnimatePresence>
       </motion.div>
+      </Movable>
 
       {/* spacer pushes the closing line to the bottom of the scene */}
       <div className="min-h-[2vh] flex-1" />

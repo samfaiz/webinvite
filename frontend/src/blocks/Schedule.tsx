@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { EventItem, InvitationContent, MotifPack } from "@/engine/types";
 import { Divider } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
+import { Movable } from "@/components/Movable";
 import { FrameBg } from "@/components/FrameBg";
 import { DirectionsLink } from "@/components/DirectionsLink";
 import { targetFromEvent } from "@/lib/maps";
@@ -99,27 +100,31 @@ export function Schedule({
         <FrameBg key={event.id} id={i === 0 ? "frame-schedule" : undefined} src={bg} fullScreen>
           <section className="px-6 py-14 text-center">
             {i === 0 ? (
-              <Reveal>
-                <h2
-                  data-edit="schedule.heading"
-                  className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
-                  style={{ color: "var(--c-primary)" }}
-                >
-                  {content.schedule.heading}
-                </h2>
-                {content.schedule.subtext ? (
-                  <p
-                    data-edit="schedule.subtext"
-                    className="font-display mt-3 text-[11px] uppercase tracking-[0.22em]"
-                    style={{ color: "var(--c-accent)" }}
+              <Movable moveKey="schedule.heading" offsetY={content.offsets?.["schedule.heading"] ?? 0}>
+                <Reveal>
+                  <h2
+                    data-edit="schedule.heading"
+                    className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
+                    style={{ color: "var(--c-primary)" }}
                   >
-                    {content.schedule.subtext}
-                  </p>
-                ) : null}
-                <Divider className="my-7" width={100} />
-              </Reveal>
+                    {content.schedule.heading}
+                  </h2>
+                  {content.schedule.subtext ? (
+                    <p
+                      data-edit="schedule.subtext"
+                      className="font-display mt-3 text-[11px] uppercase tracking-[0.22em]"
+                      style={{ color: "var(--c-accent)" }}
+                    >
+                      {content.schedule.subtext}
+                    </p>
+                  ) : null}
+                  <Divider className="my-7" width={100} />
+                </Reveal>
+              </Movable>
             ) : null}
-            <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
+            <Movable moveKey={`schedule.events.${i}.card`} offsetY={content.offsets?.[`schedule.events.${i}.card`] ?? 0}>
+              <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
+            </Movable>
           </section>
         </FrameBg>
       ))}

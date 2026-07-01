@@ -88,6 +88,31 @@ body {
   background: color-mix(in srgb, var(--c-accent) 6%, transparent);
 }
 
+/* drag-to-reposition affordance (editor preview only) */
+.wysiwyg-movable {
+  position: relative;
+}
+.wysiwyg-movable::after {
+  content: "↕ drag";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--c-primary);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.wysiwyg-movable:hover::after {
+  opacity: 0.9;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;

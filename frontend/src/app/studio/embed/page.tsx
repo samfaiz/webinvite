@@ -58,9 +58,43 @@ export default function StudioEmbed() {
       }
     }
 
+    // drag-to-reposition: nudge a [data-move] block up/down within its section.
+    // A small movement is treated as a click (so inner text stays editable);
+    // dragging past a threshold repositions and posts the offset to the parent.
+    let drag: { el: HTMLElement; key: string; startY: number; startOffset: number; moved: boolean } | null = null;
+    const clampY = (n: number) => Math.max(-220, Math.min(520, n));
+    function onPointerDown(e: PointerEvent) {
+      if (!edit) return;
+      const el = (e.target as HTMLElement)?.closest?.("[data-move]") as HTMLElement | null;
+      if (!el) return;
+      drag = { el, key: el.dataset.move || "", startY: e.clientY, startOffset: parseFloat(el.dataset.offset || "0") || 0, moved: false };
+    }
+    function onPointerMove(e: PointerEvent) {
+      if (!drag) return;
+      const dy = e.clientY - drag.startY;
+      if (!drag.moved && Math.abs(dy) < 6) return;
+      drag.moved = true;
+      e.preventDefault();
+      window.getSelection?.()?.removeAllRanges?.();
+      const y = clampY(drag.startOffset + dy);
+      drag.el.style.transform = `translateY(${y}px)`;
+      drag.el.dataset.offset = String(y);
+    }
+    function onPointerUp() {
+      if (drag && drag.moved) {
+        const y = Math.round(parseFloat(drag.el.dataset.offset || "0") || 0);
+        window.parent?.postMessage({ type: "move", key: drag.key, value: y }, "*");
+      }
+      drag = null;
+    }
+
     window.addEventListener("message", onMsg);
     document.addEventListener("input", onInput);
     document.addEventListener("keydown", onKeydown);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerUp);
     try {
       window.parent?.postMessage({ type: "embed-ready" }, "*");
     } catch {
@@ -70,16 +104,24 @@ export default function StudioEmbed() {
       window.removeEventListener("message", onMsg);
       document.removeEventListener("input", onInput);
       document.removeEventListener("keydown", onKeydown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerUp);
     };
   }, []);
 
-  // (re)apply contentEditable to tagged elements after each render
+  // (re)apply editing affordances to tagged elements after each render
   useEffect(() => {
     if (!editing) return;
     document.querySelectorAll<HTMLElement>("[data-edit]").forEach((el) => {
       el.setAttribute("contenteditable", "true");
       el.spellcheck = false;
       el.classList.add("wysiwyg-editable");
+    });
+    document.querySelectorAll<HTMLElement>("[data-move]").forEach((el) => {
+      el.style.touchAction = "none";
+      el.classList.add("wysiwyg-movable");
     });
   });
 

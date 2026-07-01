@@ -236,6 +236,14 @@ export default function CreateWizard() {
           return next;
         });
       }
+      if (e.data?.type === "move" && e.data.key) {
+        setDraft((prev) => {
+          if (!prev) return prev;
+          const next: Draft = structuredClone(prev);
+          next.content.offsets = { ...(next.content.offsets || {}), [e.data.key]: e.data.value };
+          return next;
+        });
+      }
     }
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);

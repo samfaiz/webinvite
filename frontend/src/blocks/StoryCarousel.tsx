@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { InvitationContent } from "@/engine/types";
 import { Divider } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
+import { Movable } from "@/components/Movable";
 
 /**
  * Polaroid story carousel — swipe/drag or use the arrows. Postcard-style framing
@@ -24,21 +25,23 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
 
   return (
     <section className="px-5 py-10 text-center">
-      <Reveal>
-        <h2
-          data-edit="story.heading"
-          className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
-          style={{ color: "var(--c-primary)" }}
-        >
-          {content.story.heading}
-        </h2>
-        {content.story.subtext ? (
-          <p data-edit="story.subtext" className="font-body mt-2 text-sm italic sm:text-base" style={{ color: "var(--c-secondary)" }}>
-            {content.story.subtext}
-          </p>
-        ) : null}
-        <Divider className="my-4" width={84} />
-      </Reveal>
+      <Movable moveKey="story.heading" offsetY={content.offsets?.["story.heading"] ?? 0}>
+        <Reveal>
+          <h2
+            data-edit="story.heading"
+            className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
+            style={{ color: "var(--c-primary)" }}
+          >
+            {content.story.heading}
+          </h2>
+          {content.story.subtext ? (
+            <p data-edit="story.subtext" className="font-body mt-2 text-sm italic sm:text-base" style={{ color: "var(--c-secondary)" }}>
+              {content.story.subtext}
+            </p>
+          ) : null}
+          <Divider className="my-4" width={84} />
+        </Reveal>
+      </Movable>
 
       <div className="relative mx-auto flex max-w-[340px] items-center justify-center">
         <CarouselArrow

@@ -3,6 +3,7 @@
 import type { InvitationContent, Person } from "@/engine/types";
 import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
+import { Movable } from "@/components/Movable";
 
 function FamilyColumn({
   person,
@@ -44,8 +45,9 @@ export function Families({ content }: { content: InvitationContent }) {
   return (
     <section className="px-5 py-16 text-center">
       {/* frosted vellum panel keeps the text legible over busy background art */}
+      <Movable moveKey="families.block" offsetY={content.offsets?.["families.block"] ?? 0} className="mx-auto max-w-2xl">
       <div
-        className="mx-auto max-w-2xl rounded-[2rem] px-6 py-10 sm:px-9"
+        className="rounded-[2rem] px-6 py-10 sm:px-9"
         style={{
           background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
           backdropFilter: "blur(8px)",
@@ -96,6 +98,7 @@ export function Families({ content }: { content: InvitationContent }) {
           </Reveal>
         ) : null}
       </div>
+      </Movable>
     </section>
   );
 }
