@@ -19,6 +19,14 @@ export type PanelProps = {
 const splitList = (s: string) =>
   s.split(",").map((x) => x.trim()).filter(Boolean);
 
+/** Return a copy of `arr` with the item at `from` moved to `to` (for drag-reorder). */
+function moveItem<T>(arr: T[], from: number, to: number): T[] {
+  const copy = arr.slice();
+  const [x] = copy.splice(from, 1);
+  copy.splice(to, 0, x);
+  return copy;
+}
+
 /**
  * Read an image File and return a downscaled JPEG data URL. Couples upload phone
  * photos (often 3–5 MB each) and several at once; raw base64 would overflow
@@ -220,6 +228,17 @@ export function SaveDateFields({ draft, update }: PanelProps) {
     <div>
       <Field label="Date (as shown)"><TextInput value={c.dateReveal.eventDate} onChange={(e) => update((d) => { d.content.dateReveal.eventDate = e.target.value; })} /></Field>
       <Field label="Location"><TextInput value={c.dateReveal.location} onChange={(e) => update((d) => { d.content.dateReveal.location = e.target.value; })} /></Field>
+      <Field label="Countdown headline"><TextInput value={c.countdown.headline} onChange={(e) => update((d) => { d.content.countdown.headline = e.target.value; })} /></Field>
+    </div>
+  );
+}
+
+/** Opening / envelope: tagline, wax-seal initials, and the custom intro video
+ *  that plays instead of the envelope. */
+export function EnvelopeFields({ draft, update }: PanelProps) {
+  const c = draft.content;
+  return (
+    <div>
       <Field label="Envelope tagline"><TextInput value={c.envelope.tagline ?? ""} onChange={(e) => update((d) => { d.content.envelope.tagline = e.target.value; })} /></Field>
       <Field label="Wax seal initials (optional — defaults to your initials)">
         <TextInput
@@ -229,7 +248,18 @@ export function SaveDateFields({ draft, update }: PanelProps) {
         />
       </Field>
       <IntroVideoField draft={draft} update={update} />
-      <Field label="Countdown headline"><TextInput value={c.countdown.headline} onChange={(e) => update((d) => { d.content.countdown.headline = e.target.value; })} /></Field>
+    </div>
+  );
+}
+
+/** The "opening experience" step: envelope/intro video + background music. */
+export function CoverFields({ draft, update }: PanelProps) {
+  return (
+    <div>
+      <EnvelopeFields draft={draft} update={update} />
+      <div className="mt-5 border-t border-slate-100 pt-5">
+        <MusicFields draft={draft} update={update} />
+      </div>
     </div>
   );
 }
@@ -318,6 +348,7 @@ export function StoryFields({ draft, update }: PanelProps) {
   const c = draft.content;
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState("");
+  const dragIndex = useRef<number | null>(null);
 
   const setPhoto = async (idx: number, file?: File) => {
     if (!file) return;
@@ -344,7 +375,17 @@ export function StoryFields({ draft, update }: PanelProps) {
       <Field label="Heading subtitle"><TextInput value={c.story.subtext ?? ""} onChange={(e) => update((d) => { d.content.story.subtext = e.target.value; })} /></Field>
 
       {c.story.items.map((item, i) => (
-        <div key={i} className="relative mb-3 rounded-lg border border-slate-200 p-3">
+        <div
+          key={i}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
+            const from = dragIndex.current;
+            dragIndex.current = null;
+            if (from == null || from === i) return;
+            update((d) => { d.content.story.items = moveItem(d.content.story.items, from, i); });
+          }}
+          className="relative mb-3 rounded-lg border border-slate-200 p-3"
+        >
           {/* delete the whole moment (photo + caption) — top right, with confirm */}
           <button
             type="button"
@@ -356,7 +397,18 @@ export function StoryFields({ draft, update }: PanelProps) {
             ✕
           </button>
 
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Photo {i + 1}</p>
+          <div className="mb-2 flex items-center gap-2">
+            <span
+              draggable
+              onDragStart={() => { dragIndex.current = i; }}
+              onDragEnd={() => { dragIndex.current = null; }}
+              title="Drag to reorder"
+              className="cursor-grab select-none text-slate-400 active:cursor-grabbing hover:text-slate-600"
+            >
+              ⠿
+            </span>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Photo {i + 1}</p>
+          </div>
 
           <div className="flex gap-3">
             <div className="h-20 w-16 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-50">
@@ -406,11 +458,34 @@ export function ScheduleFields({ draft, update }: PanelProps) {
   const c = draft.content;
   const motif = getMotif(draft.motifId);
   const iconOptions = Object.keys(motif.icons).map((k) => ({ value: k, label: k }));
+  const dragIndex = useRef<number | null>(null);
   return (
     <div>
       <Field label="Subtitle"><TextInput value={c.schedule.subtext ?? ""} onChange={(e) => update((d) => { d.content.schedule.subtext = e.target.value; })} /></Field>
       {c.schedule.events.map((ev, i) => (
-        <div key={ev.id} className="mb-2 rounded-md border border-slate-200 p-2">
+        <div
+          key={ev.id}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => {
+            const from = dragIndex.current;
+            dragIndex.current = null;
+            if (from == null || from === i) return;
+            update((d) => { d.content.schedule.events = moveItem(d.content.schedule.events, from, i); });
+          }}
+          className="mb-2 rounded-md border border-slate-200 p-2"
+        >
+          <div className="mb-1 flex items-center gap-2">
+            <span
+              draggable
+              onDragStart={() => { dragIndex.current = i; }}
+              onDragEnd={() => { dragIndex.current = null; }}
+              title="Drag to reorder"
+              className="cursor-grab select-none text-slate-400 active:cursor-grabbing hover:text-slate-600"
+            >
+              ⠿
+            </span>
+            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Event {i + 1}</span>
+          </div>
           <Field label="Event name"><TextInput value={ev.name} onChange={(e) => update((d) => { d.content.schedule.events[i].name = e.target.value; })} /></Field>
           <div className="grid grid-cols-2 gap-2">
             <Field label="Date"><TextInput value={ev.date} onChange={(e) => update((d) => { d.content.schedule.events[i].date = e.target.value; })} /></Field>
@@ -471,12 +546,14 @@ export function RsvpFields({ draft, update }: PanelProps) {
 export function ContentPanel({ draft, update }: PanelProps) {
   return (
     <div>
-      <Group title="Couple" open><CoupleFields draft={draft} update={update} /></Group>
+      <Group title="Envelope & Intro" open><EnvelopeFields draft={draft} update={update} /></Group>
+      <Group title="Couple"><CoupleFields draft={draft} update={update} /></Group>
       <Group title="Families"><FamilyFields draft={draft} update={update} /></Group>
       <Group title="Save the date"><SaveDateFields draft={draft} update={update} /></Group>
       <Group title="Our Story"><StoryFields draft={draft} update={update} /></Group>
       <Group title="Schedule of Events"><ScheduleFields draft={draft} update={update} /></Group>
       <Group title="RSVP"><RsvpFields draft={draft} update={update} /></Group>
+      <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
     </div>
   );
 }

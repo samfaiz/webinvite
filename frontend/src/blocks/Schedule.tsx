@@ -8,7 +8,7 @@ import { FrameBg } from "@/components/FrameBg";
 import { DirectionsLink } from "@/components/DirectionsLink";
 import { targetFromEvent } from "@/lib/maps";
 
-function EventCard({ event, motif }: { event: EventItem; motif: MotifPack }) {
+function EventCard({ event, motif, basePath }: { event: EventItem; motif: MotifPack; basePath: string }) {
   const icon = (event.icon && motif.icons[event.icon]) || motif.icons.heart || "♥";
   return (
     <Reveal>
@@ -27,38 +27,38 @@ function EventCard({ event, motif }: { event: EventItem; motif: MotifPack }) {
           outlineOffset: -10,
         }}
       >
-        <p className="font-display text-xs uppercase tracking-[0.22em]" style={{ color: "var(--c-primary)" }}>
+        <p data-edit={`${basePath}.date`} className="font-display text-xs uppercase tracking-[0.22em]" style={{ color: "var(--c-primary)" }}>
           {event.date}
         </p>
         <div className="my-4 text-3xl" style={{ color: "var(--c-accent)" }} aria-hidden>
           {icon}
         </div>
-        <h3 className="font-script text-4xl" style={{ color: "var(--c-primary)" }}>
+        <h3 data-edit={`${basePath}.name`} className="font-script text-4xl" style={{ color: "var(--c-primary)" }}>
           {event.name}
         </h3>
         <Divider className="my-4" width={60} />
-        <p className="font-display text-sm tracking-[0.12em]" style={{ color: "var(--c-text)" }}>
+        <p data-edit={`${basePath}.time`} className="font-display text-sm tracking-[0.12em]" style={{ color: "var(--c-text)" }}>
           {event.time}
         </p>
         <p className="font-display mt-3 text-[11px] uppercase tracking-[0.18em]" style={{ color: "var(--c-accent)" }}>
           Venue
         </p>
-        <p className="font-body text-base" style={{ color: "var(--c-text)" }}>
+        <p data-edit={`${basePath}.venue`} className="font-body text-base" style={{ color: "var(--c-text)" }}>
           {event.venue}
         </p>
         {event.address ? (
-          <p className="font-body text-sm" style={{ color: "var(--c-muted)" }}>
+          <p data-edit={`${basePath}.address`} className="font-body text-sm" style={{ color: "var(--c-muted)" }}>
             {event.address}
           </p>
         ) : null}
 
         {event.verse ? (
           <div className="mt-5">
-            <p className="font-body text-sm italic" style={{ color: "var(--c-secondary)" }}>
+            <p data-edit={`${basePath}.verse`} className="font-body text-sm italic" style={{ color: "var(--c-secondary)" }}>
               “{event.verse}”
             </p>
             {event.verseRef ? (
-              <p className="font-display mt-1 text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--c-muted)" }}>
+              <p data-edit={`${basePath}.verseRef`} className="font-display mt-1 text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--c-muted)" }}>
                 {event.verseRef}
               </p>
             ) : null}
@@ -101,6 +101,7 @@ export function Schedule({
             {i === 0 ? (
               <Reveal>
                 <h2
+                  data-edit="schedule.heading"
                   className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
                   style={{ color: "var(--c-primary)" }}
                 >
@@ -108,6 +109,7 @@ export function Schedule({
                 </h2>
                 {content.schedule.subtext ? (
                   <p
+                    data-edit="schedule.subtext"
                     className="font-display mt-3 text-[11px] uppercase tracking-[0.22em]"
                     style={{ color: "var(--c-accent)" }}
                   >
@@ -117,7 +119,7 @@ export function Schedule({
                 <Divider className="my-7" width={100} />
               </Reveal>
             ) : null}
-            <EventCard event={event} motif={motif} />
+            <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
           </section>
         </FrameBg>
       ))}

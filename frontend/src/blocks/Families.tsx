@@ -57,6 +57,7 @@ export function Families({ content }: { content: InvitationContent }) {
         <Reveal>
           {families.subheading ? (
             <p
+              data-edit="families.subheading"
               className="font-display text-[11px] uppercase tracking-[0.3em]"
               style={{ color: "var(--c-accent)" }}
             >
@@ -64,6 +65,7 @@ export function Families({ content }: { content: InvitationContent }) {
             </p>
           ) : null}
           <h2
+            data-edit="families.heading"
             className="font-display mt-3 text-2xl uppercase tracking-[0.12em] sm:text-3xl"
             style={{ color: "var(--c-primary)" }}
           >

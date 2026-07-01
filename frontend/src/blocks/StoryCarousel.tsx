@@ -26,13 +26,14 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
     <section className="px-5 py-10 text-center">
       <Reveal>
         <h2
+          data-edit="story.heading"
           className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
           style={{ color: "var(--c-primary)" }}
         >
           {content.story.heading}
         </h2>
         {content.story.subtext ? (
-          <p className="font-body mt-2 text-sm italic sm:text-base" style={{ color: "var(--c-secondary)" }}>
+          <p data-edit="story.subtext" className="font-body mt-2 text-sm italic sm:text-base" style={{ color: "var(--c-secondary)" }}>
             {content.story.subtext}
           </p>
         ) : null}
@@ -65,7 +66,7 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
             >
-              <Polaroid photo={item.photo} caption={item.caption} />
+              <Polaroid photo={item.photo} caption={item.caption} captionPath={`story.items.${index}.caption`} />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -98,7 +99,7 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
 }
 
 /** A single polaroid frame — photo on top, handwritten caption beneath. */
-function Polaroid({ photo, caption }: { photo?: string; caption: string }) {
+function Polaroid({ photo, caption, captionPath }: { photo?: string; caption: string; captionPath?: string }) {
   const [errored, setErrored] = useState(false);
   const showPhoto = photo && !errored;
 
@@ -154,6 +155,7 @@ function Polaroid({ photo, caption }: { photo?: string; caption: string }) {
       </div>
 
       <p
+        data-edit={captionPath}
         className="font-script mt-2.5 line-clamp-2 text-lg leading-tight"
         style={{ color: "var(--c-secondary)" }}
       >

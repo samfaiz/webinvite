@@ -12,7 +12,7 @@ import {
   StoryFields,
   ScheduleFields,
   RsvpFields,
-  MusicFields,
+  CoverFields,
   SettingsPanel,
   type PanelProps,
 } from "@/studio/panels";
@@ -57,7 +57,7 @@ const STEPS: Step[] = [
   { id: "story", frame: "frame-story", title: "Your story", Comp: StoryFields },
   { id: "schedule", frame: "frame-schedule", title: "Schedule of events", Comp: ScheduleFields },
   { id: "rsvp", frame: "frame-rsvp", title: "RSVP", Comp: RsvpFields },
-  { id: "music", frame: "frame-couple", title: "Add music", Comp: MusicFields },
+  { id: "cover", frame: "frame-couple", title: "Cover & music", Comp: CoverFields },
   { id: "details", frame: "frame-couple", title: "Date & contact", Comp: SettingsPanel },
   { id: "finish", frame: "frame-rsvp", title: "Finish & publish", Comp: null },
 ];
