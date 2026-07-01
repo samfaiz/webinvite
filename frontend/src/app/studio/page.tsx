@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Draft } from "@/studio/draft";
-import { loadDraft, saveDraft, defaultDraft, draftFromPreset } from "@/studio/draft";
+import { loadDraft, saveDraft, defaultDraft, draftFromPreset, setByPath } from "@/studio/draft";
 import { getPreset } from "@/templates/registry";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
@@ -15,8 +15,6 @@ import {
   SettingsPanel,
   type PanelProps,
 } from "@/studio/panels";
-import { getTemplateComponent } from "@/templates/components";
-import { getMotif } from "@/motifs";
 
 const TABS: { id: string; label: string; Comp: (p: PanelProps) => React.ReactNode }[] = [
   { id: "design", label: "Design", Comp: DesignPanel },
@@ -33,6 +31,10 @@ export default function StudioPage() {
   const [serverId, setServerId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  // live-editable preview (iframe) wiring — same as the Create builder
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const suppressPost = useRef(false);
+  const [embedReady, setEmbedReady] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -62,6 +64,45 @@ export default function StudioPage() {
   useEffect(() => {
     if (draft) saveDraft(draft);
   }, [draft]);
+
+  // messages from the editable preview: ready + inline (WYSIWYG) edits
+  useEffect(() => {
+    function onMsg(e: MessageEvent) {
+      if (e.data?.type === "embed-ready") setEmbedReady(true);
+      if (e.data?.type === "edit" && e.data.path) {
+        suppressPost.current = true;
+        setDraft((prev) => {
+          if (!prev) return prev;
+          const next: Draft = structuredClone(prev);
+          setByPath(next.content as unknown as Record<string, unknown>, e.data.path, e.data.value);
+          return next;
+        });
+      }
+    }
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  // push the live draft into the preview iframe (skip echoes of inline edits)
+  useEffect(() => {
+    if (!embedReady || !draft) return;
+    if (suppressPost.current) {
+      suppressPost.current = false;
+      return;
+    }
+    iframeRef.current?.contentWindow?.postMessage(
+      {
+        type: "render",
+        payload: {
+          templateId: draft.templateId,
+          theme: draft.theme,
+          motifId: draft.motifId,
+          content: draft.content,
+        },
+      },
+      "*",
+    );
+  }, [draft, embedReady]);
 
   if (!draft) {
     return <div className="flex h-screen items-center justify-center text-slate-400">Loading Studio…</div>;
@@ -137,7 +178,6 @@ export default function StudioPage() {
   };
 
   const ActivePanel = TABS.find((t) => t.id === tab)!.Comp;
-  const Template = getTemplateComponent(draft.templateId);
 
   return (
     <div className="flex h-dvh flex-col bg-slate-100">
@@ -201,16 +241,17 @@ export default function StudioPage() {
           </div>
         </aside>
 
-        {/* live preview — transform creates a containing block so the template's
-            fixed elements (particles, music toggle) stay inside this pane */}
-        <main className="min-h-0 flex-1 overflow-y-auto bg-slate-200 p-4" style={{ transform: "translateZ(0)" }}>
-          <div className="mx-auto max-w-[440px] overflow-hidden rounded-2xl bg-white shadow-xl">
-            <Template
-              content={draft.content}
-              theme={draft.theme}
-              motif={getMotif(draft.motifId)}
-              intro={false}
-              compact
+        {/* live editable preview — click any text/photo to edit it inline */}
+        <main className="flex min-h-0 flex-1 flex-col items-center justify-center bg-slate-200 p-4">
+          <p className="mb-2 text-center text-[11px] text-slate-500">
+            ✎ Click any text or photo on the preview to edit it
+          </p>
+          <div className="aspect-[9/16] max-h-[calc(100%-1.5rem)] overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+            <iframe
+              ref={iframeRef}
+              src="/studio/embed?edit=1"
+              title="Live editable preview — click text to edit"
+              className="h-full w-full border-0"
             />
           </div>
         </main>
