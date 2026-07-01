@@ -138,7 +138,7 @@ cp .env.example .env
 nano .env
 #   JWT_SECRET=<openssl rand -hex 32>
 #   FRONTEND_ORIGIN=https://webinvite.co
-#   DATABASE_URL="file:./prisma/prod.db"
+#   DATABASE_URL="file:./prod.db"     # MUST start with file:  (→ prisma/prod.db)
 #   PORT=4000
 npm ci
 npx prisma migrate deploy
