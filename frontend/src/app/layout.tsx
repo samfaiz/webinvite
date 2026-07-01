@@ -12,6 +12,8 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
+import { SITE, organizationLd, websiteLd, softwareApplicationLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -55,10 +57,46 @@ const fontVars = [cinzel, cormorant, greatVibes, jost, playfair, marcellus, ebGa
   .map((f) => f.variable)
   .join(" ");
 
+const DEFAULT_TITLE = "Web Invite — Beautiful Wedding Invitation Websites";
+
 export const metadata: Metadata = {
-  title: "Eternal — Wedding Invitations",
-  description:
-    "Create a beautiful, animated wedding invitation website in minutes.",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: DEFAULT_TITLE,
+    template: "%s · Web Invite",
+  },
+  description: SITE.description,
+  applicationName: SITE.name,
+  keywords: [...SITE.keywords],
+  authors: [{ name: SITE.name, url: SITE.url }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  alternates: { canonical: SITE.url },
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    url: SITE.url,
+    title: DEFAULT_TITLE,
+    description: SITE.description,
+    locale: SITE.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: SITE.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  category: "technology",
 };
 
 export default function RootLayout({
@@ -72,6 +110,7 @@ export default function RootLayout({
       className={`${fontVars} h-full antialiased`}
     >
       <body className="min-h-full">
+        <JsonLd data={[organizationLd(), websiteLd(), softwareApplicationLd()]} />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

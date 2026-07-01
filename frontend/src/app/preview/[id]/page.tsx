@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTemplateComponent } from "@/templates/components";
 import { getPreset } from "@/templates/registry";
@@ -7,6 +8,12 @@ import { getMotif } from "@/motifs";
 import type { Theme } from "@/engine/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+// Template/design preview surface — not indexable marketing content.
+export const metadata: Metadata = {
+  title: "Design preview",
+  robots: { index: false, follow: false },
+};
 
 /** Live full-page preview of a code preset OR an admin-created design (by id). */
 export default async function PreviewPage({

@@ -1,8 +1,39 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTemplateComponent } from "@/templates/components";
 import { getMotif } from "@/motifs";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+/** Personal invitation: rich title/description for social sharing, but noindex
+ *  (each couple's page is private, not marketing content). */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const fallback: Metadata = { title: { absolute: "Wedding Invitation" }, robots: { index: false, follow: true } };
+  try {
+    const res = await fetch(`${API}/public/invitations/${slug}`, { cache: "no-store" });
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const c = data?.content?.couple;
+    const names =
+      c?.partner1?.name && c?.partner2?.name ? `${c.partner1.name} & ${c.partner2.name}` : "Our Wedding";
+    const tagline = data?.content?.envelope?.tagline || `You're invited to celebrate the wedding of ${names}.`;
+    const title = `${names} — Wedding Invitation`;
+    return {
+      title: { absolute: title },
+      description: tagline,
+      robots: { index: false, follow: true },
+      openGraph: { title, description: tagline, type: "website" },
+      twitter: { card: "summary_large_image", title, description: tagline },
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
