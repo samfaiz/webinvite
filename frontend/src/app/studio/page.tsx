@@ -250,17 +250,19 @@ export default function StudioPage() {
         </aside>
 
         {/* live editable preview — click any text/photo to edit it inline */}
-        <main className="flex min-h-0 flex-1 flex-col items-center justify-center bg-slate-200 p-4">
-          <p className="mb-2 text-center text-[11px] text-slate-500">
+        <main className="flex min-h-0 flex-1 flex-col items-center bg-slate-200 p-3">
+          <p className="mb-2 shrink-0 text-center text-[11px] text-slate-500">
             ✎ Click any text or photo on the preview to edit it
           </p>
-          <div className="aspect-[9/16] max-h-[calc(100%-1.5rem)] overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
-            <iframe
-              ref={iframeRef}
-              src="/studio/embed?edit=1"
-              title="Live editable preview — click text to edit"
-              className="h-full w-full border-0"
-            />
+          <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+            <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+              <iframe
+                ref={iframeRef}
+                src="/studio/embed?edit=1"
+                title="Live editable preview — click text to edit"
+                className="h-full w-full border-0"
+              />
+            </div>
           </div>
         </main>
       </div>
