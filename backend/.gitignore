@@ -5,7 +5,8 @@
 *.db-journal
 prisma/dev.db*
 
-# RSVP excel exports (dev mode)
-exports/
+# RSVP excel exports (dev mode) — anchored so it won't match src/*/exports
+/exports/
 
-uploads/
+# runtime upload storage — anchored so it won't match src/uploads (the module)
+/uploads/
