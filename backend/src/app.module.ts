@@ -15,6 +15,7 @@ import { TracksModule } from './tracks/tracks.module';
 import { ContentModule } from './content/content.module';
 import { AiModule } from './ai/ai.module';
 import { SeoModule } from './seo/seo.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { ExpiryService } from './tasks/expiry.service';
 
 @Module({
@@ -34,6 +35,7 @@ import { ExpiryService } from './tasks/expiry.service';
     ContentModule,
     AiModule,
     SeoModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],

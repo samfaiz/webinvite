@@ -173,6 +173,9 @@ export const api = {
   seoBlogDraft: (topic: string, keywords?: string[]) =>
     request<BlogDraft>("/admin/seo/blog-draft", { method: "POST", body: JSON.stringify({ topic, keywords }) }, true),
 
+  // analytics (admin)
+  adminAnalytics: (days = 30) => request<AnalyticsSummary>(`/admin/analytics/summary?days=${days}`, {}, true),
+
   // music library
   listTracks: () => request<Track[]>("/tracks"),
   adminListTracks: () => request<Track[]>("/admin/tracks", {}, true),
@@ -303,4 +306,22 @@ export interface BlogDraft {
   excerpt: string;
   tags: string[];
   blocks: unknown[];
+}
+
+export interface AnalyticsSummary {
+  range: { days: number };
+  totals: { views: number; visitors: number };
+  timeseries: { date: string; views: number; visitors: number }[];
+  topPages: { path: string; views: number }[];
+  referrers: { source: string; views: number }[];
+  devices: { device: string; views: number }[];
+  ga: {
+    configured: boolean;
+    range?: string;
+    users?: number;
+    sessions?: number;
+    pageviews?: number;
+    topPages?: { path: string; views: number }[];
+    error?: string;
+  };
 }

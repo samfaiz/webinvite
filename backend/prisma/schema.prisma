@@ -154,3 +154,18 @@ model Track {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
+
+/// Privacy-friendly, first-party pageview log for the built-in analytics
+/// dashboard. `visitor` is an anonymous daily-rotating hash of IP+UA (no raw IP
+/// or PII is stored, no cookies). Referrer is reduced to a host label.
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String? // source host, or null for direct
+  device    String? // "mobile" | "tablet" | "desktop"
+  visitor   String // anonymous hash for unique-visitor counts
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+}
