@@ -121,7 +121,7 @@ function Review({
       </ul>
       {!user ? (
         <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Log in to publish — your progress is saved on this device.
+          Log in or sign up to publish — your design is saved and reopens right after.
         </p>
       ) : null}
       {msg ? <p className="mt-3 text-sm text-slate-600">{msg}</p> : null}
@@ -171,8 +171,17 @@ export default function CreateWizard() {
           return;
         }
       }
-      // returning user with a local draft → resume build
-      // (only if they explicitly continue; otherwise start fresh from caste)
+      // returning from login (?resume=1) → restore the in-progress draft so the
+      // design isn't lost, and drop them at the finish step ready to publish
+      if (params.get("resume")) {
+        const local = loadDraft();
+        if (local) {
+          setDraft(local);
+          setStep(STEPS.length - 1);
+          setPhase("build");
+          return;
+        }
+      }
     })();
   }, []);
 
@@ -480,7 +489,7 @@ export default function CreateWizard() {
                     </button>
                   </div>
                 ) : (
-                  <Link href="/login" className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#23315a]">
+                  <Link href={`/login?redirect=${encodeURIComponent("/create?resume=1")}`} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#23315a]">
                     Log in to publish
                   </Link>
                 )

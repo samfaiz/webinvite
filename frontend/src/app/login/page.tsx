@@ -24,7 +24,11 @@ export default function LoginPage() {
         mode === "login"
           ? await login(email, password)
           : await register(email, password, name);
-      router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      // return to where the user came from (e.g. the builder), if it's a safe
+      // internal path; otherwise go to their default home
+      const redirect = new URLSearchParams(window.location.search).get("redirect");
+      const safe = redirect && redirect.startsWith("/") && !redirect.startsWith("//");
+      router.push(safe ? redirect : user.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       setError((err as Error).message || "Something went wrong");
     } finally {
