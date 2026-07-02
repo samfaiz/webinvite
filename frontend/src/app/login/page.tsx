@@ -37,15 +37,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f4f1ea] px-6">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
-        <Link href="/gallery" className="text-xs text-slate-400 hover:text-slate-600">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fff8f0] px-6">
+      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: "linear-gradient(90deg,#e3a23c,#e0705a,#c9497c,#7a5ba6)" }} />
+      <div className="w-full max-w-sm rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white p-8 shadow-[0_20px_50px_rgba(122,44,44,0.12)]">
+        <Link
+          href="/gallery"
+          className="text-xs text-[rgba(90,35,56,0.55)] hover:text-[#d95f48]"
+          style={{ fontFamily: "var(--f-body)" }}
+        >
           ← Browse designs
         </Link>
-        <h1 className="font-display mt-4 text-2xl uppercase tracking-[0.12em] text-[#2b3a67]">
+        <h1
+          className="mt-4 text-3xl font-medium italic text-[#5a2338]"
+          style={{ fontFamily: "var(--f-serif)" }}
+        >
           {mode === "login" ? "Welcome back" : "Create account"}
         </h1>
-        <p className="font-body mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[rgba(90,35,56,0.65)]" style={{ fontFamily: "var(--f-body)" }}>
           {mode === "login"
             ? "Log in to manage your invitations."
             : "Sign up to build and publish your invitation."}
@@ -54,36 +62,40 @@ export default function LoginPage() {
         <form onSubmit={submit} className="mt-6 space-y-3">
           {mode === "register" ? (
             <input
-              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
+              className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              style={{ fontFamily: "var(--f-body)" }}
             />
           ) : null}
           <input
             type="email"
             required
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            style={{ fontFamily: "var(--f-body)" }}
           />
           <input
             type="password"
             required
             minLength={6}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
             placeholder="Password (min 6 chars)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            style={{ fontFamily: "var(--f-body)" }}
           />
 
-          {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+          {error ? <p className="text-sm text-[#c14e38]">{error}</p> : null}
 
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-lg bg-[#2b3a67] py-2.5 text-sm font-medium text-white hover:bg-[#23315a] disabled:opacity-60"
+            className="w-full rounded-full py-2.5 text-sm font-medium shadow-[0_10px_24px_rgba(217,95,72,0.3)] transition hover:brightness-95 disabled:opacity-60"
+            style={{ background: "var(--c-primary)", color: "var(--c-on-primary)", fontFamily: "var(--f-body)" }}
           >
             {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
           </button>
@@ -94,7 +106,8 @@ export default function LoginPage() {
             setMode(mode === "login" ? "register" : "login");
             setError("");
           }}
-          className="mt-4 w-full text-center text-sm text-slate-500 hover:text-slate-800"
+          className="mt-4 w-full text-center text-sm text-[rgba(90,35,56,0.6)] hover:text-[#c9497c]"
+          style={{ fontFamily: "var(--f-body)" }}
         >
           {mode === "login"
             ? "New here? Create an account"

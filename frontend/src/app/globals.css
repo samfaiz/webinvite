@@ -1,20 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* Theme tokens are injected at runtime by <ThemeProvider>; these are fallbacks. */
-  --c-bg: #eef2f6;
-  --c-surface: #fbf8f1;
-  --c-primary: #2b3a67;
-  --c-secondary: #3f5b8b;
-  --c-accent: #b08d57;
-  --c-text: #33414f;
-  --c-muted: #7c8aa0;
-  --c-grad-from: #dfe7f0;
-  --c-grad-to: #cdd9e8;
+  /* Theme tokens are injected at runtime by <ThemeProvider>; these are fallbacks.
+     Marketing / auth / dashboard chrome uses these directly — the warm palette
+     below is the site's default look. Per-invitation themes override at runtime. */
+  --c-bg: #fff8f0;
+  --c-surface: #ffffff;
+  --c-primary: #d95f48;     /* coral — buttons, CTAs */
+  --c-primary-soft: #fbe0d8;/* coral tint — chip backgrounds, hero panels */
+  --c-on-primary: #ffffff;  /* text on --c-primary */
+  --c-secondary: #c9497c;   /* pink — accent 2 */
+  --c-accent: #e3a23c;      /* marigold — highlights */
+  --c-text: #5a2338;        /* wine — headings & body */
+  --c-muted: #8a5f6c;       /* muted wine */
+  --c-grad-from: #fbe0d8;
+  --c-grad-to: #f9dce9;
 
-  --f-display: var(--font-cinzel), serif;
-  --f-script: var(--font-greatvibes), cursive;
-  --f-body: var(--font-cormorant), serif;
+  /* Additional brand tokens used by the landing page + shared chrome. */
+  --c-wine-deep: #4a1c2e;
+  --c-cream-warm: #fdf1e2;
+  --c-cream-gold: #fbecc9;
+  --c-plum: #7a5ba6;
+  --c-forest: #5c8a5e;
+
+  --f-display: var(--font-cormorant), serif;
+  --f-script: var(--font-parisienne), var(--font-greatvibes), cursive;
+  --f-body: var(--font-inter), system-ui, sans-serif;
+  --f-headings: var(--font-space-grotesk), system-ui, sans-serif;
+  --f-mono: var(--font-space-mono), ui-monospace, monospace;
+  --f-serif: var(--font-cormorant), serif;
+}
+
+/* Optional dark-mode accent overrides (applied when <html data-theme="dark">). */
+[data-theme="dark"] {
+  --c-primary: var(--c-primary-dark, var(--c-primary));
+  --c-primary-soft: var(--c-primary-soft-dark, var(--c-primary-soft));
+  --c-on-primary: var(--c-on-primary-dark, var(--c-on-primary));
 }
 
 * {
@@ -70,6 +91,27 @@ body {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* Landing-page motion — fanning invitation cards, gentle floats, RSVP toast */
+@keyframes wi-fan {
+  0%, 26%   { transform: translateX(-50%) rotate(0deg) scale(1); opacity: 1; z-index: 3; }
+  33%, 59%  { transform: translateX(-148%) rotate(-9deg) scale(0.9); opacity: 0.8; z-index: 1; }
+  66%, 92%  { transform: translateX(48%) rotate(8deg) scale(0.9); opacity: 0.85; z-index: 1; }
+  100%      { transform: translateX(-50%) rotate(0deg) scale(1); opacity: 1; z-index: 3; }
+}
+@keyframes wi-toast {
+  0%, 10%   { transform: translateY(10px); opacity: 0; }
+  16%, 82%  { transform: translateY(0); opacity: 1; }
+  92%, 100% { transform: translateY(-8px); opacity: 0; }
+}
+@keyframes wi-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes wi-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.35); opacity: 0.6; }
 }
 
 /* WYSIWYG inline editing affordances (editor preview only) */

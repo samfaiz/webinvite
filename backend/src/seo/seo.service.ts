@@ -126,6 +126,29 @@ export class SeoService {
     return this.runSeo(doc, this.trafficFor(doc, stats));
   }
 
+  /**
+   * Editor "Optimise all with AI" — one Claude call, returns SEO title,
+   * description, OG variants, keywords AND FAQs together. Never persists.
+   */
+  async optimiseAll(contentId: string) {
+    const doc = await this.mustGetDoc(contentId);
+    const memory = (await this.getMemory(doc.id)).map((n) => n.note);
+    return this.ai.optimizePage({
+      title: doc.title,
+      url: this.urlFor(doc),
+      body: this.bodyText(doc),
+      currentTitle: doc.seoTitle,
+      currentDescription: doc.seoDescription,
+      memory,
+    });
+  }
+
+  /** Editor "Generate with AI" for the FAQ list only. Never persists. */
+  async generateFaqs(contentId: string, count = 6) {
+    const doc = await this.mustGetDoc(contentId);
+    return this.ai.generateFaqs({ title: doc.title, body: this.bodyText(doc), count });
+  }
+
   /** Create a persisted proposal (queued for admin review). `stats` is passed in
    *  during a full audit so we fetch traffic once, not per page. */
   async proposeForContent(contentId: string, source: 'audit' | 'manual', stats?: PageStats) {

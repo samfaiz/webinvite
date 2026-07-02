@@ -86,14 +86,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     <PublicShell>
       <JsonLd data={articleLd} />
       <article className="mx-auto max-w-3xl px-6 py-12">
-        <Link href="/blog" className="text-sm text-slate-500 hover:text-[#2b3a67]">← All posts</Link>
-        <h1 className="mt-4 font-display text-4xl leading-tight text-[#2b3a67]">{post.title}</h1>
-        <p className="mt-3 text-[11px] uppercase tracking-wide text-slate-400">
+        <Link href="/blog" className="text-sm text-[rgba(90,35,56,0.6)] hover:text-[#d95f48]" style={{ fontFamily: "var(--f-body)" }}>← All posts</Link>
+        <h1
+          className="mt-4 text-4xl font-medium italic leading-tight text-[#5a2338] sm:text-5xl"
+          style={{ fontFamily: "var(--f-serif)" }}
+        >
+          {post.title}
+        </h1>
+        <p
+          className="mt-3 text-[11px] uppercase tracking-wide text-[rgba(90,35,56,0.5)]"
+          style={{ fontFamily: "var(--f-body)" }}
+        >
           {[post.authorName, post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : null].filter(Boolean).join(" · ")}
         </p>
         {post.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.coverImage} alt="" className="mt-6 w-full rounded-2xl border border-slate-200 object-cover" />
+          <img src={post.coverImage} alt="" className="mt-6 w-full rounded-2xl border border-[rgba(90,35,56,0.1)] object-cover" />
         ) : null}
         <div className="mt-8">
           <BlockRenderer blocks={normalizeBlocks(post.blocks)} />

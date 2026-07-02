@@ -89,6 +89,10 @@ model Setting {
 /// CMS content — marketing pages ("page") and blog posts ("post"). Body is a
 /// list of editor blocks stored as JSON; per-doc SEO fields feed the page's
 /// <head>. One row serves both types so the block editor/renderer are shared.
+///
+/// For "page" docs the admin form ALSO exposes: sortOrder (nav position),
+/// canonicalUrl (SEO), faqsJson (answer-engine optimisation Q&A list). The
+/// tagsJson column doubles as SEO keywords on pages.
 model ContentDoc {
   id             String    @id @default(cuid())
   type           String // "page" | "post"
@@ -97,12 +101,17 @@ model ContentDoc {
   excerpt        String? // short summary (blog cards, meta fallback)
   coverImage     String? // hero/cover image URL
   blocksJson     String    @default("[]") // Block[] as JSON
-  tagsJson       String    @default("[]") // string[] as JSON
+  tagsJson       String    @default("[]") // string[] (SEO keywords for pages)
   authorName     String?
   status         String    @default("draft") // "draft" | "published"
   seoTitle       String?
   seoDescription String?
+  ogTitle        String? // Social (OG) title — falls back to seoTitle
+  ogDescription  String? // Social (OG) description — falls back to seoDescription
   ogImage        String?
+  canonicalUrl   String? // absolute URL; blank = the page's own URL
+  faqsJson       String    @default("[]") // [{id, question, answer}] for AEO
+  sortOrder      Int       @default(0) // ascending; nav / list ordering
   noindex        Boolean   @default(false)
   publishedAt    DateTime?
   createdAt      DateTime  @default(now())
@@ -113,6 +122,7 @@ model ContentDoc {
 
   @@unique([type, slug])
   @@index([type, status])
+  @@index([type, sortOrder])
 }
 
 /// AI-generated SEO suggestion for a ContentDoc, awaiting admin review.
@@ -153,6 +163,56 @@ model Track {
   url       String
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+/// Messages submitted through the public /contact form. The admin inbox shows
+/// them, marks them read/replied, and can delete. Kept intentionally simple —
+/// no attachments, no threading; treat as first-touch capture.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  status    String   @default("new") // "new" | "read" | "replied"
+  source    String   @default("contact-page") // where it came from
+  ip        String? // reduced to /24 or /48 for privacy; can be null
+  userAgent String?
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+  repliedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+/// Singleton config for the SEO/AEO/GEO audit algorithm. The prompt/rubric
+/// itself + the "AI learning memory" live in `SeoAlgorithmVersion` (each save
+/// creates a new version); this row only holds the auto-improve toggles.
+model SeoAlgorithm {
+  id             String    @id
+  autoImprove    Boolean   @default(false)
+  frequency      String    @default("weekly") // "daily" | "weekly" | "monthly"
+  versionsToKeep Int       @default(90)
+  lastRunAt      DateTime?
+  lastRunNote    String?
+  updatedAt      DateTime  @updatedAt
+}
+
+/// One archived revision of the SEO algorithm. Each admin save + AI improve
+/// run inserts a new row (marked isCurrent = true) so the admin can compare
+/// and revert. Older rows past `SeoAlgorithm.versionsToKeep` are pruned.
+model SeoAlgorithmVersion {
+  id             String   @id @default(cuid())
+  algorithm      String   // the prompt / rubric text
+  learningMemory String   // the AI learning-memory notes at time of save
+  avgAuditScore  Float?   // updated when downstream audits complete
+  source         String   @default("manual") // manual | ai-improve | schedule | restore | reset
+  isCurrent      Boolean  @default(false) // exactly one row has this true
+  createdAt      DateTime @default(now())
+
+  @@index([isCurrent])
+  @@index([createdAt])
 }
 
 /// Privacy-friendly, first-party pageview log for the built-in analytics

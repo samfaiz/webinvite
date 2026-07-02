@@ -36,11 +36,21 @@ export default async function BlogIndex() {
   return (
     <PublicShell>
       <div className="mx-auto max-w-5xl px-6 py-14">
-        <h1 className="font-display text-4xl text-[#2b3a67]">The Web Invite Blog</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">Ideas, etiquette and inspiration for your wedding invitations.</p>
+        <span className="text-[11px] font-medium tracking-[0.28em] text-[#c9497c]" style={{ fontFamily: "var(--f-body)" }}>
+          THE JOURNAL
+        </span>
+        <h1 className="mt-3 text-5xl font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+          The Web Invite Blog
+        </h1>
+        <p className="mt-3 max-w-2xl text-[rgba(90,35,56,0.7)]" style={{ fontFamily: "var(--f-body)" }}>
+          Ideas, etiquette and inspiration for your wedding invitations.
+        </p>
 
         {posts.length === 0 ? (
-          <p className="mt-12 rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-400">
+          <p
+            className="mt-12 rounded-xl border border-dashed border-[rgba(201,73,124,0.35)] p-10 text-center text-[rgba(90,35,56,0.55)]"
+            style={{ fontFamily: "var(--f-body)" }}
+          >
             No posts yet — check back soon.
           </p>
         ) : (
@@ -49,20 +59,26 @@ export default async function BlogIndex() {
               <Link
                 key={p.slug}
                 href={`/blog/${p.slug}`}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-lg"
+                className="group overflow-hidden rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white shadow-[0_10px_30px_rgba(122,44,44,0.06)] transition-shadow hover:shadow-[0_20px_50px_rgba(122,44,44,0.14)]"
               >
-                <div className="aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                <div className="aspect-[16/10] w-full overflow-hidden bg-[#fdf1e2]">
                   {p.coverImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.coverImage} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-slate-300">Web Invite</div>
+                    <div className="flex h-full items-center justify-center text-[rgba(90,35,56,0.35)]" style={{ fontFamily: "var(--f-serif)", fontStyle: "italic", fontSize: 22 }}>
+                      Web Invite
+                    </div>
                   )}
                 </div>
                 <div className="p-5">
-                  <h2 className="font-display text-lg text-[#2b3a67]">{p.title}</h2>
-                  {p.excerpt ? <p className="mt-2 line-clamp-3 text-sm text-slate-600">{p.excerpt}</p> : null}
-                  <p className="mt-3 text-[11px] uppercase tracking-wide text-slate-400">
+                  <h2 className="text-xl font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>{p.title}</h2>
+                  {p.excerpt ? (
+                    <p className="mt-2 line-clamp-3 text-sm text-[rgba(90,35,56,0.7)]" style={{ fontFamily: "var(--f-body)" }}>
+                      {p.excerpt}
+                    </p>
+                  ) : null}
+                  <p className="mt-3 text-[11px] uppercase tracking-wide text-[rgba(90,35,56,0.5)]" style={{ fontFamily: "var(--f-body)" }}>
                     {[p.authorName, p.publishedAt ? new Date(p.publishedAt).toLocaleDateString() : null].filter(Boolean).join(" · ")}
                   </p>
                 </div>

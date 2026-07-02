@@ -34,6 +34,16 @@ export class SeoController {
     return this.svc.suggest(id);
   }
 
+  @Post('content/:id/optimise-all')
+  optimiseAll(@Param('id') id: string) {
+    return this.svc.optimiseAll(id);
+  }
+
+  @Post('content/:id/faqs')
+  faqs(@Param('id') id: string, @Body() body?: { count?: number }) {
+    return this.svc.generateFaqs(id, body?.count);
+  }
+
   @Post('content/:id/propose')
   propose(@Param('id') id: string) {
     return this.svc.proposeForContent(id, 'manual');

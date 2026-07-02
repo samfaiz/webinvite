@@ -1,10 +1,29 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsIn,
+  IsInt,
   IsOptional,
   IsString,
+  MaxLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class FaqItemDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsString()
+  @MaxLength(500)
+  question!: string;
+
+  @IsString()
+  @MaxLength(4000)
+  answer!: string;
+}
 
 /** Create/update payload for a CMS document (page or blog post). */
 export class SaveContentDto {
@@ -48,7 +67,31 @@ export class SaveContentDto {
 
   @IsOptional()
   @IsString()
+  ogTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  ogDescription?: string;
+
+  @IsOptional()
+  @IsString()
   ogImage?: string;
+
+  @IsOptional()
+  @IsString()
+  canonicalUrl?: string;
+
+  /** answer-engine-optimisation FAQ list rendered on the public page + as JSON-LD */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(30)
+  @ValidateNested({ each: true })
+  @Type(() => FaqItemDto)
+  faqs?: FaqItemDto[];
+
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
 
   @IsOptional()
   @IsBoolean()

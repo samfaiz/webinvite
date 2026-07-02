@@ -58,6 +58,13 @@ export class ContentController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
+  @Post('admin/content/seed-pages')
+  seedPages() {
+    return this.svc.seedDefaultPages();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Post('content')
   create(@Body() dto: SaveContentDto) {
     return this.svc.create(dto);

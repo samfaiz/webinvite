@@ -18,6 +18,9 @@ import { SeoModule } from './seo/seo.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SecretsModule } from './secrets/secrets.module';
 import { IntegrationsModule } from './secrets/integrations.module';
+import { SiteSettingsModule } from './site-settings/site-settings.module';
+import { ContactModule } from './contact/contact.module';
+import { SeoAlgorithmModule } from './seo-algorithm/seo-algorithm.module';
 import { ExpiryService } from './tasks/expiry.service';
 
 @Module({
@@ -40,6 +43,9 @@ import { ExpiryService } from './tasks/expiry.service';
     SeoModule,
     AnalyticsModule,
     IntegrationsModule,
+    SiteSettingsModule,
+    ContactModule,
+    SeoAlgorithmModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],

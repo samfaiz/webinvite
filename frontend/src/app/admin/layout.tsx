@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdminShell } from "./AdminShell";
 
 // Covers /admin and all admin sub-pages via metadata inheritance.
 export const metadata: Metadata = {
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -16,7 +16,7 @@ function inlineMd(raw: string): string {
   s = s.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+|\/[^\s)]*)\)/g,
     (_m, text: string, url: string) =>
-      `<a href="${url}" class="text-[#2b3a67] underline underline-offset-2 hover:opacity-70"${
+      `<a href="${url}" class="text-[#c9497c] underline underline-offset-2 hover:text-[#d95f48]"${
         url.startsWith("http") ? ' target="_blank" rel="noopener noreferrer"' : ""
       }>${text}</a>`,
   );
@@ -32,55 +32,120 @@ const Html = ({ text, className }: { text: string; className?: string }) => (
 
 function BlockView({ block }: { block: Block }) {
   switch (block.type) {
-    case "hero":
+    case "hero": {
+      const crop = block.imageCrop || "center";
       return (
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center sm:px-12 sm:py-20">
+        <section className="relative overflow-hidden rounded-2xl border border-[rgba(201,73,124,0.2)] bg-[#fdf1e2] px-6 py-14 text-center sm:px-12 sm:py-20">
           {block.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={block.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />
+            <img
+              src={block.image}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-25"
+              style={{ objectPosition: crop }}
+            />
           ) : null}
           <div className="relative">
-            <h1 className="font-display text-3xl text-[#2b3a67] sm:text-5xl">{block.heading}</h1>
-            {block.sub ? <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{block.sub}</p> : null}
-            {block.ctaLabel && block.ctaHref ? (
-              <a
-                href={block.ctaHref}
-                className="mt-8 inline-block rounded-lg bg-[#2b3a67] px-6 py-3 text-sm font-medium text-white hover:bg-[#23315a]"
+            {block.sub ? (
+              <p
+                className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#c9497c]"
+                style={{ fontFamily: "var(--f-body)" }}
               >
-                {block.ctaLabel}
-              </a>
+                {block.sub}
+              </p>
+            ) : null}
+            <h1
+              className="mt-3 text-3xl font-medium italic text-[#5a2338] sm:text-5xl"
+              style={{ fontFamily: "var(--f-serif)" }}
+            >
+              {block.heading}
+            </h1>
+            {block.subHeading ? (
+              <p
+                className="mx-auto mt-4 max-w-2xl text-pretty text-[16px] font-light leading-[1.65] text-[rgba(90,35,56,0.72)] sm:text-[18px]"
+                style={{ fontFamily: "var(--f-body)" }}
+              >
+                {block.subHeading}
+              </p>
+            ) : null}
+            {(block.ctaLabel && block.ctaHref) || (block.secondaryCtaLabel && block.secondaryCtaHref) ? (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                {block.ctaLabel && block.ctaHref ? (
+                  <a
+                    href={block.ctaHref}
+                    className="inline-block rounded-full bg-[#d95f48] px-7 py-3 text-sm font-medium text-white shadow-[0_10px_24px_rgba(217,95,72,0.3)] hover:bg-[#c14e38]"
+                    style={{ fontFamily: "var(--f-body)" }}
+                  >
+                    {block.ctaLabel}
+                  </a>
+                ) : null}
+                {block.secondaryCtaLabel && block.secondaryCtaHref ? (
+                  <a
+                    href={block.secondaryCtaHref}
+                    className="inline-block rounded-full border border-[rgba(90,35,56,0.35)] px-6 py-3 text-sm font-medium text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+                    style={{ fontFamily: "var(--f-body)" }}
+                  >
+                    {block.secondaryCtaLabel}
+                  </a>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </section>
       );
+    }
     case "heading": {
       if (block.level === 3)
-        return <h3 className="font-display text-xl text-[#2b3a67]">{block.text}</h3>;
-      return <h2 className="font-display text-2xl text-[#2b3a67] sm:text-3xl">{block.text}</h2>;
+        return (
+          <h3 className="text-xl font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+            {block.text}
+          </h3>
+        );
+      return (
+        <h2 className="text-2xl font-medium italic text-[#5a2338] sm:text-3xl" style={{ fontFamily: "var(--f-serif)" }}>
+          {block.text}
+        </h2>
+      );
     }
     case "paragraph":
-      return <p className="leading-relaxed text-slate-700"><Html text={block.text} /></p>;
+      return (
+        <p className="leading-relaxed text-[rgba(90,35,56,0.8)]" style={{ fontFamily: "var(--f-body)" }}>
+          <Html text={block.text} />
+        </p>
+      );
     case "image":
       return block.url ? (
         <figure className="my-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={block.url} alt={block.alt || ""} className="w-full rounded-xl border border-slate-200" />
+          <img src={block.url} alt={block.alt || ""} className="w-full rounded-xl border border-[rgba(90,35,56,0.1)]" />
           {block.caption ? (
-            <figcaption className="mt-2 text-center text-sm text-slate-400">{block.caption}</figcaption>
+            <figcaption className="mt-2 text-center text-sm text-[rgba(90,35,56,0.5)]" style={{ fontFamily: "var(--f-body)" }}>
+              {block.caption}
+            </figcaption>
           ) : null}
         </figure>
       ) : null;
     case "quote":
       return (
-        <blockquote className="border-l-4 border-[#b08d57] pl-5 text-lg italic text-slate-700">
+        <blockquote
+          className="border-l-4 border-[#e3a23c] pl-5 text-lg italic text-[rgba(90,35,56,0.85)]"
+          style={{ fontFamily: "var(--f-serif)" }}
+        >
           <Html text={block.text} />
-          {block.cite ? <cite className="mt-2 block text-sm not-italic text-slate-400">— {block.cite}</cite> : null}
+          {block.cite ? (
+            <cite className="mt-2 block text-sm not-italic text-[rgba(90,35,56,0.55)]" style={{ fontFamily: "var(--f-body)" }}>
+              — {block.cite}
+            </cite>
+          ) : null}
         </blockquote>
       );
     case "list": {
       const Tag = block.ordered ? "ol" : "ul";
       return (
-        <Tag className={`space-y-1 pl-6 text-slate-700 ${block.ordered ? "list-decimal" : "list-disc"}`}>
+        <Tag
+          className={`space-y-1 pl-6 text-[rgba(90,35,56,0.8)] ${block.ordered ? "list-decimal" : "list-disc"}`}
+          style={{ fontFamily: "var(--f-body)" }}
+        >
           {block.items.map((it, i) => (
             <li key={i}><Html text={it} /></li>
           ))}
@@ -94,16 +159,17 @@ function BlockView({ block }: { block: Block }) {
             href={block.href}
             className={
               block.variant === "ghost"
-                ? "inline-block rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                : "inline-block rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#23315a]"
+                ? "inline-block rounded-full border border-[rgba(90,35,56,0.25)] px-5 py-2.5 text-sm font-medium text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+                : "inline-block rounded-full bg-[#d95f48] px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(217,95,72,0.3)] hover:bg-[#c14e38]"
             }
+            style={{ fontFamily: "var(--f-body)" }}
           >
             {block.label}
           </a>
         </div>
       );
     case "divider":
-      return <hr className="border-slate-200" />;
+      return <hr className="border-[rgba(90,35,56,0.15)]" />;
     default:
       return null;
   }

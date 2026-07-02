@@ -3,6 +3,13 @@
  * structured blocks — no raw HTML, so there's no XSS surface. The same list is
  * edited by BlockEditor and rendered by BlockRenderer.
  */
+/**
+ * Hero image crop position — passed to object-position on the image element.
+ * "center" is the default, "top" keeps faces visible, "bottom" is useful for
+ * landscape scenes with sky.
+ */
+export type HeroImageCrop = "center" | "top" | "bottom" | "left" | "right";
+
 export type Block =
   | { id: string; type: "heading"; text: string; level: 2 | 3 }
   | { id: string; type: "paragraph"; text: string }
@@ -14,11 +21,22 @@ export type Block =
   | {
       id: string;
       type: "hero";
+      /** Big italic H1 line — required. */
       heading: string;
+      /** Small kicker rendered above the heading in uppercase tracking. */
       sub?: string;
+      /** Longer prose rendered below the heading (2–3 sentences). */
+      subHeading?: string;
+      /** Background image URL (object-cover). */
       image?: string;
+      /** Object-position for the background image. Defaults to "center". */
+      imageCrop?: HeroImageCrop;
+      /** Primary CTA (coral pill). */
       ctaLabel?: string;
       ctaHref?: string;
+      /** Optional secondary CTA (outlined). */
+      secondaryCtaLabel?: string;
+      secondaryCtaHref?: string;
     };
 
 export type BlockType = Block["type"];

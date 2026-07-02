@@ -2,15 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
-import { AdminHeader } from "./AdminHeader";
 
-function StatCard({ label, value }: { label: string; value: number | string }) {
+function StatCard({ label, value, tone }: { label: string; value: number | string; tone?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 text-center">
-      <p className="font-display text-3xl text-[#2b3a67]">{value}</p>
-      <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{label}</p>
+    <div
+      className="rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white p-5 shadow-[0_10px_30px_rgba(122,44,44,0.05)]"
+      style={{ fontFamily: "var(--f-body)" }}
+    >
+      <p
+        className="text-[32px] font-semibold italic leading-none"
+        style={{ color: tone || "#5a2338", fontFamily: "var(--f-serif)" }}
+      >
+        {value}
+      </p>
+      <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[rgba(90,35,56,0.5)]">
+        {label}
+      </p>
     </div>
   );
 }
@@ -37,84 +47,174 @@ export default function AdminPage() {
   }, [loading, user, router]);
 
   if (loading || !user || user.role !== "admin") {
-    return <div className="flex h-screen items-center justify-center text-slate-400">Loading…</div>;
+    return (
+      <div
+        className="flex h-[80vh] items-center justify-center text-[rgba(90,35,56,0.5)]"
+        style={{ fontFamily: "var(--f-body)" }}
+      >
+        Loading…
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f1ea]">
-      <AdminHeader active="/admin" />
-
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        {error ? <p className="mb-4 text-sm text-rose-600">{error}</p> : null}
-
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCard label="Users" value={stats?.users ?? "—"} />
-          <StatCard label="Invitations" value={stats?.invitations ?? "—"} />
-          <StatCard label="Published" value={stats?.published ?? "—"} />
-          <StatCard label="Drafts" value={stats?.drafts ?? "—"} />
-          <StatCard label="RSVPs" value={stats?.rsvps ?? "—"} />
-          <StatCard label="Total views" value={stats?.totalViews ?? "—"} />
+    <div className="mx-auto max-w-7xl px-6 py-8 sm:px-10 sm:py-10" style={{ fontFamily: "var(--f-body)" }}>
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#c9497c]">
+            Overview
+          </span>
+          <h1
+            className="mt-1 text-4xl font-medium italic text-[#5a2338] sm:text-[42px]"
+            style={{ fontFamily: "var(--f-serif)" }}
+          >
+            Dashboard
+          </h1>
         </div>
+        <Link
+          href="/create"
+          className="rounded-full bg-[#d95f48] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(217,95,72,0.3)] transition-colors hover:bg-[#c14e38]"
+        >
+          + New invitation
+        </Link>
+      </div>
 
-        <section className="mt-10">
-          <h2 className="font-display text-lg uppercase tracking-[0.1em] text-[#2b3a67]">All Invitations</h2>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                <tr>
-                  <th className="px-4 py-2">Owner</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Template</th>
-                  <th className="px-4 py-2">Views</th>
-                  <th className="px-4 py-2">RSVPs</th>
-                  <th className="px-4 py-2">Slug</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invites.map((i) => (
-                  <tr key={i.id} className="border-b border-slate-50">
-                    <td className="px-4 py-2">{i.owner}</td>
-                    <td className="px-4 py-2">{i.status}</td>
-                    <td className="px-4 py-2 text-slate-500">{i.templateId}</td>
-                    <td className="px-4 py-2">{i.views}</td>
-                    <td className="px-4 py-2">{i.rsvpCount}</td>
-                    <td className="px-4 py-2 text-slate-500">{i.slug ?? "—"}</td>
-                  </tr>
-                ))}
-                {invites.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-6 text-center text-slate-400">No invitations yet.</td></tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-        </section>
+      {error ? <p className="mt-4 text-sm text-[#c14e38]">{error}</p> : null}
 
-        <section className="mt-10">
-          <h2 className="font-display text-lg uppercase tracking-[0.1em] text-[#2b3a67]">Users</h2>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                <tr>
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Role</th>
-                  <th className="px-4 py-2">Invitations</th>
+      {/* Stats */}
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <StatCard label="Users" value={stats?.users ?? "—"} />
+        <StatCard label="Invitations" value={stats?.invitations ?? "—"} />
+        <StatCard label="Published" value={stats?.published ?? "—"} tone="#5c8a5e" />
+        <StatCard label="Drafts" value={stats?.drafts ?? "—"} tone="#c98f2e" />
+        <StatCard label="RSVPs" value={stats?.rsvps ?? "—"} tone="#c9497c" />
+        <StatCard label="Total views" value={stats?.totalViews ?? "—"} tone="#7a5ba6" />
+      </div>
+
+      {/* Invitations table */}
+      <section className="mt-10">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[20px] font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+            All invitations
+          </h2>
+          <span className="text-[12px] text-[rgba(90,35,56,0.55)]">
+            {invites.length} total
+          </span>
+        </div>
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white shadow-[0_10px_30px_rgba(122,44,44,0.05)]">
+          <table className="w-full text-left text-[13.5px]">
+            <thead className="bg-[#fdf4ec] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(90,35,56,0.55)]">
+              <tr>
+                <th className="px-5 py-3">Owner</th>
+                <th className="px-5 py-3">Status</th>
+                <th className="px-5 py-3">Template</th>
+                <th className="px-5 py-3">Views</th>
+                <th className="px-5 py-3">RSVPs</th>
+                <th className="px-5 py-3">Slug</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invites.map((i) => (
+                <tr key={i.id} className="border-t border-[rgba(90,35,56,0.06)] transition-colors hover:bg-[#fdf4ec]/60">
+                  <td className="px-5 py-3 text-[#5a2338]">{i.owner}</td>
+                  <td className="px-5 py-3">
+                    <StatusPill status={i.status} />
+                  </td>
+                  <td className="px-5 py-3 text-[rgba(90,35,56,0.65)]">{i.templateId}</td>
+                  <td className="px-5 py-3 text-[#5a2338]">{i.views}</td>
+                  <td className="px-5 py-3 text-[#5a2338]">{i.rsvpCount}</td>
+                  <td className="px-5 py-3 text-[rgba(90,35,56,0.55)]">{i.slug ?? "—"}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u.id} className="border-b border-slate-50">
-                    <td className="px-4 py-2">{u.email}</td>
-                    <td className="px-4 py-2">{u.name ?? "—"}</td>
-                    <td className="px-4 py-2">{u.role}</td>
-                    <td className="px-4 py-2">{u.invitations}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </main>
+              ))}
+              {invites.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
+                    No invitations yet.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Users table */}
+      <section className="mt-10">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[20px] font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+            Users
+          </h2>
+          <span className="text-[12px] text-[rgba(90,35,56,0.55)]">
+            {users.length} total
+          </span>
+        </div>
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white shadow-[0_10px_30px_rgba(122,44,44,0.05)]">
+          <table className="w-full text-left text-[13.5px]">
+            <thead className="bg-[#fdf4ec] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(90,35,56,0.55)]">
+              <tr>
+                <th className="px-5 py-3">Email</th>
+                <th className="px-5 py-3">Name</th>
+                <th className="px-5 py-3">Role</th>
+                <th className="px-5 py-3">Invitations</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id} className="border-t border-[rgba(90,35,56,0.06)] transition-colors hover:bg-[#fdf4ec]/60">
+                  <td className="px-5 py-3 text-[#5a2338]">{u.email}</td>
+                  <td className="px-5 py-3 text-[rgba(90,35,56,0.75)]">{u.name ?? "—"}</td>
+                  <td className="px-5 py-3">
+                    <RolePill role={u.role} />
+                  </td>
+                  <td className="px-5 py-3 text-[#5a2338]">{u.invitations}</td>
+                </tr>
+              ))}
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
+                    No users yet.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
+  );
+}
+
+/* ---------- small helpers ---------- */
+
+function StatusPill({ status }: { status: string }) {
+  const map: Record<string, { bg: string; fg: string }> = {
+    published: { bg: "#dcfce7", fg: "#166534" },
+    draft: { bg: "#fdf1e2", fg: "#c98f2e" },
+    expired: { bg: "#fbe0d8", fg: "#b04a36" },
+  };
+  const c = map[status] || { bg: "#fdf4ec", fg: "#8a5f6c" };
+  return (
+    <span
+      className="rounded-full px-2.5 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em]"
+      style={{ background: c.bg, color: c.fg }}
+    >
+      {status}
+    </span>
+  );
+}
+
+function RolePill({ role }: { role: string }) {
+  const admin = role === "admin";
+  return (
+    <span
+      className="rounded-full px-2.5 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em]"
+      style={{
+        background: admin ? "#f9dce9" : "#fdf4ec",
+        color: admin ? "#a53a66" : "#8a5f6c",
+      }}
+    >
+      {role}
+    </span>
   );
 }

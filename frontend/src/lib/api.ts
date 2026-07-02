@@ -155,6 +155,8 @@ export const api = {
   // CMS admin
   adminListContent: (type: "page" | "post") => request<CmsDoc[]>(`/admin/content?type=${type}`, {}, true),
   adminGetContent: (id: string) => request<CmsDoc>(`/admin/content/${id}`, {}, true),
+  seedDefaultPages: () =>
+    request<{ created: string[]; pages: CmsDoc[] }>(`/admin/content/seed-pages`, { method: "POST" }, true),
   createContent: (body: CmsInput) =>
     request<CmsDoc>("/content", { method: "POST", body: JSON.stringify(body) }, true),
   updateContent: (id: string, body: CmsInput) =>
@@ -169,6 +171,14 @@ export const api = {
   seoInsights: (days = 30) => request<SeoInsights>(`/admin/seo/insights?days=${days}`, {}, true),
   seoRunAudit: () => request<{ proposed: number; skipped: number; total: number }>("/admin/seo/audit", { method: "POST" }, true),
   seoSuggest: (contentId: string) => request<SeoSuggestion>(`/admin/seo/content/${contentId}/suggest`, { method: "POST" }, true),
+  seoOptimiseAll: (contentId: string) =>
+    request<PageOptimisation>(`/admin/seo/content/${contentId}/optimise-all`, { method: "POST" }, true),
+  seoGenerateFaqs: (contentId: string, count?: number) =>
+    request<Array<{ question: string; answer: string }>>(
+      `/admin/seo/content/${contentId}/faqs`,
+      { method: "POST", body: JSON.stringify({ count }) },
+      true,
+    ),
   seoApprove: (id: string) => request<SeoProposal>(`/admin/seo/proposals/${id}/approve`, { method: "POST" }, true),
   seoReject: (id: string) => request<SeoProposal>(`/admin/seo/proposals/${id}/reject`, { method: "POST" }, true),
   seoBlogDraft: (topic: string, keywords?: string[]) =>
@@ -209,6 +219,218 @@ export const api = {
       { method: "POST", body: JSON.stringify({ to }) },
       true,
     ),
+
+  // public — landing-page AI assistant
+  chat: (messages: { role: "user" | "assistant"; content: string }[]) =>
+    request<{ reply: string }>("/ai/chat", {
+      method: "POST",
+      body: JSON.stringify({ messages }),
+    }),
+
+  // site settings (Company → Site Settings) — singleton row
+  getSiteSettings: () => request<SiteSettings>("/admin/site-settings", {}, true),
+  saveSiteSettings: (body: SiteSettingsInput) =>
+    request<SiteSettings>("/admin/site-settings", { method: "PUT", body: JSON.stringify(body) }, true),
+  resetSiteSettings: () => request<SiteSettings>("/admin/site-settings", { method: "DELETE" }, true),
+  publicSiteSettings: () => request<PublicSiteSettings>("/site-settings/public"),
+
+  // contact form (public + admin inbox)
+  submitContactMessage: (body: ContactMessageInput) =>
+    request<{ ok: true; receivedAt: string }>("/contact/messages", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  adminListContactMessages: (status?: "new" | "read" | "replied") =>
+    request<ContactMessage[]>(
+      `/admin/contact/messages${status ? `?status=${status}` : ""}`,
+      {},
+      true,
+    ),
+  adminContactUnread: () => request<{ count: number }>("/admin/contact/messages/unread-count", {}, true),
+  adminMarkContactRead: (id: string) =>
+    request<ContactMessage>(`/admin/contact/messages/${id}/read`, { method: "POST" }, true),
+  adminMarkContactReplied: (id: string) =>
+    request<ContactMessage>(`/admin/contact/messages/${id}/replied`, { method: "POST" }, true),
+  adminDeleteContactMessage: (id: string) =>
+    request<{ ok: true }>(`/admin/contact/messages/${id}`, { method: "DELETE" }, true),
+
+  // SEO Algorithm (Site Settings → SEO Algorithm)
+  getSeoAlgorithm: () => request<SeoAlgorithm>("/admin/seo-algorithm", {}, true),
+  saveSeoAlgorithm: (body: SeoAlgorithmInput) =>
+    request<SeoAlgorithm>("/admin/seo-algorithm", { method: "PUT", body: JSON.stringify(body) }, true),
+  resetSeoAlgorithm: () =>
+    request<SeoAlgorithm>("/admin/seo-algorithm/reset-to-default", { method: "POST" }, true),
+  improveSeoAlgorithmDraft: () =>
+    request<{ algorithm: string; learningMemory: string; rationale: string }>(
+      "/admin/seo-algorithm/improve-draft",
+      { method: "POST" },
+      true,
+    ),
+  runSeoAlgorithmNow: () =>
+    request<{ algorithm: string; learningMemory: string; rationale: string; dto: SeoAlgorithm }>(
+      "/admin/seo-algorithm/run-now",
+      { method: "POST" },
+      true,
+    ),
+  getSeoAlgorithmVersion: (id: string) =>
+    request<SeoAlgorithmVersion>(`/admin/seo-algorithm/versions/${id}`, {}, true),
+  restoreSeoAlgorithmVersion: (id: string) =>
+    request<SeoAlgorithm>(`/admin/seo-algorithm/versions/${id}/restore`, { method: "POST" }, true),
+};
+
+/* -------- site settings types -------- */
+
+export interface SiteBranding {
+  brandName: string;
+  logo: string;
+  logoDark: string;
+  favicon: string;
+}
+
+export interface SiteHero {
+  tagline: string;
+  heroHeadline: string;
+  heroSubheadline: string;
+  valueProposition: string;
+  mission: string;
+  primaryCtaLabel: string;
+  primaryCtaUrl: string;
+}
+
+export interface SiteContact {
+  contactEmail: string;
+  careersEmail: string;
+  phone: string;
+  responseTime: string;
+  address: string;
+  officeHours: string;
+  calendarUrl: string;
+}
+
+export interface SocialLink {
+  platform: string;
+  url: string;
+}
+
+export interface SiteSocial {
+  links: SocialLink[];
+  footerMessage: string;
+  copyrightText: string;
+}
+
+export interface SiteTheme {
+  accent: string;
+  accentSoft: string;
+  textOnAccent: string;
+  accentDark: string;
+  accentSoftDark: string;
+  textOnAccentDark: string;
+  fontHeadings: string;
+  fontBody: string;
+  fontMono: string;
+}
+
+export interface SiteSeo {
+  metaTitle: string;
+  metaDescription: string;
+  ogImage: string;
+  keywords: string[];
+  metaPixelId: string;
+  orgSchemaType: string;
+  orgFoundedYear: string;
+}
+
+export interface SiteSettings {
+  id: string;
+  branding: SiteBranding;
+  hero: SiteHero;
+  contact: SiteContact;
+  social: SiteSocial;
+  theme: SiteTheme;
+  seo: SiteSeo;
+  updatedAt: string | null;
+}
+
+export type SiteSettingsInput = {
+  branding?: Partial<SiteBranding>;
+  hero?: Partial<SiteHero>;
+  contact?: Partial<SiteContact>;
+  social?: Partial<SiteSocial>;
+  theme?: Partial<SiteTheme>;
+  seo?: Partial<SiteSeo>;
+};
+
+export interface PublicSiteSettings {
+  branding: SiteBranding;
+  hero: SiteHero;
+  contact: SiteContact;
+  social: SiteSocial;
+  theme: SiteTheme;
+  seo: SiteSeo;
+}
+
+/* -------- SEO algorithm (Site Settings → SEO Algorithm) -------- */
+
+export type SeoAlgorithmFrequency = "daily" | "weekly" | "monthly";
+export type SeoAlgorithmSource = "manual" | "ai-improve" | "schedule" | "restore" | "reset";
+
+export interface SeoAlgorithmVersion {
+  id: string;
+  createdAt: string;
+  source: SeoAlgorithmSource;
+  avgAuditScore: number | null;
+  isCurrent: boolean;
+  /** Only present when fetched individually. */
+  algorithm?: string;
+  learningMemory?: string;
+}
+
+export interface SeoAlgorithm {
+  algorithm: string;
+  learningMemory: string;
+  autoImprove: boolean;
+  frequency: SeoAlgorithmFrequency;
+  versionsToKeep: number;
+  lastRunAt: string | null;
+  lastRunNote: string | null;
+  currentVersionId: string | null;
+  updatedAt: string | null;
+  versions: SeoAlgorithmVersion[];
+}
+
+export type SeoAlgorithmInput = {
+  algorithm?: string;
+  learningMemory?: string;
+  autoImprove?: boolean;
+  frequency?: SeoAlgorithmFrequency;
+  versionsToKeep?: number;
+};
+
+/* -------- contact messages -------- */
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  status: "new" | "read" | "replied";
+  source: string;
+  ip?: string | null;
+  userAgent?: string | null;
+  createdAt: string;
+  readAt?: string | null;
+  repliedAt?: string | null;
+}
+
+export type ContactMessageInput = {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  source?: string;
 };
 
 export interface MailSettings {
@@ -249,6 +471,8 @@ export type TrackInput = {
   active?: boolean;
 };
 
+export type CmsFaq = { id?: string; question: string; answer: string };
+
 /** A CMS document (marketing page or blog post). `blocks` is present on
  *  single-doc reads; list endpoints omit it. */
 export interface CmsDoc {
@@ -263,7 +487,12 @@ export interface CmsDoc {
   status: "draft" | "published";
   seoTitle?: string | null;
   seoDescription?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
   ogImage?: string | null;
+  canonicalUrl?: string | null;
+  faqs: CmsFaq[];
+  sortOrder: number;
   noindex: boolean;
   publishedAt?: string | null;
   createdAt?: string;
@@ -282,9 +511,23 @@ export type CmsInput = {
   authorName?: string;
   seoTitle?: string;
   seoDescription?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
+  canonicalUrl?: string;
+  faqs?: CmsFaq[];
+  sortOrder?: number;
   noindex?: boolean;
 };
+
+export interface PageOptimisation {
+  seoTitle: string;
+  seoDescription: string;
+  ogTitle: string;
+  ogDescription: string;
+  keywords: string[];
+  faqs: Array<{ question: string; answer: string }>;
+}
 
 export interface SeoSuggestion {
   seoTitle: string;

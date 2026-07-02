@@ -62,12 +62,17 @@ export default async function ContentPageRoute({ params }: { params: Promise<{ s
 
   return (
     <PublicShell>
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="font-display text-4xl leading-tight text-[#2b3a67]">{page.title}</h1>
+      <article className="mx-auto max-w-3xl px-6 py-12">
+        <h1
+          className="text-4xl font-medium italic leading-tight text-[#5a2338] sm:text-5xl"
+          style={{ fontFamily: "var(--f-serif)" }}
+        >
+          {page.title}
+        </h1>
         <div className="mt-8">
           <BlockRenderer blocks={normalizeBlocks(page.blocks)} />
         </div>
-      </div>
+      </article>
     </PublicShell>
   );
 }
