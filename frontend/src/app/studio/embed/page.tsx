@@ -99,7 +99,9 @@ export default function StudioEmbed() {
     const clampX = (n: number) => Math.max(-280, Math.min(280, n));
     const clampY = (n: number) => Math.max(-220, Math.min(520, n));
     function place(el: HTMLElement, key: string, x: number, y: number) {
-      if (key.startsWith("edit:")) el.style.translate = x || y ? `${x}px ${y}px` : "";
+      // unwrapped elements (text fields, ornaments) use the CSS `translate`
+      // property; Movable wrappers keep `transform` (matches their SSR markup)
+      if (key.startsWith("edit:") || key.startsWith("orn:")) el.style.translate = x || y ? `${x}px ${y}px` : "";
       else el.style.transform = `translate(${x}px, ${y}px)`;
       el.dataset.offsetX = String(x);
       el.dataset.offsetY = String(y);
@@ -183,13 +185,23 @@ export default function StudioEmbed() {
         el.dataset.move = `edit:${path}${n ? `#${n}` : ""}`;
       }
     });
+    // decorative ornaments (dividers, crests) are draggable too, keyed by
+    // their document-order occurrence per ornament type
+    document.querySelectorAll<HTMLElement>("[data-orn]").forEach((el) => {
+      const type = el.dataset.orn || "";
+      const n = seen.get(`orn:${type}`) ?? 0;
+      seen.set(`orn:${type}`, n + 1);
+      if (!el.parentElement?.hasAttribute("data-move")) {
+        el.dataset.move = `orn:${type}${n ? `#${n}` : ""}`;
+      }
+    });
     document.querySelectorAll<HTMLElement>("[data-move]").forEach((el) => {
       el.style.touchAction = "none";
       el.classList.add("wysiwyg-movable");
-      // seed the drag start values: text fields from the saved offsets map
-      // (Movable wrappers already carry data-offset-x/y from render)
+      // seed the drag start values: text fields/ornaments from the saved
+      // offsets map (Movable wrappers already carry data-offset-x/y from render)
       const key = el.dataset.move || "";
-      if (key.startsWith("edit:") && el.dataset.offsetX === undefined) {
+      if ((key.startsWith("edit:") || key.startsWith("orn:")) && el.dataset.offsetX === undefined) {
         const o = payload?.content?.offsets?.[key];
         const x = typeof o === "object" ? o.x || 0 : 0;
         const y = typeof o === "object" ? o.y || 0 : typeof o === "number" ? o : 0;

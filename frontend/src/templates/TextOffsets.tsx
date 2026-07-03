@@ -22,14 +22,15 @@ import { normalizeOffset } from "@/components/Movable";
 function applyTextOffsets(offsets?: Record<string, MoveOffset>) {
   if (!offsets) return;
   for (const [key, off] of Object.entries(offsets)) {
-    if (!key.startsWith("edit:")) continue;
-    // key is `edit:<path>` or `edit:<path>#<n>` when the same path renders in
-    // several places — <n> is the element's document-order occurrence index
-    const m = /^edit:(.*?)(?:#(\d+))?$/.exec(key);
+    // `edit:<data-edit path>` = text field, `orn:<data-orn type>` = ornament
+    // (divider, crest). An optional `#<n>` suffix picks the n-th document-order
+    // occurrence when the same path/type renders in several places.
+    const m = /^(edit|orn):(.*?)(?:#(\d+))?$/.exec(key);
     if (!m) continue;
+    const attr = m[1] === "edit" ? "data-edit" : "data-orn";
     const { x, y } = normalizeOffset(off);
-    const els = document.querySelectorAll<HTMLElement>(`[data-edit="${CSS.escape(m[1])}"]`);
-    const el = els[m[2] ? Number(m[2]) : 0];
+    const els = document.querySelectorAll<HTMLElement>(`[${attr}="${CSS.escape(m[2])}"]`);
+    const el = els[m[3] ? Number(m[3]) : 0];
     if (el) el.style.translate = x || y ? `${x}px ${y}px` : "";
   }
 }

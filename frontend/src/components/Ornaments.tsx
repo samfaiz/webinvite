@@ -14,6 +14,7 @@ export function Divider({
 }) {
   return (
     <div
+      data-orn="divider"
       className={`flex items-center justify-center gap-3 ${className}`}
       style={{ color: "var(--c-accent)" }}
       aria-hidden
@@ -73,6 +74,7 @@ export function MonogramCrest({
   if (logo) {
     return (
       <div
+        data-orn="crest"
         className="relative inline-flex items-center justify-center"
         style={{ height: s, maxWidth: "100%", ...style }}
         aria-hidden
@@ -91,6 +93,7 @@ export function MonogramCrest({
 
   return (
     <div
+      data-orn="crest"
       className="relative inline-flex items-center justify-center"
       style={{ width: s, height: s, color: "var(--c-accent)", ...style }}
       aria-hidden
