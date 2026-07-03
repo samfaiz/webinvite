@@ -100,7 +100,7 @@ export function Schedule({
         <FrameBg key={event.id} id={i === 0 ? "frame-schedule" : undefined} src={bg} fullScreen>
           <section className="px-6 py-14 text-center">
             {i === 0 ? (
-              <Movable moveKey="schedule.heading" offsetY={content.offsets?.["schedule.heading"] ?? 0}>
+              <Movable moveKey="schedule.heading" offset={content.offsets?.["schedule.heading"]}>
                 <Reveal>
                   <h2
                     data-edit="schedule.heading"
@@ -122,7 +122,7 @@ export function Schedule({
                 </Reveal>
               </Movable>
             ) : null}
-            <Movable moveKey={`schedule.events.${i}.card`} offsetY={content.offsets?.[`schedule.events.${i}.card`] ?? 0}>
+            <Movable moveKey={`schedule.events.${i}.card`} offset={content.offsets?.[`schedule.events.${i}.card`]}>
               <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
             </Movable>
           </section>

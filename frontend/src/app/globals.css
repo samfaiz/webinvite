@@ -135,7 +135,7 @@ body {
   position: relative;
 }
 .wysiwyg-movable::after {
-  content: "↕ drag";
+  content: "✥ drag";
   position: absolute;
   top: -9px;
   left: 50%;

@@ -4,6 +4,7 @@ import { FlagshipTemplate } from "./flagship/FlagshipTemplate";
 import { RoyalOrnateTemplate } from "./royal/RoyalOrnateTemplate";
 import { MinimalModernTemplate } from "./minimal/MinimalModernTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
+import { withTextOffsets } from "./withTextOffsets";
 
 /**
  * Template COMPONENT map (heavy — pulls in framer-motion etc.). Import this only
@@ -21,10 +22,10 @@ type TemplateComponent = ComponentType<
 >;
 
 const components: Record<string, TemplateComponent> = {
-  "flagship-lakecomo": FlagshipTemplate,
-  "royal-ornate": RoyalOrnateTemplate,
-  "minimal-modern": MinimalModernTemplate,
-  custom: CustomTemplate,
+  "flagship-lakecomo": withTextOffsets(FlagshipTemplate),
+  "royal-ornate": withTextOffsets(RoyalOrnateTemplate),
+  "minimal-modern": withTextOffsets(MinimalModernTemplate),
+  custom: withTextOffsets(CustomTemplate),
 };
 
 export function getTemplateComponent(id: string): TemplateComponent {

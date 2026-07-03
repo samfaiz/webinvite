@@ -39,7 +39,7 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
 
   return (
     <section className="px-5 py-10 text-center">
-      <Movable moveKey="story.heading" offsetY={content.offsets?.["story.heading"] ?? 0}>
+      <Movable moveKey="story.heading" offset={content.offsets?.["story.heading"]}>
         <Reveal>
           <h2
             data-edit="story.heading"

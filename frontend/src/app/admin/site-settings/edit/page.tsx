@@ -22,6 +22,8 @@ import {
   type SocialLink,
 } from "@/lib/api";
 import { FONT_CATALOG, FONT_DEFAULT, type FontRole } from "@/lib/theme-catalog";
+import { ImageEditorModal, urlToDataUrl, dataUrlToFile } from "@/components/ImageEditorModal";
+import { fileToScaledDataUrl } from "@/lib/image";
 
 /**
  * `/admin/site-settings/edit` — tabbed form for the singleton site settings.
@@ -340,6 +342,7 @@ function BrandingTab({
             onChange={(url) => patch("logo", url)}
             onError={onError}
             accept="image/*"
+            editable
           />
         </Field>
         <Field label="Logo dark" hint="Optional logo for dark backgrounds.">
@@ -348,6 +351,7 @@ function BrandingTab({
             onChange={(url) => patch("logoDark", url)}
             onError={onError}
             accept="image/*"
+            editable
           />
         </Field>
       </div>
@@ -1569,19 +1573,50 @@ function FileDrop({
   onChange,
   onError,
   accept = "image/*",
+  editable = false,
 }: {
   value: string;
   onChange: (url: string) => void;
   onError: (msg: string) => void;
   accept?: string;
+  /** open the crop/adjust editor before uploading (raster images only) */
+  editable?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [editorSrc, setEditorSrc] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const upload = async (file: File) => {
     setUploading(true);
     try {
+      // editable raster images detour through the editor; SVGs upload as-is
+      // (rasterizing a vector logo would only lose quality)
+      if (editable && file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+        setEditorSrc(await fileToScaledDataUrl(file, 1600, 0.95, "image/png"));
+        return;
+      }
       const { url } = await api.uploadImage(file);
+      onChange(url);
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const editCurrent = async () => {
+    try {
+      setEditorSrc(await urlToDataUrl(value));
+    } catch {
+      onError("Couldn't load the saved image for editing — upload it again instead.");
+    }
+  };
+
+  const applyEdited = async (dataUrl: string) => {
+    setEditorSrc(null);
+    setUploading(true);
+    try {
+      const { url } = await api.uploadImage(await dataUrlToFile(dataUrl, "logo"));
       onChange(url);
     } catch (e) {
       onError((e as Error).message);
@@ -1639,14 +1674,36 @@ function FileDrop({
       {value ? (
         <div className="mt-2 flex items-center justify-between text-[11.5px] text-[rgba(90,35,56,0.55)]">
           <span className="truncate">{value}</span>
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="ml-2 shrink-0 rounded-full border border-[rgba(217,47,47,0.35)] px-2 py-0.5 text-[11px] text-[#c14e38] hover:bg-[#fbe0d8]"
-          >
-            Remove
-          </button>
+          <span className="ml-2 flex shrink-0 gap-1.5">
+            {editable ? (
+              <button
+                type="button"
+                onClick={editCurrent}
+                className="rounded-full border border-[rgba(90,35,56,0.2)] px-2 py-0.5 text-[11px] text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+              >
+                Edit
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="rounded-full border border-[rgba(217,47,47,0.35)] px-2 py-0.5 text-[11px] text-[#c14e38] hover:bg-[#fbe0d8]"
+            >
+              Remove
+            </button>
+          </span>
         </div>
+      ) : null}
+
+      {editorSrc ? (
+        <ImageEditorModal
+          src={editorSrc}
+          title="Edit image"
+          mime="image/png"
+          maxDim={1280}
+          onApply={applyEdited}
+          onClose={() => setEditorSrc(null)}
+        />
       ) : null}
     </div>
   );

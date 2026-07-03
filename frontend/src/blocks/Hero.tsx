@@ -59,7 +59,7 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
         </motion.div>
       ) : null}
 
-      <Movable moveKey="hero.block" offsetY={content.offsets?.["hero.block"] ?? 0} className="flex w-full flex-col items-center">
+      <Movable moveKey="hero.block" offset={content.offsets?.["hero.block"]} className="flex w-full flex-col items-center">
       <motion.div style={{ y: contentY }} className="flex w-full flex-col items-center">
         <motion.div
           initial={{ opacity: 0, y: 18 }}

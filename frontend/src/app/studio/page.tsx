@@ -110,7 +110,11 @@ export default function StudioPage() {
         setDraft((prev) => {
           if (!prev) return prev;
           const next: Draft = structuredClone(prev);
-          next.content.offsets = { ...(next.content.offsets || {}), [e.data.key]: e.data.value };
+          // new embeds post {x, y}; older ones posted a vertical-only `value`
+          const off = typeof e.data.x === "number" || typeof e.data.y === "number"
+            ? { x: Math.round(e.data.x || 0), y: Math.round(e.data.y || 0) }
+            : e.data.value;
+          next.content.offsets = { ...(next.content.offsets || {}), [e.data.key]: off };
           return next;
         });
       }

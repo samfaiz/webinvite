@@ -28,13 +28,14 @@ const storage = diskStorage({
   },
 });
 
-const isImageOrAudio = (m: string) =>
-  /^image\/(png|jpe?g|webp|gif|avif)$/.test(m) ||
-  /^audio\/(mpeg|mp3|ogg|wav|x-wav|webm|aac|mp4|x-m4a)$/.test(m);
+const isImage = (m: string) => /^image\/(png|jpe?g|webp|gif|avif)$/.test(m);
+const isAudio = (m: string) => /^audio\/(mpeg|mp3|ogg|wav|x-wav|webm|aac|mp4|x-m4a)$/.test(m);
+const isVideo = (m: string) => /^video\/(mp4|webm|ogg|quicktime)$/.test(m);
 
-const isImageOrVideo = (m: string) =>
-  /^image\/(png|jpe?g|webp|gif|avif)$/.test(m) ||
-  /^video\/(mp4|webm|ogg|quicktime)$/.test(m);
+const isImageOrAudio = (m: string) => isImage(m) || isAudio(m);
+
+/** Couple media: photos, intro video, and their own music (MP3 etc.). */
+const isCoupleMedia = (m: string) => isImage(m) || isVideo(m) || isAudio(m);
 
 function fileUrl(file: Express.Multer.File, req: Request) {
   const origin = `${req.protocol}://${req.get('host')}`;
@@ -66,11 +67,11 @@ export class UploadsController {
     FileInterceptor('file', {
       storage,
       limits: { fileSize: 80 * 1024 * 1024 },
-      fileFilter: (_req, file, cb) => cb(null, isImageOrVideo(file.mimetype)),
+      fileFilter: (_req, file, cb) => cb(null, isCoupleMedia(file.mimetype)),
     }),
   )
   uploadMedia(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
-    if (!file) throw new BadRequestException('No file (field "file")');
+    if (!file) throw new BadRequestException('No file, or unsupported file type (field "file")');
     return fileUrl(file, req);
   }
 }

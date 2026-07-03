@@ -86,32 +86,50 @@ export default function StudioEmbed() {
       );
     }
 
-    // drag-to-reposition: nudge a [data-move] block up/down within its section.
-    // A small movement is treated as a click (so inner text stays editable);
-    // dragging past a threshold repositions and posts the offset to the parent.
-    let drag: { el: HTMLElement; key: string; startY: number; startOffset: number; moved: boolean } | null = null;
+    // drag-to-reposition: move a [data-move] block (or auto-tagged text field)
+    // anywhere within its section. A small movement is treated as a click (so
+    // inner text stays editable); dragging past a threshold repositions and
+    // posts the {x, y} offset to the parent. Text fields (`edit:` keys) are
+    // positioned via the CSS `translate` property so framer-motion transforms
+    // keep working; block wrappers keep using `transform` (matches their SSR).
+    let drag: { el: HTMLElement; key: string; startX: number; startY: number; ox: number; oy: number; moved: boolean } | null = null;
+    const clampX = (n: number) => Math.max(-280, Math.min(280, n));
     const clampY = (n: number) => Math.max(-220, Math.min(520, n));
+    function place(el: HTMLElement, key: string, x: number, y: number) {
+      if (key.startsWith("edit:")) el.style.translate = x || y ? `${x}px ${y}px` : "";
+      else el.style.transform = `translate(${x}px, ${y}px)`;
+      el.dataset.offsetX = String(x);
+      el.dataset.offsetY = String(y);
+    }
     function onPointerDown(e: PointerEvent) {
       if (!edit) return;
       const el = (e.target as HTMLElement)?.closest?.("[data-move]") as HTMLElement | null;
       if (!el) return;
-      drag = { el, key: el.dataset.move || "", startY: e.clientY, startOffset: parseFloat(el.dataset.offset || "0") || 0, moved: false };
+      drag = {
+        el,
+        key: el.dataset.move || "",
+        startX: e.clientX,
+        startY: e.clientY,
+        ox: parseFloat(el.dataset.offsetX || "0") || 0,
+        oy: parseFloat(el.dataset.offsetY || "0") || 0,
+        moved: false,
+      };
     }
     function onPointerMove(e: PointerEvent) {
       if (!drag) return;
+      const dx = e.clientX - drag.startX;
       const dy = e.clientY - drag.startY;
-      if (!drag.moved && Math.abs(dy) < 6) return;
+      if (!drag.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       drag.moved = true;
       e.preventDefault();
       window.getSelection?.()?.removeAllRanges?.();
-      const y = clampY(drag.startOffset + dy);
-      drag.el.style.transform = `translateY(${y}px)`;
-      drag.el.dataset.offset = String(y);
+      place(drag.el, drag.key, clampX(drag.ox + dx), clampY(drag.oy + dy));
     }
     function onPointerUp() {
       if (drag && drag.moved) {
-        const y = Math.round(parseFloat(drag.el.dataset.offset || "0") || 0);
-        window.parent?.postMessage({ type: "move", key: drag.key, value: y }, "*");
+        const x = Math.round(parseFloat(drag.el.dataset.offsetX || "0") || 0);
+        const y = Math.round(parseFloat(drag.el.dataset.offsetY || "0") || 0);
+        window.parent?.postMessage({ type: "move", key: drag.key, x, y }, "*");
       }
       drag = null;
     }
@@ -144,14 +162,37 @@ export default function StudioEmbed() {
   // (re)apply editing affordances to tagged elements after each render
   useEffect(() => {
     if (!editing) return;
+    // the same data-edit path can render in several places (e.g. a name in the
+    // hero AND the families section) — suffix repeats with their document-order
+    // index so each copy drags independently
+    const seen = new Map<string, number>();
     document.querySelectorAll<HTMLElement>("[data-edit]").forEach((el) => {
       el.setAttribute("contenteditable", "true");
       el.spellcheck = false;
       el.classList.add("wysiwyg-editable");
+      const path = el.dataset.edit || "";
+      const n = seen.get(path) ?? 0;
+      seen.set(path, n + 1);
+      // every text field is its own drag handle too — unless it's already
+      // directly wrapped by a Movable (custom sections), where the wrapper
+      // is the handle and tagging both would double-move the same text
+      if (!el.parentElement?.hasAttribute("data-move")) {
+        el.dataset.move = `edit:${path}${n ? `#${n}` : ""}`;
+      }
     });
     document.querySelectorAll<HTMLElement>("[data-move]").forEach((el) => {
       el.style.touchAction = "none";
       el.classList.add("wysiwyg-movable");
+      // seed the drag start values: text fields from the saved offsets map
+      // (Movable wrappers already carry data-offset-x/y from render)
+      const key = el.dataset.move || "";
+      if (key.startsWith("edit:") && el.dataset.offsetX === undefined) {
+        const o = payload?.content?.offsets?.[key];
+        const x = typeof o === "object" ? o.x || 0 : 0;
+        const y = typeof o === "object" ? o.y || 0 : typeof o === "number" ? o : 0;
+        el.dataset.offsetX = String(x);
+        el.dataset.offsetY = String(y);
+      }
     });
   });
 

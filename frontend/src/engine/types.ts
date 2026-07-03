@@ -117,6 +117,10 @@ export interface SectionStyle {
   cardBlur?: number;
 }
 
+/** Free 2-axis nudge (px) for a draggable block or text field. Plain numbers
+ *  are legacy vertical-only offsets from before X dragging existed. */
+export type MoveOffset = number | { x: number; y: number };
+
 /** One composable section instance in a section-first (custom) invitation. */
 export interface CustomSection {
   id: string;
@@ -137,9 +141,10 @@ export interface InvitationContent {
   /** order of the middle sections (the opening scene stays first). Defaults to
    *  families → story → schedule → rsvp when unset. */
   sectionOrder?: SectionKey[];
-  /** per-block vertical nudge (px), keyed by block id — lets couples drag a text
-   *  block up/down within its section to sit nicely over the background art. */
-  offsets?: Record<string, number>;
+  /** per-block nudge (px), keyed by block id or `edit:<data-edit path>` — lets
+   *  couples drag blocks and individual text fields anywhere within their
+   *  section. Plain numbers are legacy vertical-only offsets. */
+  offsets?: Record<string, MoveOffset>;
   /** per-element text formatting overrides, keyed by the element's data-edit path. */
   styles?: Record<string, TextStyle>;
   /** section-first "design from scratch" body. When present and templateId is

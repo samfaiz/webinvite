@@ -13,6 +13,7 @@ import { orderedSections, type SectionKey, type TextStyle } from "@/engine/types
 import { CustomBuilder } from "@/custom/CustomBuilder";
 import { starterSections } from "@/custom/registry";
 import { api, type Track } from "@/lib/api";
+import { ImageEditorModal, urlToDataUrl } from "@/components/ImageEditorModal";
 
 export type PanelProps = {
   draft: Draft;
@@ -202,18 +203,32 @@ export function CoupleFields({ draft, update }: PanelProps) {
   const scale = c.couple.logoScale ?? 1;
   const [logoBusy, setLogoBusy] = useState(false);
   const [logoErr, setLogoErr] = useState("");
+  const [logoEditorSrc, setLogoEditorSrc] = useState<string | null>(null);
 
+  // a fresh file opens in the editor first; Apply is what stores it
   const setLogo = async (file?: File) => {
     if (!file) return;
     setLogoErr("");
     setLogoBusy(true);
     try {
-      // keep transparency (PNG) and a modest size — a crest is small on screen,
-      // so cap it tight to keep the base64 out of the localStorage quota
-      const url = await fileToScaledDataUrl(file, 384, 0.92, "image/png");
-      update((d) => { d.content.couple.logo = url; });
+      // edit at a generous size; the editor's export re-caps it below
+      setLogoEditorSrc(await fileToScaledDataUrl(file, 1024, 0.95, "image/png"));
     } catch (e) {
       setLogoErr((e as Error).message);
+    } finally {
+      setLogoBusy(false);
+    }
+  };
+
+  // re-edit the current logo (already-published logos are fetched back in)
+  const editLogo = async () => {
+    if (!logo) return;
+    setLogoErr("");
+    setLogoBusy(true);
+    try {
+      setLogoEditorSrc(await urlToDataUrl(logo));
+    } catch {
+      setLogoErr("Couldn't load the saved logo for editing — upload it again instead.");
     } finally {
       setLogoBusy(false);
     }
@@ -255,19 +270,44 @@ export function CoupleFields({ draft, update }: PanelProps) {
                 <input type="file" accept="image/png,image/webp,image/jpeg,image/*" className="hidden" disabled={logoBusy} onChange={(e) => { setLogo(e.target.files?.[0]); e.target.value = ""; }} />
               </label>
               {logo ? (
-                <button
-                  type="button"
-                  onClick={() => update((d) => { d.content.couple.logo = undefined; })}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
-                >
-                  Use default
-                </button>
+                <>
+                  <button
+                    type="button"
+                    disabled={logoBusy}
+                    onClick={editLogo}
+                    className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => update((d) => { d.content.couple.logo = undefined; })}
+                    className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                  >
+                    Use default
+                  </button>
+                </>
               ) : null}
             </div>
             <p className="mt-1 text-[10px] text-slate-400">PNG with a transparent background looks best.</p>
           </div>
         </div>
         {logoErr ? <p className="mt-1.5 text-[11px] text-rose-600">{logoErr}</p> : null}
+
+        {logoEditorSrc ? (
+          <ImageEditorModal
+            src={logoEditorSrc}
+            title="Edit logo"
+            mime="image/png"
+            // a crest renders small — cap tight to keep base64 within the localStorage quota
+            maxDim={384}
+            onApply={(url) => {
+              update((d) => { d.content.couple.logo = url; });
+              setLogoEditorSrc(null);
+            }}
+            onClose={() => setLogoEditorSrc(null)}
+          />
+        ) : null}
 
         <label className="mt-3 block">
           <span className="mb-1 flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
@@ -378,6 +418,21 @@ export function SaveDateFields({ draft, update }: PanelProps) {
     <div>
       <Field label="Date (as shown)"><TextInput value={c.dateReveal.eventDate} onChange={(e) => update((d) => { d.content.dateReveal.eventDate = e.target.value; })} /></Field>
       <Field label="Location"><TextInput value={c.dateReveal.location} onChange={(e) => update((d) => { d.content.dateReveal.location = e.target.value; })} /></Field>
+      {/* texts drawn on the scratch-off cover; empty falls back to the defaults */}
+      <Field label="Scratch card — main text" hint="Shown on the cover guests scratch off.">
+        <TextInput
+          value={c.dateReveal.teaser ?? ""}
+          placeholder="Scratch to reveal"
+          onChange={(e) => update((d) => { d.content.dateReveal.teaser = e.target.value || undefined; })}
+        />
+      </Field>
+      <Field label="Scratch card — subtitle">
+        <TextInput
+          value={c.dateReveal.revealLabel ?? ""}
+          placeholder="your special day"
+          onChange={(e) => update((d) => { d.content.dateReveal.revealLabel = e.target.value || undefined; })}
+        />
+      </Field>
       <Field label="Countdown headline"><TextInput value={c.countdown.headline} onChange={(e) => update((d) => { d.content.countdown.headline = e.target.value; })} /></Field>
     </div>
   );

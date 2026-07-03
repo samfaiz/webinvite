@@ -45,7 +45,7 @@ export function Families({ content }: { content: InvitationContent }) {
   return (
     <section className="px-5 py-16 text-center">
       {/* frosted vellum panel keeps the text legible over busy background art */}
-      <Movable moveKey="families.block" offsetY={content.offsets?.["families.block"] ?? 0} className="mx-auto max-w-2xl">
+      <Movable moveKey="families.block" offset={content.offsets?.["families.block"]} className="mx-auto max-w-2xl">
       <div
         className="rounded-[2rem] px-6 py-10 sm:px-9"
         style={{

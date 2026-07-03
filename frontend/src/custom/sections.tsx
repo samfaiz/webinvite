@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties, type ReactNode } from "react";
-import type { CustomSection } from "@/engine/types";
+import type { CustomSection, MoveOffset } from "@/engine/types";
 import { Countdown } from "@/blocks/Countdown";
 import { Movable } from "@/components/Movable";
 import { api } from "@/lib/api";
@@ -18,7 +18,7 @@ type Props = {
   live?: boolean;
   editing?: boolean;
   slug?: string;
-  offsets?: Record<string, number>;
+  offsets?: Record<string, MoveOffset>;
 };
 
 const get = (c: Record<string, unknown>, k: string, d = "") => (typeof c[k] === "string" ? (c[k] as string) : d);
@@ -28,7 +28,7 @@ function Editable({
   sec, offsets, path, k, value, tag = "div", className, style,
 }: {
   sec: CustomSection;
-  offsets?: Record<string, number>;
+  offsets?: Record<string, MoveOffset>;
   path: string;
   k: string;
   value: string;
@@ -39,7 +39,7 @@ function Editable({
   const moveKey = `sec.${sec.id}.${k}`;
   const Tag = tag as React.ElementType;
   return (
-    <Movable moveKey={moveKey} offsetY={offsets?.[moveKey] ?? 0} className="w-full">
+    <Movable moveKey={moveKey} offset={offsets?.[moveKey]} className="w-full">
       <Tag data-edit={`${path}.content.${k}`} className={className} style={style}>
         {value}
       </Tag>
