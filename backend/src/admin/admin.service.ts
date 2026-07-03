@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { SettingsService } from '../settings/settings.service';
 import { MailService } from '../mail/mail.service';
@@ -64,6 +66,30 @@ export class AdminService {
       invitations: u._count.invitations,
       createdAt: u.createdAt,
     }));
+  }
+
+  /** Admin resets a user's password. If no password is supplied a secure
+   *  temporary one is generated and returned (so the admin can share it once);
+   *  a supplied password is applied and never echoed back. */
+  async resetUserPassword(userId: string, password?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    let plain = (password ?? '').trim();
+    const generated = plain.length === 0;
+    if (generated) plain = this.tempPassword();
+    if (plain.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters.');
+    }
+
+    const passwordHash = await bcrypt.hash(plain, 10);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    return { ok: true, email: user.email, password: generated ? plain : undefined };
+  }
+
+  private tempPassword(): string {
+    const rnd = randomBytes(12).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return `Wi-${rnd}`.slice(0, 16);
   }
 
   /* ----------------------------- mail settings ----------------------------- */

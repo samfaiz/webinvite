@@ -10,6 +10,8 @@ import { motifList, getMotif } from "@/motifs";
 import { googleMapsUrl, targetFromEvent } from "@/lib/maps";
 import { sealInitials } from "@/lib/initials";
 import { orderedSections, type SectionKey, type TextStyle } from "@/engine/types";
+import { CustomBuilder } from "@/custom/CustomBuilder";
+import { starterSections } from "@/custom/registry";
 import { api, type Track } from "@/lib/api";
 
 export type PanelProps = {
@@ -72,15 +74,32 @@ function fileToScaledDataUrl(
 /* ------------------------------- DESIGN ------------------------------- */
 
 export function DesignPanel({ draft, update }: PanelProps) {
+  const isCustom = draft.templateId === "custom";
+  const setLayout = (v: string) =>
+    update((d) => {
+      d.templateId = v;
+      // switching into section-first mode: seed a starter layout if empty
+      if (v === "custom" && (!d.content.customSections || d.content.customSections.length === 0)) {
+        d.content.customSections = starterSections();
+      }
+    });
   return (
     <div>
       <Field label="Layout">
         <Select
           value={draft.templateId}
-          onChange={(v) => update((d) => { d.templateId = v; })}
-          options={templates.map((t) => ({ value: t.id, label: t.name }))}
+          onChange={setLayout}
+          options={[
+            ...templates.map((t) => ({ value: t.id, label: t.name })),
+            { value: "custom", label: "✦ Design from scratch (sections)" },
+          ]}
         />
       </Field>
+      {isCustom ? (
+        <p className="mb-3 -mt-1 rounded-lg bg-[#2b3a67]/[0.04] px-3 py-2 text-[11px] text-slate-500">
+          Section-first mode. Build your invitation in the <strong>Content</strong> tab — add sections, pick a layout for each, set backgrounds &amp; fonts. Colours/fonts here apply as global defaults.
+        </p>
+      ) : null}
 
       <Field label="Community (motifs & blessings)">
         <Select
@@ -410,6 +429,25 @@ export function MusicFields({ draft, update }: PanelProps) {
 
   const choose = (url: string) => update((d) => { d.content.music.trackUrl = url; });
 
+  const [uploadingMp3, setUploadingMp3] = useState(false);
+  const [mp3Err, setMp3Err] = useState("");
+  const uploadMp3 = async (file?: File) => {
+    if (!file) return;
+    setMp3Err("");
+    if (!/audio\/|\.mp3$/i.test(`${file.type} ${file.name}`)) { setMp3Err("Please choose an MP3 audio file."); return; }
+    if (file.size > 25 * 1024 * 1024) { setMp3Err("That file is over 25 MB — please use a smaller MP3."); return; }
+    setUploadingMp3(true);
+    try {
+      const { url } = await api.uploadMedia(file);
+      choose(url);
+    } catch (e) {
+      const msg = (e as Error).message || "";
+      setMp3Err(/401|unauth/i.test(msg) ? "Please log in first to upload your own song." : msg);
+    } finally {
+      setUploadingMp3(false);
+    }
+  };
+
   const preview = (url: string) => {
     const a = audioRef.current;
     if (!a) return;
@@ -467,7 +505,18 @@ export function MusicFields({ draft, update }: PanelProps) {
       ) : null}
 
       <div className="mt-3">
-        <Field label="Or paste your own song link (.mp3)">
+        <p className="mb-1 block text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Or upload your own MP3</p>
+        <label className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-white ${uploadingMp3 ? "bg-slate-400" : "bg-[#2b3a67] hover:bg-[#23315a]"}`}>
+          {uploadingMp3 ? "Uploading…" : "⬆ Upload MP3"}
+          <input type="file" accept="audio/mpeg,audio/mp3,.mp3" className="hidden" disabled={uploadingMp3} onChange={(e) => { uploadMp3(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+        {customUrl ? <p className="mt-1 text-[11px] text-emerald-600">Custom song selected ✓</p> : null}
+        {mp3Err ? <p className="mt-1 text-[11px] text-rose-600">{mp3Err}</p> : null}
+        <p className="mt-1 text-[10px] text-slate-400">MP3 up to 25 MB. You must be signed in to upload.</p>
+      </div>
+
+      <div className="mt-3">
+        <Field label="Or paste a song link (.mp3)">
           <TextInput value={customUrl} placeholder="https://…/song.mp3" onChange={(e) => choose(e.target.value)} />
         </Field>
       </div>
@@ -740,6 +789,18 @@ export function FormatPanel({
 
 /** All content groups in one scroll (used by the advanced Studio). */
 export function ContentPanel({ draft, update }: PanelProps) {
+  // section-first "design from scratch" invitations get the composable builder
+  if (draft.templateId === "custom") {
+    return (
+      <div>
+        <CustomBuilder draft={draft} update={update} />
+        <div className="mt-4 border-t border-slate-100 pt-3">
+          <Group title="Intro video (plays first)"><IntroVideoField draft={draft} update={update} /></Group>
+          <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <Group title="Envelope & Intro" frame="frame-couple" open><EnvelopeFields draft={draft} update={update} /></Group>

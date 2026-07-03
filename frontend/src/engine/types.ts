@@ -74,6 +74,60 @@ export interface TextStyle {
   align?: "left" | "center" | "right";
 }
 
+/* ---------------- "Design from scratch" — composable sections ---------------- */
+
+export type SectionType =
+  | "cover"
+  | "names"
+  | "families"
+  | "story"
+  | "schedule"
+  | "rsvp"
+  | "gallery"
+  | "quote"
+  | "countdown"
+  | "text";
+
+/** Per-section background: a solid colour, a gradient, and/or an image with an
+ *  optional dark tint for text legibility. */
+export interface SectionBackground {
+  image?: string; // uploaded URL / data URL
+  color?: string; // solid background colour
+  gradientFrom?: string;
+  gradientTo?: string;
+  tint?: number; // 0–100 dark overlay opacity over the image
+}
+
+/** Per-section style overrides on top of the global theme. */
+export interface SectionStyle {
+  fontDisplay?: string; // CSS font value, e.g. var(--font-cinzel)
+  fontBody?: string;
+  textColor?: string;
+  accentColor?: string;
+  align?: "left" | "center" | "right";
+  /** wrap this section's content in a frosted card panel (available on any
+   *  section). The card's look is set by the fields below: its max width (px), a
+   *  minimum height (px, 0 = auto), fill colour, the fill's opacity (0–100,
+   *  default 100 = solid) and a backdrop blur (px). */
+  card?: boolean;
+  cardWidth?: number;
+  cardHeight?: number;
+  cardColor?: string;
+  cardOpacity?: number;
+  cardBlur?: number;
+}
+
+/** One composable section instance in a section-first (custom) invitation. */
+export interface CustomSection {
+  id: string;
+  type: SectionType;
+  variant: string; // layout-variant key from the section registry
+  background?: SectionBackground;
+  style?: SectionStyle;
+  /** section-type-specific fields (heading, items, etc.) */
+  content: Record<string, unknown>;
+}
+
 export interface InvitationContent {
   meta: {
     slug: string;
@@ -88,6 +142,10 @@ export interface InvitationContent {
   offsets?: Record<string, number>;
   /** per-element text formatting overrides, keyed by the element's data-edit path. */
   styles?: Record<string, TextStyle>;
+  /** section-first "design from scratch" body. When present and templateId is
+   *  "custom", the invitation renders these composable sections instead of the
+   *  fixed template layout. */
+  customSections?: CustomSection[];
   couple: Couple;
   /** the sealed-envelope intro */
   envelope: {

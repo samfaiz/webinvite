@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Draft } from "@/studio/draft";
-import { loadDraft, saveDraft, defaultDraft, draftFromPreset, setByPath } from "@/studio/draft";
+import { loadDraft, saveDraft, defaultDraft, defaultCustomDraft, draftFromPreset, setByPath } from "@/studio/draft";
 import { hasEmbeddedMedia, flushEmbeddedMedia } from "@/studio/media";
 import { getPreset } from "@/templates/registry";
 import { useAuth } from "@/lib/auth";
@@ -36,14 +36,27 @@ export default function StudioPage() {
   const [msg, setMsg] = useState("");
   // live-editable preview (iframe) wiring — same as the Create builder
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const previewRef = useRef<HTMLIFrameElement>(null); // read-only "guest view" (3rd pane, wide screens)
   const suppressPost = useRef(false);
+  const draftRef = useRef<Draft | null>(null); // latest draft, for pushing to an iframe the moment it's ready
   const [embedReady, setEmbedReady] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
   const [selected, setSelected] = useState<SelectedText | null>(null);
+
+  const renderPayload = (d: Draft) => ({
+    type: "render" as const,
+    payload: { templateId: d.templateId, theme: d.theme, motifId: d.motifId, content: d.content },
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     const presetId = params.get("preset");
+    const startNew = params.get("new");
+    if (startNew === "custom") {
+      setDraft(defaultCustomDraft());
+      return;
+    }
     (async () => {
       if (id) {
         try {
@@ -66,6 +79,7 @@ export default function StudioPage() {
     })();
   }, []);
   useEffect(() => {
+    draftRef.current = draft;
     if (draft && !saveDraft(draft)) {
       setMsg("⚠ This browser's storage is full — recent changes aren't auto-saved. Save or publish to keep them.");
     }
@@ -74,7 +88,15 @@ export default function StudioPage() {
   // messages from the editable preview: ready + inline (WYSIWYG) edits
   useEffect(() => {
     function onMsg(e: MessageEvent) {
-      if (e.data?.type === "embed-ready") setEmbedReady(true);
+      if (e.data?.type === "embed-ready") {
+        // both iframes announce readiness — flag whichever one sent it AND push it
+        // the current draft immediately (covers late loads, reloads and re-inits,
+        // where the ready flag was already set so no effect would re-post).
+        if (e.source === previewRef.current?.contentWindow) setPreviewReady(true);
+        else setEmbedReady(true);
+        const d = draftRef.current;
+        if (d && e.source) (e.source as Window).postMessage(renderPayload(d), "*");
+      }
       if (e.data?.type === "edit" && e.data.path) {
         suppressPost.current = true;
         setDraft((prev) => {
@@ -100,26 +122,18 @@ export default function StudioPage() {
     return () => window.removeEventListener("message", onMsg);
   }, []);
 
-  // push the live draft into the preview iframe (skip echoes of inline edits)
+  // push the live draft into both preview iframes
   useEffect(() => {
-    if (!embedReady || !draft) return;
-    if (suppressPost.current) {
-      suppressPost.current = false;
-      return;
+    if (!draft) return;
+    const payload = renderPayload(draft);
+    // the read-only "guest view" always mirrors the latest draft
+    if (previewReady) previewRef.current?.contentWindow?.postMessage(payload, "*");
+    // the editable view skips echoing back its own inline edit (keeps the caret)
+    if (embedReady) {
+      if (suppressPost.current) suppressPost.current = false;
+      else iframeRef.current?.contentWindow?.postMessage(payload, "*");
     }
-    iframeRef.current?.contentWindow?.postMessage(
-      {
-        type: "render",
-        payload: {
-          templateId: draft.templateId,
-          theme: draft.theme,
-          motifId: draft.motifId,
-          content: draft.content,
-        },
-      },
-      "*",
-    );
-  }, [draft, embedReady]);
+  }, [draft, embedReady, previewReady]);
 
   // expanding a section group scrolls the preview to that section
   useEffect(() => {
@@ -283,19 +297,29 @@ export default function StudioPage() {
           </div>
         </aside>
 
-        {/* live editable preview — click any text/photo to edit it inline */}
-        <main className="flex min-h-0 flex-1 flex-col items-center bg-slate-200 p-3">
-          <p className="mb-2 shrink-0 text-center text-[11px] text-slate-500">
-            ✎ Click any text or photo on the preview to edit it
-          </p>
-          <div className="flex min-h-0 w-full flex-1 items-center justify-center">
-            <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
-              <iframe
-                ref={iframeRef}
-                src="/studio/embed?edit=1"
-                title="Live editable preview — click text to edit"
-                className="h-full w-full border-0"
-              />
+        {/* previews: editable (middle) + a read-only "guest view" (right, wide screens) */}
+        <main className="flex min-h-0 flex-1 bg-slate-200">
+          {/* editable preview — click any text/photo to edit inline */}
+          <div className="flex min-h-0 flex-1 flex-col items-center p-3">
+            <p className="mb-2 shrink-0 text-center text-[11px] font-medium text-slate-500">
+              ✎ Edit — click any text or photo
+            </p>
+            <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+              <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+                <iframe ref={iframeRef} src="/studio/embed?edit=1" title="Live editable preview — click text to edit" className="h-full w-full border-0" />
+              </div>
+            </div>
+          </div>
+
+          {/* guest view — how it looks to guests, with animations. Wide screens only. */}
+          <div className="hidden min-h-0 flex-1 flex-col items-center border-l border-slate-300 p-3 2xl:flex">
+            <p className="mb-2 shrink-0 text-center text-[11px] font-medium text-slate-500">
+              👁 Guest view — live result with animations
+            </p>
+            <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+              <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+                <iframe ref={previewRef} src="/studio/embed" title="Guest view — final animated result" className="h-full w-full border-0" />
+              </div>
             </div>
           </div>
         </main>

@@ -3,6 +3,7 @@ import type { RenderProps } from "@/engine/types";
 import { FlagshipTemplate } from "./flagship/FlagshipTemplate";
 import { RoyalOrnateTemplate } from "./royal/RoyalOrnateTemplate";
 import { MinimalModernTemplate } from "./minimal/MinimalModernTemplate";
+import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
  * Template COMPONENT map (heavy — pulls in framer-motion etc.). Import this only
@@ -23,6 +24,7 @@ const components: Record<string, TemplateComponent> = {
   "flagship-lakecomo": FlagshipTemplate,
   "royal-ornate": RoyalOrnateTemplate,
   "minimal-modern": MinimalModernTemplate,
+  custom: CustomTemplate,
 };
 
 export function getTemplateComponent(id: string): TemplateComponent {

@@ -98,8 +98,13 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`${fontVars} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full">
+      {/* suppressHydrationWarning: some browser extensions (e.g. Bitdefender,
+          password managers) inject attributes like `bis_register` /
+          `__processed_*` into <html>/<body> before React hydrates. That's
+          harmless but triggers a hydration-mismatch warning; this silences it. */}
+      <body className="min-h-full" suppressHydrationWarning>
         <JsonLd data={[organizationLd(settings), websiteLd(settings), softwareApplicationLd(settings)]} />
         <ThemeInjector />
         <GoogleAnalytics />

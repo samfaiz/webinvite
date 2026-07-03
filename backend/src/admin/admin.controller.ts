@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/auth.decorators';
@@ -23,6 +23,13 @@ export class AdminController {
   @Get('users')
   users() {
     return this.svc.listUsers();
+  }
+
+  /** Reset a user's password. Body `{ password? }` — omit to auto-generate a
+   *  temporary one (returned in the response so the admin can share it). */
+  @Post('users/:id/reset-password')
+  resetPassword(@Param('id') id: string, @Body() dto: { password?: string }) {
+    return this.svc.resetUserPassword(id, dto?.password);
   }
 
   /* outgoing-email configuration */

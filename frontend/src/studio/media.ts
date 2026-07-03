@@ -13,12 +13,25 @@ type Content = Draft["content"];
 
 const isDataUrl = (v: unknown): v is string => typeof v === "string" && v.startsWith("data:");
 
+/** Every base64 image inside the composable "custom" sections (backgrounds,
+ *  story photos, gallery images). */
+function customSectionDataUrls(content: Content): boolean {
+  for (const s of content.customSections ?? []) {
+    if (isDataUrl(s.background?.image)) return true;
+    const c = s.content as Record<string, unknown>;
+    if (Array.isArray(c.items) && (c.items as { photo?: unknown }[]).some((it) => isDataUrl(it?.photo))) return true;
+    if (Array.isArray(c.images) && (c.images as unknown[]).some(isDataUrl)) return true;
+  }
+  return false;
+}
+
 /** True if the content still has any inline base64 media that should be uploaded. */
 export function hasEmbeddedMedia(content: Content): boolean {
   const photos = content.story?.items ?? [];
   if (photos.some((it) => isDataUrl(it.photo))) return true;
   if (isDataUrl(content.envelope?.videoUrl)) return true;
-  return isDataUrl(content.couple?.logo);
+  if (isDataUrl(content.couple?.logo)) return true;
+  return customSectionDataUrls(content);
 }
 
 /** Convert a base64 data URL to a File for multipart upload. */
@@ -48,5 +61,34 @@ export async function flushEmbeddedMedia(content: Content): Promise<void> {
   if (isDataUrl(logo)) {
     const { url } = await api.uploadMedia(await dataUrlToFile(logo, "crest"));
     content.couple.logo = url;
+  }
+
+  // composable "custom" sections: backgrounds, story photos, gallery images
+  const sections = content.customSections ?? [];
+  for (let si = 0; si < sections.length; si++) {
+    const s = sections[si];
+    if (isDataUrl(s.background?.image)) {
+      const { url } = await api.uploadMedia(await dataUrlToFile(s.background!.image!, `sec-${si + 1}-bg`));
+      s.background!.image = url;
+    }
+    const c = s.content as Record<string, unknown>;
+    if (Array.isArray(c.items)) {
+      const items = c.items as { photo?: unknown }[];
+      for (let i = 0; i < items.length; i++) {
+        if (isDataUrl(items[i]?.photo)) {
+          const { url } = await api.uploadMedia(await dataUrlToFile(items[i].photo as string, `sec-${si + 1}-photo-${i + 1}`));
+          items[i].photo = url;
+        }
+      }
+    }
+    if (Array.isArray(c.images)) {
+      const imgs = c.images as unknown[];
+      for (let i = 0; i < imgs.length; i++) {
+        if (isDataUrl(imgs[i])) {
+          const { url } = await api.uploadMedia(await dataUrlToFile(imgs[i] as string, `sec-${si + 1}-img-${i + 1}`));
+          imgs[i] = url;
+        }
+      }
+    }
   }
 }

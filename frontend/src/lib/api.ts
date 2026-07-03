@@ -208,6 +208,12 @@ export const api = {
   adminStats: () => request<any>("/admin/stats", {}, true),
   adminInvitations: () => request<any[]>("/admin/invitations", {}, true),
   adminUsers: () => request<any[]>("/admin/users", {}, true),
+  resetUserPassword: (id: string, password?: string) =>
+    request<{ ok: boolean; email: string; password?: string }>(
+      `/admin/users/${id}/reset-password`,
+      { method: "POST", body: JSON.stringify({ password }) },
+      true,
+    ),
 
   // admin — outgoing email settings
   getMailSettings: () => request<MailSettings>("/admin/settings/mail", {}, true),

@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [invites, setInvites] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [resetUser, setResetUser] = useState<{ id: string; email: string } | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -157,6 +158,7 @@ export default function AdminPage() {
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Role</th>
                 <th className="px-5 py-3">Invitations</th>
+                <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -168,11 +170,19 @@ export default function AdminPage() {
                     <RolePill role={u.role} />
                   </td>
                   <td className="px-5 py-3 text-[#5a2338]">{u.invitations}</td>
+                  <td className="px-5 py-3 text-right">
+                    <button
+                      onClick={() => setResetUser({ id: u.id, email: u.email })}
+                      className="rounded-lg border border-[rgba(201,73,124,0.3)] px-3 py-1.5 text-[12px] font-medium text-[#c9497c] transition-colors hover:bg-[#fdf4ec]"
+                    >
+                      Reset password
+                    </button>
+                  </td>
                 </tr>
               ))}
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
+                  <td colSpan={5} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
                     No users yet.
                   </td>
                 </tr>
@@ -181,6 +191,119 @@ export default function AdminPage() {
           </table>
         </div>
       </section>
+
+      {resetUser ? (
+        <ResetPasswordModal user={resetUser} onClose={() => setResetUser(null)} />
+      ) : null}
+    </div>
+  );
+}
+
+/* ---------- reset-password modal ---------- */
+
+function ResetPasswordModal({ user, onClose }: { user: { id: string; email: string }; onClose: () => void }) {
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState<{ generated?: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const submit = async () => {
+    setBusy(true);
+    setErr("");
+    try {
+      const r = await api.resetUserPassword(user.id, pw.trim() || undefined);
+      setDone({ generated: r.password });
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const copy = async () => {
+    if (!done?.generated) return;
+    try {
+      await navigator.clipboard.writeText(done.generated);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(40,20,30,0.35)] p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-[0_20px_60px_rgba(60,20,40,0.25)]"
+        style={{ fontFamily: "var(--f-body)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-[18px] font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+          Reset password
+        </h3>
+        <p className="mt-1 text-[13px] text-[rgba(90,35,56,0.7)]">
+          for <strong className="text-[#5a2338]">{user.email}</strong>
+        </p>
+
+        {done ? (
+          <div className="mt-4">
+            <p className="text-[13px] font-medium text-emerald-700">Password updated ✓</p>
+            {done.generated ? (
+              <div className="mt-3">
+                <p className="text-[12px] text-[rgba(90,35,56,0.7)]">
+                  Temporary password — share it securely; it won&apos;t be shown again:
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="flex-1 rounded-lg bg-[#fdf4ec] px-3 py-2 text-[14px] tracking-wide text-[#5a2338]">
+                    {done.generated}
+                  </code>
+                  <button onClick={copy} className="rounded-lg border border-[rgba(201,73,124,0.3)] px-3 py-2 text-[12px] font-medium text-[#c9497c] hover:bg-[#fdf4ec]">
+                    {copied ? "Copied ✓" : "Copy"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-2 text-[12px] text-[rgba(90,35,56,0.7)]">The password you set is now active.</p>
+            )}
+            <div className="mt-5 flex justify-end">
+              <button onClick={onClose} className="rounded-lg bg-[#c9497c] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90">
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <label className="block text-[12px] text-[rgba(90,35,56,0.7)]">
+              New password
+              <input
+                type="text"
+                autoComplete="off"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="Leave blank to auto-generate"
+                className="mt-1 w-full rounded-lg border border-[rgba(201,73,124,0.25)] px-3 py-2 text-[14px] text-[#5a2338] outline-none focus:border-[#c9497c]"
+              />
+            </label>
+            <p className="mt-1 text-[11px] text-[rgba(90,35,56,0.5)]">
+              Minimum 8 characters. Leave blank to generate a secure temporary password.
+            </p>
+            {err ? <p className="mt-2 text-[12px] text-rose-600">{err}</p> : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={onClose} className="rounded-lg border border-[rgba(90,35,56,0.2)] px-4 py-2 text-[13px] text-[rgba(90,35,56,0.75)] hover:bg-[#fdf4ec]">
+                Cancel
+              </button>
+              <button
+                onClick={submit}
+                disabled={busy}
+                className="rounded-lg bg-[#c9497c] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-60"
+              >
+                {busy ? "Resetting…" : "Reset password"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { InvitationContent, Theme } from "@/engine/types";
 import { sampleSurajLibina } from "@/data/sampleSurajLibina";
 import { getTheme } from "@/themes";
+import { starterSections } from "@/custom/registry";
 
 /**
  * A Studio "draft" = everything needed to render + publish an invitation:
@@ -69,6 +70,21 @@ export function draftFromDesign(d: {
       backgrounds: d.backgrounds,
     },
     content: clone(sampleSurajLibina),
+    ownerEmail: "",
+  };
+}
+
+/** Blank section-first ("design from scratch") draft. Uses templateId "custom"
+ *  so the CustomTemplate renders `content.customSections`, seeded with a starter
+ *  layout. The other content fields are inert for this template. */
+export function defaultCustomDraft(): Draft {
+  const content = clone(sampleSurajLibina);
+  content.customSections = starterSections();
+  return {
+    templateId: "custom",
+    motifId: sampleSurajLibina.meta.community,
+    theme: clone(getTheme("dusty-blue")),
+    content,
     ownerEmail: "",
   };
 }
