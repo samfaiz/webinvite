@@ -60,6 +60,16 @@ export default function StudioEmbed() {
         );
       }
     }
+    // clicking a photo in edit mode opens the parent's image editor. Capture
+    // phase so it wins over the photo's own click behavior (e.g. lightbox).
+    function onPhotoClick(e: MouseEvent) {
+      if (!edit) return;
+      const el = (e.target as HTMLElement)?.closest?.("[data-photo]") as HTMLElement | null;
+      if (!el || !el.dataset.photo) return;
+      e.preventDefault();
+      e.stopPropagation();
+      window.parent?.postMessage({ type: "photo", path: el.dataset.photo }, "*");
+    }
     function onKeydown(e: KeyboardEvent) {
       const el = (e.target as HTMLElement)?.closest?.("[data-edit]") as HTMLElement | null;
       if (el && e.key === "Enter" && el.dataset.multiline !== "1") {
@@ -143,6 +153,7 @@ export default function StudioEmbed() {
     document.addEventListener("input", onInput);
     document.addEventListener("keydown", onKeydown);
     document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("click", onPhotoClick, true);
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
@@ -157,6 +168,7 @@ export default function StudioEmbed() {
       document.removeEventListener("input", onInput);
       document.removeEventListener("keydown", onKeydown);
       document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("click", onPhotoClick, true);
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerup", onPointerUp);
@@ -184,6 +196,11 @@ export default function StudioEmbed() {
       if (!el.parentElement?.hasAttribute("data-move")) {
         el.dataset.move = `edit:${path}${n ? `#${n}` : ""}`;
       }
+    });
+    // photos open the parent's image editor on click
+    document.querySelectorAll<HTMLElement>("[data-photo]").forEach((el) => {
+      el.classList.add("wysiwyg-photo");
+      el.title = "Click to edit photo";
     });
     // decorative ornaments (dividers, crests) are draggable too, keyed by
     // their document-order occurrence per ornament type

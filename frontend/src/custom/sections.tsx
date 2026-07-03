@@ -217,7 +217,7 @@ function Story(p: Props) {
           <figure key={i} className={v === "carousel" ? "w-64 shrink-0 snap-center" : v === "timeline" ? "flex items-center gap-4 text-left" : ""}>
             {it.photo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={it.photo} alt={it.caption || ""} className={`${v === "timeline" ? "h-24 w-24 shrink-0" : "w-full"} rounded-xl object-cover`} />
+              <img src={it.photo} alt={it.caption || ""} data-photo={`${path}.content.items.${i}.photo`} className={`${v === "timeline" ? "h-24 w-24 shrink-0" : "w-full"} rounded-xl object-cover`} />
             ) : (
               <div className={`${v === "timeline" ? "h-24 w-24 shrink-0" : "aspect-[4/5] w-full"} grid place-items-center rounded-xl border border-dashed`} style={{ borderColor: "var(--c-muted)", color: "var(--c-muted)" }}>photo</div>
             )}
@@ -242,7 +242,7 @@ function Gallery(p: Props) {
         {images.length ? (
           images.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="" className={`${v === "strip" ? "h-40 w-40 shrink-0" : "w-full"} rounded-xl object-cover`} />
+            <img key={i} src={src} alt="" data-photo={`${path}.content.images.${i}`} className={`${v === "strip" ? "h-40 w-40 shrink-0" : "w-full"} rounded-xl object-cover`} />
           ))
         ) : (
           <p className="col-span-full text-sm" style={{ color: "var(--c-muted)" }}>Add images in the editor.</p>

@@ -87,7 +87,7 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
             >
-              <Polaroid photo={item.photo} caption={item.caption} captionPath={`story.items.${index}.caption`} />
+              <Polaroid photo={item.photo} caption={item.caption} captionPath={`story.items.${index}.caption`} photoPath={`story.items.${index}.photo`} />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -120,7 +120,7 @@ export function StoryCarousel({ content }: { content: InvitationContent }) {
 }
 
 /** A single polaroid frame — photo on top, handwritten caption beneath. */
-function Polaroid({ photo, caption, captionPath }: { photo?: string; caption: string; captionPath?: string }) {
+function Polaroid({ photo, caption, captionPath, photoPath }: { photo?: string; caption: string; captionPath?: string; photoPath?: string }) {
   const [errored, setErrored] = useState(false);
   const showPhoto = photo && !errored;
 
@@ -139,6 +139,7 @@ function Polaroid({ photo, caption, captionPath }: { photo?: string; caption: st
           <img
             src={photo}
             alt={caption}
+            data-photo={photoPath}
             className="h-full w-full object-cover"
             draggable={false}
             onError={() => setErrored(true)}

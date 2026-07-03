@@ -46,6 +46,7 @@ export function StoryGrid({ content }: { content: InvitationContent }) {
               <img
                 src={item.photo}
                 alt={item.caption}
+                data-photo={`story.items.${i}.photo`}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <span

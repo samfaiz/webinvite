@@ -155,6 +155,16 @@ body {
   opacity: 0.9;
 }
 
+/* click-to-edit photo affordance (editor preview only) */
+.wysiwyg-photo {
+  cursor: pointer;
+}
+.wysiwyg-photo:hover {
+  outline: 2px dashed var(--c-accent);
+  outline-offset: -2px;
+  filter: brightness(1.05);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;

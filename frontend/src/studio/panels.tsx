@@ -583,17 +583,32 @@ export function StoryFields({ draft, update }: PanelProps) {
   const c = draft.content;
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState("");
+  const [photoEditor, setPhotoEditor] = useState<{ idx: number; src: string } | null>(null);
   const dragIndex = useRef<number | null>(null);
 
+  // a fresh pick opens in the crop/adjust editor first; Apply is what stores it
   const setPhoto = async (idx: number, file?: File) => {
     if (!file) return;
     setErr("");
     setBusy(idx);
     try {
-      const url = await fileToScaledDataUrl(file);
-      update((d) => { d.content.story.items[idx].photo = url; });
+      setPhotoEditor({ idx, src: await fileToScaledDataUrl(file, 1600, 0.95) });
     } catch (e) {
       setErr((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const editPhoto = async (idx: number) => {
+    const photo = c.story.items[idx]?.photo;
+    if (!photo) return;
+    setErr("");
+    setBusy(idx);
+    try {
+      setPhotoEditor({ idx, src: await urlToDataUrl(photo) });
+    } catch {
+      setErr("Couldn't load that photo for editing — upload it again instead.");
     } finally {
       setBusy(null);
     }
@@ -662,13 +677,23 @@ export function StoryFields({ draft, update }: PanelProps) {
                   <input type="file" accept="image/*" className="hidden" disabled={busy === i} onChange={(e) => { setPhoto(i, e.target.files?.[0]); e.target.value = ""; }} />
                 </label>
                 {item.photo ? (
-                  <button
-                    type="button"
-                    onClick={() => update((d) => { d.content.story.items[i].photo = ""; })}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
-                  >
-                    Remove photo
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      disabled={busy === i}
+                      onClick={() => editPhoto(i)}
+                      className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => update((d) => { d.content.story.items[i].photo = ""; })}
+                      className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                    >
+                      Remove photo
+                    </button>
+                  </>
                 ) : null}
               </div>
               <p className="mt-1.5 text-[10px] text-slate-400">Portrait photos look best.</p>
@@ -685,6 +710,20 @@ export function StoryFields({ draft, update }: PanelProps) {
 
       {err ? <p className="mb-2 text-xs text-rose-600">{err}</p> : null}
       <Btn onClick={() => update((d) => { d.content.story.items.push({ photo: "", caption: "New moment" }); })}>+ Add another photo</Btn>
+
+      {photoEditor ? (
+        <ImageEditorModal
+          src={photoEditor.src}
+          title={`Edit photo ${photoEditor.idx + 1}`}
+          mime="image/jpeg"
+          maxDim={1280}
+          onApply={(url) => {
+            update((d) => { d.content.story.items[photoEditor.idx].photo = url; });
+            setPhotoEditor(null);
+          }}
+          onClose={() => setPhotoEditor(null)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -969,13 +1008,33 @@ export function ColorsPanel({ draft, update }: PanelProps) {
 
 export function PhotoUploaders({ draft, update }: PanelProps) {
   const items = draft.content.story.items;
-  const onFile = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+  const [photoEditor, setPhotoEditor] = useState<{ idx: number; src: string } | null>(null);
+  const [err, setErr] = useState("");
+
+  // picks open in the crop/adjust editor first (also caps huge phone photos)
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => update((d) => { d.content.story.items[idx].photo = String(reader.result); });
-    reader.readAsDataURL(file);
+    setErr("");
+    try {
+      setPhotoEditor({ idx, src: await fileToScaledDataUrl(file, 1600, 0.95) });
+    } catch (ex) {
+      setErr((ex as Error).message);
+    }
   };
+
+  const editPhoto = async (idx: number) => {
+    const photo = items[idx]?.photo;
+    if (!photo) return;
+    setErr("");
+    try {
+      setPhotoEditor({ idx, src: await urlToDataUrl(photo) });
+    } catch {
+      setErr("Couldn't load that photo for editing — upload it again instead.");
+    }
+  };
+
   if (items.length === 0)
     return <p className="text-xs text-slate-400">Add photo slots first.</p>;
   return (
@@ -991,11 +1050,37 @@ export function PhotoUploaders({ draft, update }: PanelProps) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs text-slate-600">{item.caption}</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-xs text-slate-600">{item.caption}</p>
+              {item.photo ? (
+                <button
+                  type="button"
+                  onClick={() => editPhoto(i)}
+                  className="shrink-0 rounded-md border border-slate-300 px-2 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
+                >
+                  Edit
+                </button>
+              ) : null}
+            </div>
             <input type="file" accept="image/*" onChange={(e) => onFile(e, i)} className="mt-1 block w-full text-[11px] text-slate-500 file:mr-2 file:rounded file:border-0 file:bg-slate-800 file:px-2 file:py-1 file:text-white" />
           </div>
         </div>
       ))}
+      {err ? <p className="mb-2 text-xs text-rose-600">{err}</p> : null}
+
+      {photoEditor ? (
+        <ImageEditorModal
+          src={photoEditor.src}
+          title={`Edit photo ${photoEditor.idx + 1}`}
+          mime="image/jpeg"
+          maxDim={1280}
+          onApply={(url) => {
+            update((d) => { d.content.story.items[photoEditor.idx].photo = url; });
+            setPhotoEditor(null);
+          }}
+          onClose={() => setPhotoEditor(null)}
+        />
+      ) : null}
     </div>
   );
 }

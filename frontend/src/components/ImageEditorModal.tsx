@@ -171,7 +171,11 @@ export function ImageEditorModal({
   };
 
   /* ESC to close + lock body scroll while open */
+  const panelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
+    // take focus so ESC works even when the trigger lived in an iframe
+    // (e.g. clicking a photo inside the WYSIWYG preview)
+    panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -276,7 +280,7 @@ export function ImageEditorModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-3 sm:p-6" role="dialog" aria-modal="true">
-      <div className="flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div ref={panelRef} tabIndex={-1} className="flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl outline-none">
         {/* header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h2 className="text-sm font-semibold text-slate-800">{title}</h2>

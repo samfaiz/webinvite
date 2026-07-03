@@ -8,6 +8,7 @@ import { hasEmbeddedMedia, flushEmbeddedMedia } from "@/studio/media";
 import { getPreset } from "@/templates/registry";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { ImageEditorModal, urlToDataUrl } from "@/components/ImageEditorModal";
 import {
   DesignPanel,
   ContentPanel,
@@ -42,6 +43,8 @@ export default function StudioPage() {
   const [embedReady, setEmbedReady] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
   const [selected, setSelected] = useState<SelectedText | null>(null);
+  // photo clicked in the WYSIWYG preview → its content path + editable data URL
+  const [photoEdit, setPhotoEdit] = useState<{ path: string; src: string } | null>(null);
 
   const renderPayload = (d: Draft) => ({
     type: "render" as const,
@@ -117,6 +120,17 @@ export default function StudioPage() {
           next.content.offsets = { ...(next.content.offsets || {}), [e.data.key]: off };
           return next;
         });
+      }
+      if (e.data?.type === "photo" && e.data.path) {
+        const path = e.data.path as string;
+        const current = path
+          .split(".")
+          .reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k as never], draftRef.current?.content);
+        if (typeof current === "string" && current) {
+          urlToDataUrl(current)
+            .then((src) => setPhotoEdit({ path, src }))
+            .catch(() => setMsg("⚠ Couldn't load that photo for editing — replace it from the panel instead."));
+        }
       }
       if (e.data?.type === "select" && e.data.path) {
         setSelected({ path: e.data.path, current: e.data.current });
@@ -333,6 +347,20 @@ export default function StudioPage() {
         <div className="fixed right-5 top-16 z-50">
           <FormatPanel draft={draft} update={update} selected={selected} onClose={() => setSelected(null)} />
         </div>
+      ) : null}
+
+      {photoEdit ? (
+        <ImageEditorModal
+          src={photoEdit.src}
+          title="Edit photo"
+          mime="image/jpeg"
+          maxDim={1280}
+          onApply={(url) => {
+            update((d) => setByPath(d.content as unknown as Record<string, unknown>, photoEdit.path, url));
+            setPhotoEdit(null);
+          }}
+          onClose={() => setPhotoEdit(null)}
+        />
       ) : null}
     </div>
   );
