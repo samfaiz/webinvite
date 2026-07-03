@@ -27,6 +27,25 @@ export type ImageEditorProps = {
 type Crop = { x: number; y: number; w: number; h: number }; // normalized 0..1
 type DragMode = "move" | "nw" | "ne" | "sw" | "se";
 
+/** A text overlay baked into the exported image. x/y are normalized to the
+ *  (rotated) base image; size is % of the image width, so preview (cqw units)
+ *  and canvas export stay identical. */
+type TextOverlay = {
+  id: number;
+  text: string;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  font: string;
+};
+
+const TEXT_FONTS = [
+  { label: "Elegant", value: "Georgia, 'Times New Roman', serif" },
+  { label: "Script", value: "'Segoe Script', 'Brush Script MT', cursive" },
+  { label: "Clean", value: "Arial, Helvetica, sans-serif" },
+];
+
 const FULL: Crop = { x: 0, y: 0, w: 1, h: 1 };
 const MIN = 0.05; // smallest crop edge (normalized)
 
@@ -115,7 +134,12 @@ export function ImageEditorModal({
   const imgRef = useRef<HTMLImageElement | null>(null); // original bitmap
   const baseRef = useRef<HTMLCanvasElement | null>(null); // rotated/flipped bitmap
   const boxRef = useRef<HTMLDivElement | null>(null); // preview box (crop coords)
-  const dragRef = useRef<{ mode: DragMode; x: number; y: number; start: Crop } | null>(null);
+  const dragRef = useRef<
+    | { kind: "crop"; mode: DragMode; x: number; y: number; start: Crop }
+    | { kind: "text"; id: number; x: number; y: number; tx: number; ty: number }
+    | null
+  >(null);
+  const nextTextId = useRef(1);
 
   const [baseUrl, setBaseUrl] = useState("");
   const [err, setErr] = useState("");
@@ -130,6 +154,21 @@ export function ImageEditorModal({
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
   const [bw, setBw] = useState(0);
+  const [texts, setTexts] = useState<TextOverlay[]>([]);
+  const [activeText, setActiveText] = useState<number | null>(null);
+
+  const active = texts.find((t) => t.id === activeText) ?? null;
+  const patchText = (id: number, patch: Partial<TextOverlay>) =>
+    setTexts((ts) => ts.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+
+  const addText = () => {
+    const id = nextTextId.current++;
+    setTexts((ts) => [
+      ...ts,
+      { id, text: "Your text", x: 0.5, y: 0.5, size: 7, color: "#ffffff", font: TEXT_FONTS[0].value },
+    ]);
+    setActiveText(id);
+  };
 
   const filterCss = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${warmth}%) grayscale(${bw}%)`;
   const dirtyFilters =
@@ -198,8 +237,17 @@ export function ImageEditorModal({
   const startDrag = (mode: DragMode) => (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setActiveText(null);
     boxRef.current?.setPointerCapture?.(e.pointerId);
-    dragRef.current = { mode, x: e.clientX, y: e.clientY, start: crop };
+    dragRef.current = { kind: "crop", mode, x: e.clientX, y: e.clientY, start: crop };
+  };
+
+  const startTextDrag = (t: TextOverlay) => (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveText(t.id);
+    boxRef.current?.setPointerCapture?.(e.pointerId);
+    dragRef.current = { kind: "text", id: t.id, x: e.clientX, y: e.clientY, tx: t.x, ty: t.y };
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -208,6 +256,11 @@ export function ImageEditorModal({
     const rect = box.getBoundingClientRect();
     const dx = (e.clientX - drag.x) / rect.width;
     const dy = (e.clientY - drag.y) / rect.height;
+
+    if (drag.kind === "text") {
+      patchText(drag.id, { x: clamp(drag.tx + dx, 0, 1), y: clamp(drag.ty + dy, 0, 1) });
+      return;
+    }
     const s = drag.start;
 
     if (drag.mode === "move") {
@@ -262,6 +315,22 @@ export function ImageEditorModal({
         applyAdjustments(id.data, brightness / 100, contrast / 100, saturation / 100, warmth / 100, bw / 100);
         ctx.putImageData(id, 0, 0);
       }
+      // text overlays go on last so they stay crisp and unfiltered. Position
+      // and size map from the full base image into the cropped output; the
+      // shadow mirrors the preview's em-based text-shadow.
+      for (const t of texts) {
+        if (!t.text.trim()) continue;
+        const fs = (t.size / 100) * bc.width * scale;
+        ctx.font = `${fs}px ${t.font}`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(0,0,0,0.35)";
+        ctx.shadowBlur = fs * 0.15;
+        ctx.shadowOffsetY = fs * 0.04;
+        ctx.fillStyle = t.color;
+        ctx.fillText(t.text, (t.x * bc.width - sx) * scale, (t.y * bc.height - sy) * scale);
+      }
+      ctx.shadowColor = "transparent";
       onApply(out.toDataURL(mime, 0.92));
     } catch (e) {
       setErr((e as Error).message);
@@ -272,6 +341,7 @@ export function ImageEditorModal({
 
   const reset = () => {
     setBrightness(100); setContrast(100); setSaturation(100); setWarmth(0); setBw(0);
+    setTexts([]); setActiveText(null);
     orient(0, false, false);
   };
 
@@ -317,6 +387,31 @@ export function ImageEditorModal({
                   <div className={`${handleCls} -bottom-2 -left-2 cursor-nesw-resize`} onPointerDown={startDrag("sw")} />
                   <div className={`${handleCls} -bottom-2 -right-2 cursor-nwse-resize`} onPointerDown={startDrag("se")} />
                 </div>
+                {/* text overlays — drag anywhere; size in cqw so preview matches
+                    export. The @container layer is absolute (sized BY the box) —
+                    putting container-type on the shrink-to-fit box itself would
+                    collapse its width to zero. */}
+                <div className="@container pointer-events-none absolute inset-0">
+                  {texts.map((t) => (
+                    <div
+                      key={t.id}
+                      onPointerDown={startTextDrag(t)}
+                      className={`pointer-events-auto absolute cursor-move whitespace-nowrap ${activeText === t.id ? "rounded-sm ring-1 ring-white/90" : ""}`}
+                      style={{
+                        left: `${t.x * 100}%`,
+                        top: `${t.y * 100}%`,
+                        transform: "translate(-50%, -50%)",
+                        color: t.color,
+                        fontFamily: t.font,
+                        fontSize: `${t.size}cqw`,
+                        lineHeight: 1.2,
+                        textShadow: "0 0.04em 0.15em rgba(0,0,0,0.35)",
+                      }}
+                    >
+                      {t.text || " "}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -355,6 +450,56 @@ export function ImageEditorModal({
                   <path d="M3 12h18" /><path d="M7 8l5-5 5 5H7z" /><path d="M7 16l5 5 5-5H7z" />
                 </IconBtn>
               </div>
+            </div>
+
+            <div>
+              <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Text</p>
+              <button
+                type="button"
+                onClick={addText}
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+              >
+                + Add text
+              </button>
+              {active ? (
+                <div className="mt-2 space-y-2">
+                  <input
+                    value={active.text}
+                    onChange={(e) => patchText(active.id, { text: e.target.value })}
+                    placeholder="Your text"
+                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={active.color}
+                      onChange={(e) => patchText(active.id, { color: e.target.value })}
+                      aria-label="Text colour"
+                      className="h-7 w-8 shrink-0 cursor-pointer rounded border border-slate-200 bg-white p-0.5"
+                    />
+                    <select
+                      value={active.font}
+                      onChange={(e) => patchText(active.id, { font: e.target.value })}
+                      aria-label="Text font"
+                      className="w-full rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[11px] text-slate-700"
+                    >
+                      {TEXT_FONTS.map((f) => (
+                        <option key={f.label} value={f.value}>{f.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Slider label="Text size" value={active.size} onChange={(v) => patchText(active.id, { size: v })} min={2} max={20} />
+                  <button
+                    type="button"
+                    onClick={() => { setTexts((ts) => ts.filter((t) => t.id !== active.id)); setActiveText(null); }}
+                    className="rounded-md border border-rose-200 bg-white px-2 py-1 text-[11px] text-rose-600 hover:bg-rose-50"
+                  >
+                    Remove text
+                  </button>
+                </div>
+              ) : texts.length ? (
+                <p className="mt-1.5 text-[10px] text-slate-400">Tap a text on the image to edit it; drag to place it.</p>
+              ) : null}
             </div>
 
             <div>
