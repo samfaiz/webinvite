@@ -2,9 +2,18 @@
 
 import type { InvitationContent, VenueLocation } from "@/engine/types";
 
-/** Manual venues with a real name, capped at the 4 map slots (A–D). */
-export function cleanVenues(list?: VenueLocation[]): VenueLocation[] {
-  return (list ?? []).filter((v) => v.label?.trim()).slice(0, 4);
+/** A map pin; editPath (e.g. "venues.1") makes its labels inline-editable in
+ *  the WYSIWYG editor — only manual locations have one, derived venues don't. */
+export type VenuePin = VenueLocation & { editPath?: string };
+
+/** Manual venues with a real name, capped at the 4 map slots (A–D). Keeps the
+ *  original array index in editPath so inline edits hit the right entry even
+ *  when earlier slots are empty. */
+export function cleanVenues(list?: VenueLocation[]): VenuePin[] {
+  return (list ?? [])
+    .map((v, i) => ({ ...v, editPath: `venues.${i}` }))
+    .filter((v) => v.label?.trim())
+    .slice(0, 4);
 }
 
 /** Unique venues from the schedule (deduped by name+address) — so if all events
@@ -24,7 +33,7 @@ function uniqueVenues(events: InvitationContent["schedule"]["events"]) {
 
 /** Pins for the map: the couple's manual locations when any are set,
  *  otherwise the venues derived from their schedule. */
-export function resolveVenues(content: InvitationContent): VenueLocation[] {
+export function resolveVenues(content: InvitationContent): VenuePin[] {
   const manual = cleanVenues(content.venues);
   return manual.length > 0 ? manual : uniqueVenues(content.schedule.events).slice(0, 4);
 }
@@ -37,7 +46,7 @@ const YS: Record<number, number[]> = { 1: [26], 2: [28, 24], 3: [30, 20, 26], 4:
  * path (1–4 pins). Fed by resolveVenues() (fixed templates) or the manual
  * locations alone (custom sections).
  */
-export function VenueMap({ venues }: { venues: VenueLocation[] }) {
+export function VenueMap({ venues }: { venues: VenuePin[] }) {
   const pins = venues.slice(0, 4);
   if (pins.length === 0) return null;
 
@@ -77,11 +86,19 @@ export function VenueMap({ venues }: { venues: VenueLocation[] }) {
       <div className="flex justify-around px-4 pb-4 pt-1 text-center">
         {pins.map((v, i) => (
           <div key={i} className="px-1" style={{ maxWidth: `${100 / pins.length}%` }}>
-            <p className="font-display text-[9px] uppercase tracking-[0.1em]" style={{ color: "var(--c-primary)" }}>
+            <p
+              data-edit={v.editPath ? `${v.editPath}.label` : undefined}
+              className="font-display text-[9px] uppercase tracking-[0.1em]"
+              style={{ color: "var(--c-primary)" }}
+            >
               {v.label}
             </p>
             {v.address ? (
-              <p className="text-[9px]" style={{ color: "var(--c-muted)" }}>
+              <p
+                data-edit={v.editPath ? `${v.editPath}.address` : undefined}
+                className="text-[9px]"
+                style={{ color: "var(--c-muted)" }}
+              >
                 {v.address}
               </p>
             ) : null}

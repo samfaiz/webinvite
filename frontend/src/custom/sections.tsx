@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type CSSProperties, type ReactNode } from "react";
-import type { CustomSection, MoveOffset, VenueLocation } from "@/engine/types";
+import type { CustomSection, MoveOffset } from "@/engine/types";
 import { Countdown } from "@/blocks/Countdown";
-import { VenueMap } from "@/blocks/VenueMap";
+import { VenueMap, type VenuePin } from "@/blocks/VenueMap";
 import { Movable } from "@/components/Movable";
 import { api } from "@/lib/api";
 
@@ -21,7 +21,7 @@ type Props = {
   slug?: string;
   offsets?: Record<string, MoveOffset>;
   /** manual map locations (invitation-level), shown under the RSVP section */
-  venues?: VenueLocation[];
+  venues?: VenuePin[];
 };
 
 const get = (c: Record<string, unknown>, k: string, d = "") => (typeof c[k] === "string" ? (c[k] as string) : d);

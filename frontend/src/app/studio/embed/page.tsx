@@ -51,8 +51,11 @@ export default function StudioEmbed() {
     function onInput(e: Event) {
       const el = (e.target as HTMLElement)?.closest?.("[data-edit]") as HTMLElement | null;
       if (el && el.getAttribute("contenteditable") === "true") {
+        // textContent, not innerText: innerText returns the RENDERED text, so a
+        // CSS `uppercase` element would store the capitalized copy of what the
+        // user typed
         window.parent?.postMessage(
-          { type: "edit", path: el.dataset.edit, value: el.innerText.replace(/\s+/g, " ").trim() },
+          { type: "edit", path: el.dataset.edit, value: (el.textContent ?? "").replace(/\s+/g, " ").trim() },
           "*",
         );
       }
