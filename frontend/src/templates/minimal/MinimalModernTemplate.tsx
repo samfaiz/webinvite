@@ -11,6 +11,7 @@ import { ParticleField } from "@/components/ParticleField";
 import { MusicToggle } from "@/components/MusicToggle";
 import { Divider } from "@/components/Ornaments";
 import { StyleOverrides } from "@/components/StyleOverrides";
+import { TextOffsets } from "@/templates/TextOffsets";
 import { HeroMinimal } from "@/blocks/HeroMinimal";
 import { Countdown } from "@/blocks/Countdown";
 import { Families } from "@/blocks/Families";
@@ -53,6 +54,7 @@ export function MinimalModernTemplate({
       <div style={sansOverride}>
         {snap ? null : <SmoothScroll />}
         <StyleOverrides content={content} />
+        <TextOffsets offsets={content.offsets} />
         <ParticleField type={theme.particles.type} color={theme.particles.color} count={6} />
 
         <main>

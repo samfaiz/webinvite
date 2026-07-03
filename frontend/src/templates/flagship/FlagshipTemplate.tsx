@@ -14,6 +14,7 @@ import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { EnvelopeIntro } from "@/blocks/EnvelopeIntro";
 import { VideoIntro } from "@/blocks/VideoIntro";
 import { StyleOverrides } from "@/components/StyleOverrides";
+import { TextOffsets } from "@/templates/TextOffsets";
 import { resolveSeal } from "@/lib/initials";
 import { Hero } from "@/blocks/Hero";
 import { Families } from "@/blocks/Families";
@@ -55,6 +56,7 @@ export function FlagshipTemplate({
     >
       {snap ? null : <SmoothScroll />}
       <StyleOverrides content={content} />
+      <TextOffsets offsets={content.offsets} />
       <ParticleField type={theme.particles.type} color={theme.particles.color} />
 
       <AnimatePresence>

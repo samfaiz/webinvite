@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { PreviewContext } from "@/components/PreviewContext";
 import { MusicToggle } from "@/components/MusicToggle";
 import { StyleOverrides } from "@/components/StyleOverrides";
+import { TextOffsets } from "@/templates/TextOffsets";
 import { SectionBody, cardBox } from "./sections";
 
 /** Full-screen section wrapper: applies the section's own background (colour,
@@ -95,6 +96,7 @@ export function CustomTemplate({
         className={`relative overflow-x-hidden ${snap ? "h-svh snap-y snap-mandatory overflow-y-auto" : "min-h-screen"}`}
       >
         <StyleOverrides content={content} />
+        <TextOffsets offsets={content.offsets} />
         <main>
           {content.envelope?.videoUrl ? <IntroVideo src={content.envelope.videoUrl} /> : null}
           {sections.length === 0 ? (

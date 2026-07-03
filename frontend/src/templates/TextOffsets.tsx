@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ComponentType } from "react";
+import { useEffect } from "react";
 import type { MoveOffset } from "@/engine/types";
 import { normalizeOffset } from "@/components/Movable";
 
@@ -8,12 +8,15 @@ import { normalizeOffset } from "@/components/Movable";
  * Applies saved free-drag offsets for individual text fields (`edit:<path>`
  * keys in content.offsets) to the rendered DOM. Block-level offsets are
  * handled by <Movable> at render time; text fields have no wrapper, so their
- * nudge is applied here to every matching [data-edit] element. Uses the CSS
+ * nudge is applied here to the matching [data-edit] element. Uses the CSS
  * `translate` property (not `transform`) so it composes with framer-motion
  * animations instead of fighting them.
  *
- * Wrapped around every template in templates/components.ts, so it covers the
+ * Rendered (as a null component) inside every template root, so it covers the
  * editor preview, the guest view, and the published /i/<slug> page alike.
+ * It must stay a component rendered by the client templates — calling a
+ * client-module function while building the template map breaks the Next.js
+ * server build.
  */
 
 function applyTextOffsets(offsets?: Record<string, MoveOffset>) {
@@ -31,20 +34,14 @@ function applyTextOffsets(offsets?: Record<string, MoveOffset>) {
   }
 }
 
-export function withTextOffsets<P extends { content: { offsets?: Record<string, MoveOffset> } }>(
-  Template: ComponentType<P>,
-): ComponentType<P> {
-  function WithTextOffsets(props: P) {
-    const offsets = props.content?.offsets;
-    useEffect(() => {
-      applyTextOffsets(offsets);
-      // sections can mount late (envelope open, carousel slides, lightboxes) —
-      // re-apply whenever new nodes appear
-      const mo = new MutationObserver(() => applyTextOffsets(offsets));
-      mo.observe(document.body, { childList: true, subtree: true });
-      return () => mo.disconnect();
-    }, [offsets]);
-    return <Template {...props} />;
-  }
-  return WithTextOffsets;
+export function TextOffsets({ offsets }: { offsets?: Record<string, MoveOffset> }) {
+  useEffect(() => {
+    applyTextOffsets(offsets);
+    // sections can mount late (envelope open, carousel slides, lightboxes) —
+    // re-apply whenever new nodes appear
+    const mo = new MutationObserver(() => applyTextOffsets(offsets));
+    mo.observe(document.body, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [offsets]);
+  return null;
 }

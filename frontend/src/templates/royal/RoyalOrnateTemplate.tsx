@@ -15,6 +15,7 @@ import { EnvelopeIntro } from "@/blocks/EnvelopeIntro";
 import { VideoIntro } from "@/blocks/VideoIntro";
 import { resolveSeal } from "@/lib/initials";
 import { StyleOverrides } from "@/components/StyleOverrides";
+import { TextOffsets } from "@/templates/TextOffsets";
 import { HeroClassic } from "@/blocks/HeroClassic";
 import { Countdown } from "@/blocks/Countdown";
 import { Families } from "@/blocks/Families";
@@ -53,6 +54,7 @@ export function RoyalOrnateTemplate({
     >
       {snap ? null : <SmoothScroll />}
       <StyleOverrides content={content} />
+      <TextOffsets offsets={content.offsets} />
       <ParticleField type={theme.particles.type} color={theme.particles.color} />
 
       <AnimatePresence>
