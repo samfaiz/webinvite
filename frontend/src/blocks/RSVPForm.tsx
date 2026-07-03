@@ -6,7 +6,7 @@ import type { InvitationContent } from "@/engine/types";
 import { MonogramCrest } from "@/components/Ornaments";
 import { Reveal } from "@/components/Reveal";
 import { usePreview } from "@/components/PreviewContext";
-import { VenueMap } from "./VenueMap";
+import { VenueMap, resolveVenues } from "./VenueMap";
 import { ArchedCard } from "@/components/ArchedCard";
 import { DirectionsLink } from "@/components/DirectionsLink";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
@@ -171,7 +171,7 @@ export function RSVPForm({
           </AnimatePresence>
 
           <div className="mt-8">
-            <VenueMap content={content} />
+            <VenueMap venues={resolveVenues(content)} />
           </div>
         </ArchedCard>
       </Reveal>

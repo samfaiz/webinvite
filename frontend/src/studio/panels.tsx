@@ -763,6 +763,12 @@ export function ScheduleFields({ draft, update }: PanelProps) {
 
 export function RsvpFields({ draft, update }: PanelProps) {
   const c = draft.content;
+  const setVenue = (i: number, k: "label" | "address", v: string) =>
+    update((d) => {
+      const arr = (d.content.venues ??= []);
+      while (arr.length < 4) arr.push({ label: "" });
+      arr[i] = { ...arr[i], [k]: v };
+    });
   return (
     <div>
       <Field label="Heading"><TextInput value={c.rsvp.heading} onChange={(e) => update((d) => { d.content.rsvp.heading = e.target.value; })} /></Field>
@@ -773,6 +779,32 @@ export function RsvpFields({ draft, update }: PanelProps) {
       </div>
       <Field label="Submit button"><TextInput value={c.rsvp.submitLabel} onChange={(e) => update((d) => { d.content.rsvp.submitLabel = e.target.value; })} /></Field>
       <Field label="Footer line"><TextInput value={c.rsvp.footer ?? ""} onChange={(e) => update((d) => { d.content.rsvp.footer = e.target.value; })} /></Field>
+
+      {/* manual map pins — override the venues auto-derived from the schedule */}
+      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Map locations</p>
+        <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+          Up to 4 pins on the RSVP map. Leave all empty to use your schedule&apos;s venues automatically.
+        </p>
+        {(["A", "B", "C", "D"] as const).map((letter, i) => (
+          <div key={letter} className="grid grid-cols-2 gap-2">
+            <Field label={`Location ${letter}`}>
+              <TextInput
+                value={c.venues?.[i]?.label ?? ""}
+                placeholder="Venue name"
+                onChange={(e) => setVenue(i, "label", e.target.value)}
+              />
+            </Field>
+            <Field label="Area / city">
+              <TextInput
+                value={c.venues?.[i]?.address ?? ""}
+                placeholder="e.g. Salalah, Oman"
+                onChange={(e) => setVenue(i, "address", e.target.value)}
+              />
+            </Field>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

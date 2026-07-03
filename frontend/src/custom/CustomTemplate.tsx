@@ -8,6 +8,7 @@ import { MusicToggle } from "@/components/MusicToggle";
 import { StyleOverrides } from "@/components/StyleOverrides";
 import { TextOffsets } from "@/templates/TextOffsets";
 import { SectionBody, cardBox } from "./sections";
+import { cleanVenues } from "@/blocks/VenueMap";
 
 /** Full-screen section wrapper: applies the section's own background (colour,
  *  gradient or image + tint) and style overrides (fonts/colours as CSS vars that
@@ -107,7 +108,7 @@ export function CustomTemplate({
           ) : null}
           {sections.map((s, i) => (
             <SectionFrame key={s.id} section={s}>
-              <SectionBody section={s} path={`customSections.${i}`} live={live} editing={editing} slug={slug} offsets={content.offsets} />
+              <SectionBody section={s} path={`customSections.${i}`} live={live} editing={editing} slug={slug} offsets={content.offsets} venues={cleanVenues(content.venues)} />
             </SectionFrame>
           ))}
         </main>

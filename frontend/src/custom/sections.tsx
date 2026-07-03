@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type CSSProperties, type ReactNode } from "react";
-import type { CustomSection, MoveOffset } from "@/engine/types";
+import type { CustomSection, MoveOffset, VenueLocation } from "@/engine/types";
 import { Countdown } from "@/blocks/Countdown";
+import { VenueMap } from "@/blocks/VenueMap";
 import { Movable } from "@/components/Movable";
 import { api } from "@/lib/api";
 
@@ -19,6 +20,8 @@ type Props = {
   editing?: boolean;
   slug?: string;
   offsets?: Record<string, MoveOffset>;
+  /** manual map locations (invitation-level), shown under the RSVP section */
+  venues?: VenueLocation[];
 };
 
 const get = (c: Record<string, unknown>, k: string, d = "") => (typeof c[k] === "string" ? (c[k] as string) : d);
@@ -323,6 +326,11 @@ function Rsvp(p: Props) {
         </div>
       )}
       {get(c, "footer") ? <Editable sec={s} offsets={offsets} path={path} k="footer" value={get(c, "footer")} tag="p" className="mt-4 text-center text-xs" style={{ color: "var(--c-muted)" }} /> : null}
+      {(p.venues?.length ?? 0) > 0 ? (
+        <div className="mt-6 w-full">
+          <VenueMap venues={p.venues!} />
+        </div>
+      ) : null}
     </Wrap>
   );
 }

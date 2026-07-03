@@ -121,6 +121,12 @@ export interface SectionStyle {
  *  are legacy vertical-only offsets from before X dragging existed. */
 export type MoveOffset = number | { x: number; y: number };
 
+/** One venue pin on the RSVP map. */
+export interface VenueLocation {
+  label: string;
+  address?: string;
+}
+
 /** One composable section instance in a section-first (custom) invitation. */
 export interface CustomSection {
   id: string;
@@ -147,6 +153,9 @@ export interface InvitationContent {
   offsets?: Record<string, MoveOffset>;
   /** per-element text formatting overrides, keyed by the element's data-edit path. */
   styles?: Record<string, TextStyle>;
+  /** manual map locations (up to 4). When any are set they replace the venues
+   *  derived from the schedule on the RSVP map. */
+  venues?: VenueLocation[];
   /** section-first "design from scratch" body. When present and templateId is
    *  "custom", the invitation renders these composable sections instead of the
    *  fixed template layout. */
