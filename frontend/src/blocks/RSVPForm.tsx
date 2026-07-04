@@ -27,15 +27,24 @@ export function RSVPForm({
   const { rsvp, couple, map } = content;
   const { editing } = usePreview();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(true);
   const [attending, setAttending] = useState<"accept" | "decline" | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const names =
+    couple.partner1?.name && couple.partner2?.name
+      ? `${couple.partner1.name} & ${couple.partner2.name}`
+      : "the couple";
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setError("Please enter your name.");
     if (!attending) return setError("Please let us know if you can make it.");
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim()))
+      return setError("That email doesn't look right — please check it.");
     setError("");
 
     if (live && content.meta?.slug) {
@@ -44,6 +53,9 @@ export function RSVPForm({
         await api.createRsvp(content.meta.slug, {
           guestName: name.trim(),
           attending,
+          ...(email.trim()
+            ? { email: email.trim(), subscribed }
+            : {}),
         });
         setSubmitted(true);
       } catch (err) {
@@ -117,9 +129,39 @@ export function RSVPForm({
                   }}
                 />
 
+                <label
+                  className="font-display text-[11px] uppercase tracking-[0.18em]"
+                  style={{ color: "var(--c-muted)" }}
+                >
+                  Email <span className="normal-case tracking-normal opacity-70">(optional — for your confirmation &amp; details)</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="font-body mt-1 w-full rounded-lg px-4 py-3 text-base outline-none"
+                  style={{
+                    background: "color-mix(in srgb, var(--c-grad-from) 40%, white)",
+                    border: "1px solid color-mix(in srgb, var(--c-accent) 30%, transparent)",
+                    color: "var(--c-text)",
+                  }}
+                />
+                {email.trim() ? (
+                  <label className="font-body mt-2 flex cursor-pointer items-start gap-2 text-sm" style={{ color: "var(--c-text)" }}>
+                    <input
+                      type="checkbox"
+                      checked={subscribed}
+                      onChange={(e) => setSubscribed(e.target.checked)}
+                      className="mt-1 h-4 w-4 shrink-0 accent-[var(--c-primary)]"
+                    />
+                    <span>Receive all updates from {names}&apos;s wedding</span>
+                  </label>
+                ) : null}
+
                 <p
                   data-edit="rsvp.prompt"
-                  className="font-display text-[11px] uppercase tracking-[0.18em]"
+                  className="font-display mt-5 text-[11px] uppercase tracking-[0.18em]"
                   style={{ color: "var(--c-muted)" }}
                 >
                   {rsvp.prompt}

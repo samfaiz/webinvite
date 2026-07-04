@@ -219,9 +219,17 @@ export default function DashboardPage() {
                         </p>
                         <ul className="space-y-1">
                           {rsvpData.rsvps.map((r: any) => (
-                            <li key={r.id} className="flex justify-between border-b border-[rgba(90,35,56,0.08)] py-1">
-                              <span>{r.guestName}</span>
-                              <span style={{ color: r.attending === "accept" ? "#166534" : "#991b1b" }}>
+                            <li key={r.id} className="flex justify-between gap-2 border-b border-[rgba(90,35,56,0.08)] py-1">
+                              <span className="min-w-0">
+                                {r.guestName}
+                                {r.email ? (
+                                  <span className="block truncate text-[11px] text-[rgba(90,35,56,0.55)]">
+                                    {r.email}
+                                    {r.subscribed ? " · updates ✓" : ""}
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span className="shrink-0" style={{ color: r.attending === "accept" ? "#166534" : "#991b1b" }}>
                                 {r.attending === "accept" ? `Accepts (${r.guests})` : "Declines"}
                               </span>
                             </li>

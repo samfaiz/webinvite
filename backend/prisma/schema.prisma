@@ -72,6 +72,10 @@ model Rsvp {
   attending    String // "accept" | "decline"
   guests       Int        @default(1)
   message      String?
+  /// guest's email (optional) — used for the confirmation email and updates
+  email        String?
+  /// consented to receive wedding updates at `email`
+  subscribed   Boolean    @default(false)
   createdAt    DateTime   @default(now())
 
   @@index([invitationId])

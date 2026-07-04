@@ -156,6 +156,14 @@ export interface InvitationContent {
   /** manual map locations (up to 4). When any are set they replace the venues
    *  derived from the schedule on the RSVP map. */
   venues?: VenueLocation[];
+  /** guest confirmation emails (sent when a guest RSVPs with an email).
+   *  Subject/heading/message per outcome; photo defaults to the first story
+   *  photo. `{guest}` and `{names}` placeholders are replaced when sending. */
+  guestEmails?: {
+    photo?: string;
+    accept?: { subject?: string; heading?: string; message?: string };
+    decline?: { subject?: string; heading?: string; message?: string };
+  };
   /** section-first "design from scratch" body. When present and templateId is
    *  "custom", the invitation renders these composable sections instead of the
    *  fixed template layout. */

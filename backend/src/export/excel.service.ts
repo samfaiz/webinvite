@@ -14,6 +14,8 @@ export class ExcelService {
       { header: 'Guest Name', key: 'guestName', width: 30 },
       { header: 'Response', key: 'attending', width: 14 },
       { header: 'Guests', key: 'guests', width: 10 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Updates', key: 'subscribed', width: 10 },
       { header: 'Message', key: 'message', width: 45 },
       { header: 'Responded At', key: 'createdAt', width: 24 },
     ];
@@ -36,6 +38,8 @@ export class ExcelService {
         guestName: r.guestName,
         attending: r.attending === 'accept' ? 'Accepting' : 'Declining',
         guests: r.guests,
+        email: r.email || '',
+        subscribed: r.email ? (r.subscribed ? 'Yes' : 'No') : '',
         message: r.message || '',
         createdAt: new Date(r.createdAt).toLocaleString(),
       });

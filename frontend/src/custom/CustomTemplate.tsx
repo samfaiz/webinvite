@@ -108,7 +108,20 @@ export function CustomTemplate({
           ) : null}
           {sections.map((s, i) => (
             <SectionFrame key={s.id} section={s}>
-              <SectionBody section={s} path={`customSections.${i}`} live={live} editing={editing} slug={slug} offsets={content.offsets} venues={cleanVenues(content.venues)} />
+              <SectionBody
+                section={s}
+                path={`customSections.${i}`}
+                live={live}
+                editing={editing}
+                slug={slug}
+                offsets={content.offsets}
+                venues={cleanVenues(content.venues)}
+                coupleNames={
+                  content.couple?.partner1?.name && content.couple?.partner2?.name
+                    ? `${content.couple.partner1.name} & ${content.couple.partner2.name}`
+                    : undefined
+                }
+              />
             </SectionFrame>
           ))}
         </main>

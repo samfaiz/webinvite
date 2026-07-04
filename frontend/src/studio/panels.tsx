@@ -850,6 +850,199 @@ export function RsvpFields({ draft, update }: PanelProps) {
   );
 }
 
+/* ------------------------------ guest emails ------------------------------ */
+
+/** Scaled live preview of the confirmation email a guest would receive —
+ *  rendered by the backend's real template so the preview IS the email. */
+function EmailLivePreview({ draft, kind }: { draft: Draft; kind: "accept" | "decline" }) {
+  const [data, setData] = useState<{ subject: string; html: string } | null>(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    let dead = false;
+    const t = setTimeout(() => {
+      api
+        .previewGuestEmail(draft.content, kind)
+        .then((d) => { if (!dead) { setData(d); setErr(""); } })
+        .catch((e) => { if (!dead) setErr((e as Error).message); });
+    }, 400);
+    return () => { dead = true; clearTimeout(t); };
+  }, [draft, kind]);
+
+  if (err) return <p className="mt-2 text-[11px] text-rose-600">Preview unavailable: {err}</p>;
+  return (
+    <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <p className="truncate border-b border-slate-100 bg-slate-50 px-2.5 py-1.5 text-[11px] text-slate-600">
+        <span className="font-medium">Subject:</span> {data?.subject ?? "…"}
+      </p>
+      <div className="h-[430px] overflow-hidden">
+        {data ? (
+          <iframe
+            title={`Email preview — ${kind}`}
+            srcDoc={data.html}
+            scrolling="no"
+            className="pointer-events-none origin-top-left border-0"
+            style={{ width: 620, height: 780, transform: "scale(0.55)" }}
+          />
+        ) : (
+          <p className="p-3 text-[11px] text-slate-400">Rendering…</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Designer for the confirmation emails guests receive after RSVPing. */
+export function GuestEmailFields({ draft, update }: PanelProps) {
+  const c = draft.content;
+  const ge = c.guestEmails ?? {};
+  const storyPhotos = (c.story?.items ?? []).map((i) => i.photo).filter(Boolean) as string[];
+  const effectivePhoto = ge.photo || storyPhotos[0] || "";
+  const [photoEditor, setPhotoEditor] = useState<string | null>(null);
+  const [photoErr, setPhotoErr] = useState("");
+  const [preview, setPreview] = useState<"accept" | "decline" | null>(null);
+
+  const setTpl = (kind: "accept" | "decline", key: "subject" | "heading" | "message", v: string) =>
+    update((d) => {
+      const g = (d.content.guestEmails ??= {});
+      const t = (g[kind] ??= {});
+      t[key] = v || undefined;
+    });
+
+  const pickUpload = async (file?: File) => {
+    if (!file) return;
+    setPhotoErr("");
+    try {
+      setPhotoEditor(await fileToScaledDataUrl(file, 1600, 0.95));
+    } catch (e) {
+      setPhotoErr((e as Error).message);
+    }
+  };
+
+  const tplFields = (kind: "accept" | "decline") => {
+    const t = ge[kind] ?? {};
+    const coming = kind === "accept";
+    return (
+      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+          {coming ? "For guests who are coming" : "For guests who can't come"}
+        </p>
+        <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+          {coming
+            ? "A welcome email with your photo, the date, venues and directions."
+            : "A warm thank-you note."}
+        </p>
+        <Field label="Subject">
+          <TextInput
+            value={t.subject ?? ""}
+            placeholder={coming ? "You're on the guest list — {names}" : "Thank you for letting us know — {names}"}
+            onChange={(e) => setTpl(kind, "subject", e.target.value)}
+          />
+        </Field>
+        <Field label="Heading">
+          <TextInput
+            value={t.heading ?? ""}
+            placeholder={coming ? "We can't wait to celebrate with you!" : "We'll miss you"}
+            onChange={(e) => setTpl(kind, "heading", e.target.value)}
+          />
+        </Field>
+        <Field label="Message">
+          <TextArea
+            value={t.message ?? ""}
+            placeholder={
+              coming
+                ? "Dear {guest}, thank you for accepting our invitation — it means the world to us. Here is everything you need for the big day."
+                : "Dear {guest}, thank you for letting us know. We're sad you can't be with us, but we truly appreciate you taking the time — you'll be in our hearts on the day."
+            }
+            onChange={(e) => setTpl(kind, "message", e.target.value)}
+          />
+        </Field>
+        <button
+          type="button"
+          onClick={() => setPreview(preview === kind ? null : kind)}
+          className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+        >
+          {preview === kind ? "Hide live preview" : "👁 Live preview"}
+        </button>
+        {preview === kind ? <EmailLivePreview draft={draft} kind={kind} /> : null}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <p className="mb-3 text-sm text-slate-500">
+        When a guest RSVPs with their email, they instantly get a confirmation from you. Leave fields empty to use the
+        wording shown — <code className="text-[11px]">{"{guest}"}</code> and <code className="text-[11px]">{"{names}"}</code> become
+        the guest&apos;s and your names.
+      </p>
+
+      {/* photo used at the top of the welcome email */}
+      <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Email photo</p>
+        <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+          Shown at the top of the welcome email. Defaults to your first story photo.
+        </p>
+        <div className="flex items-center gap-2">
+          <div className="h-14 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white">
+            {effectivePhoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={effectivePhoto} alt="Email header" className="h-full w-full object-cover" />
+            ) : (
+              <div className="grid h-full w-full place-items-center text-[9px] text-slate-400">No photo</div>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+            {storyPhotos.slice(0, 4).map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                title={`Use story photo ${i + 1}`}
+                onClick={() => update((d) => { (d.content.guestEmails ??= {}).photo = p; })}
+                className={`h-10 w-10 shrink-0 overflow-hidden rounded border ${effectivePhoto === p ? "border-[#2b3a67] ring-1 ring-[#2b3a67]/40" : "border-slate-200"}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+            <label className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded border border-dashed border-slate-300 text-slate-400 hover:border-slate-400 hover:text-slate-600" title="Upload a photo">
+              +
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => { pickUpload(e.target.files?.[0]); e.target.value = ""; }} />
+            </label>
+            {ge.photo ? (
+              <button
+                type="button"
+                onClick={() => update((d) => { if (d.content.guestEmails) d.content.guestEmails.photo = undefined; })}
+                className="self-center text-[11px] text-slate-500 underline hover:text-slate-800"
+              >
+                Reset
+              </button>
+            ) : null}
+          </div>
+        </div>
+        {photoErr ? <p className="mt-1.5 text-[11px] text-rose-600">{photoErr}</p> : null}
+      </div>
+
+      {tplFields("accept")}
+      <div className="mt-3" />
+      {tplFields("decline")}
+
+      {photoEditor ? (
+        <ImageEditorModal
+          src={photoEditor}
+          title="Edit email photo"
+          mime="image/jpeg"
+          maxDim={1280}
+          onApply={(url) => {
+            update((d) => { (d.content.guestEmails ??= {}).photo = url; });
+            setPhotoEditor(null);
+          }}
+          onClose={() => setPhotoEditor(null)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 /* ------------------------ per-element text formatting ------------------------ */
 
 export type SelectedText = {
@@ -924,6 +1117,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
         <CustomBuilder draft={draft} update={update} />
         <div className="mt-4 border-t border-slate-100 pt-3">
           <Group title="Intro video (plays first)"><IntroVideoField draft={draft} update={update} /></Group>
+          <Group title="Guest emails"><GuestEmailFields draft={draft} update={update} /></Group>
           <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
         </div>
       </div>
@@ -938,6 +1132,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
       <Group title="Our Story" frame="frame-story"><StoryFields draft={draft} update={update} /></Group>
       <Group title="Schedule of Events" frame="frame-schedule"><ScheduleFields draft={draft} update={update} /></Group>
       <Group title="RSVP" frame="frame-rsvp"><RsvpFields draft={draft} update={update} /></Group>
+      <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
     </div>
   );

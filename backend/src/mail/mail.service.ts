@@ -83,6 +83,8 @@ export class MailService {
     to: string;
     subject: string;
     text: string;
+    html?: string;
+    replyTo?: string;
     attachments?: MailAttachment[];
   }): Promise<{ sent: boolean; recipient: string; savedTo?: string }> {
     const cfg = await this.resolveConfig();

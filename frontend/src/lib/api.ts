@@ -92,11 +92,25 @@ export const api = {
   // public
   createRsvp: (
     slug: string,
-    body: { guestName: string; attending: string; guests?: number; message?: string },
+    body: {
+      guestName: string;
+      attending: string;
+      guests?: number;
+      message?: string;
+      email?: string;
+      subscribed?: boolean;
+    },
   ) =>
     request<{ ok: boolean }>(`/public/invitations/${slug}/rsvp`, {
       method: "POST",
       body: JSON.stringify(body),
+    }),
+
+  // live preview of the guest confirmation email (pure render, no auth)
+  previewGuestEmail: (content: unknown, kind: "accept" | "decline") =>
+    request<{ subject: string; html: string }>("/public/email-preview", {
+      method: "POST",
+      body: JSON.stringify({ content, kind }),
     }),
 
   // designs (public catalog)

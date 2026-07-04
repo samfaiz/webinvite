@@ -22,6 +22,8 @@ type Props = {
   offsets?: Record<string, MoveOffset>;
   /** manual map locations (invitation-level), shown under the RSVP section */
   venues?: VenuePin[];
+  /** "Partner1 & Partner2" — for the RSVP updates-consent label */
+  coupleNames?: string;
 };
 
 const get = (c: Record<string, unknown>, k: string, d = "") => (typeof c[k] === "string" ? (c[k] as string) : d);
@@ -282,6 +284,8 @@ function Rsvp(p: Props) {
   const { section: s, path, offsets, live, slug } = p;
   const c = s.content;
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(true);
   const [attending, setAttending] = useState<"accept" | "decline">("accept");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -291,9 +295,15 @@ function Rsvp(p: Props) {
   const submit = async () => {
     if (!live || !slug) return;
     if (!name.trim()) { setErr("Please enter your name"); return; }
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) { setErr("That email doesn't look right — please check it."); return; }
     setBusy(true); setErr("");
     try {
-      await api.createRsvp(slug, { guestName: name.trim(), attending, message: message.trim() || undefined });
+      await api.createRsvp(slug, {
+        guestName: name.trim(),
+        attending,
+        message: message.trim() || undefined,
+        ...(email.trim() ? { email: email.trim(), subscribed } : {}),
+      });
       setSent(true);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
@@ -310,6 +320,13 @@ function Rsvp(p: Props) {
       ) : (
         <div className="mt-5 w-full space-y-3 text-left">
           <input className={input} style={bd} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input className={input} style={bd} type="email" placeholder="Email (optional — for your confirmation & details)" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {email.trim() ? (
+            <label className="flex cursor-pointer items-start gap-2 text-sm" style={{ color: "var(--c-text)" }}>
+              <input type="checkbox" checked={subscribed} onChange={(e) => setSubscribed(e.target.checked)} className="mt-1 h-4 w-4 shrink-0" />
+              <span>Receive all updates from {p.coupleNames || "the couple"}&apos;s wedding</span>
+            </label>
+          ) : null}
           <div className="flex gap-2">
             {(["accept", "decline"] as const).map((a) => (
               <button key={a} type="button" onClick={() => setAttending(a)} className={`flex-1 rounded-lg border px-3 py-2 text-sm ${attending === a ? "text-white" : ""}`}

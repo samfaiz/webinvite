@@ -1,4 +1,6 @@
 import {
+  IsBoolean,
+  IsEmail,
   IsIn,
   IsInt,
   IsOptional,
@@ -26,4 +28,13 @@ export class CreateRsvpDto {
   @IsString()
   @MaxLength(500)
   message?: string;
+
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(254)
+  email?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  subscribed?: boolean;
 }

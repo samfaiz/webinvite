@@ -4,9 +4,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Invitation } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
+import { buildGuestEmail } from '../mail/guest-email';
 import { CreateRsvpDto } from './rsvp.dto';
 
 @Injectable()
@@ -16,7 +18,13 @@ export class RsvpService {
   constructor(
     private prisma: PrismaService,
     private mail: MailService,
+    private config: ConfigService,
   ) {}
+
+  /** Public site origin for links/photos inside guest emails. */
+  private origin(): string {
+    return (this.config.get<string>('FRONTEND_ORIGIN') || 'http://localhost:3000').replace(/\/+$/, '');
+  }
 
   async create(slug: string, dto: CreateRsvpDto) {
     const inv = await this.prisma.invitation.findUnique({ where: { slug } });
@@ -25,6 +33,7 @@ export class RsvpService {
     if (inv.expiryDate && inv.expiryDate.getTime() < Date.now())
       throw new GoneException('This invitation has expired');
 
+    const email = dto.email?.trim().toLowerCase() || undefined;
     const r = await this.prisma.rsvp.create({
       data: {
         invitationId: inv.id,
@@ -32,16 +41,67 @@ export class RsvpService {
         attending: dto.attending,
         guests: dto.guests ?? 1,
         message: dto.message,
+        email,
+        subscribed: Boolean(email && dto.subscribed),
       },
     });
 
-    // instant heads-up to the couple — fire-and-forget so a mail hiccup can
-    // never fail the guest's RSVP
+    // both mails are fire-and-forget — a mail hiccup can never fail the RSVP
     this.notifyOwner(inv, dto).catch((e) =>
       this.logger.warn(`RSVP notification not sent: ${(e as Error).message}`),
     );
+    if (email) {
+      this.sendGuestConfirmation(inv, dto, r.id, email).catch((e) =>
+        this.logger.warn(`Guest confirmation not sent: ${(e as Error).message}`),
+      );
+    }
 
     return { ok: true, id: r.id };
+  }
+
+  /** Confirmation email to the guest (welcome + venue details when coming,
+   *  a warm note when not). One per guest email per invitation, so the public
+   *  form can't be abused to spam an inbox. */
+  private async sendGuestConfirmation(
+    inv: Invitation,
+    dto: CreateRsvpDto,
+    rsvpId: string,
+    email: string,
+  ) {
+    const earlier = await this.prisma.rsvp.count({
+      where: { invitationId: inv.id, email, NOT: { id: rsvpId } },
+    });
+    if (earlier > 0) return;
+
+    const owner = await this.prisma.user.findUnique({ where: { id: inv.userId } });
+    const built = buildGuestEmail({
+      content: JSON.parse(inv.contentJson),
+      guestName: dto.guestName,
+      attending: dto.attending as 'accept' | 'decline',
+      guests: dto.guests,
+      origin: this.origin(),
+      slug: inv.slug ?? undefined,
+      unsubscribeUrl:
+        dto.subscribed && inv.slug
+          ? `${this.origin()}/api/public/rsvps/${rsvpId}/unsubscribe`
+          : undefined,
+    });
+    await this.mail.send({
+      to: email,
+      subject: built.subject,
+      text: built.text,
+      html: built.html,
+      replyTo: inv.ownerEmail || owner?.email || undefined,
+    });
+  }
+
+  /** One-click unsubscribe (linked from guest emails; the cuid is the token). */
+  async unsubscribe(rsvpId: string): Promise<boolean> {
+    const r = await this.prisma.rsvp.findUnique({ where: { id: rsvpId } });
+    if (!r) return false;
+    if (r.subscribed)
+      await this.prisma.rsvp.update({ where: { id: rsvpId }, data: { subscribed: false } });
+    return true;
   }
 
   /** Email the couple the moment a guest responds: who, coming or not, and
