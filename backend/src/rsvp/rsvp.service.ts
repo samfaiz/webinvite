@@ -68,10 +68,18 @@ export class RsvpService {
     rsvpId: string,
     email: string,
   ) {
-    // one confirmation per guest email — but only DELIVERED ones count, so a
-    // failed send (e.g. SMTP misconfigured at the time) can be retried later
+    // one confirmation per guest email PER OUTCOME — a guest who changes
+    // their answer gets the confirmation matching the new response (so at
+    // most 2 emails per address), and only DELIVERED sends count, so a
+    // failed send (e.g. SMTP misconfigured at the time) can be retried
     const earlier = await this.prisma.rsvp.count({
-      where: { invitationId: inv.id, email, confirmedAt: { not: null }, NOT: { id: rsvpId } },
+      where: {
+        invitationId: inv.id,
+        email,
+        attending: dto.attending,
+        confirmedAt: { not: null },
+        NOT: { id: rsvpId },
+      },
     });
     if (earlier > 0) return;
 
