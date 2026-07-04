@@ -76,6 +76,9 @@ model Rsvp {
   email        String?
   /// consented to receive wedding updates at `email`
   subscribed   Boolean    @default(false)
+  /// when the confirmation email was actually delivered to SMTP — dedupe
+  /// counts only these, so failed sends (e.g. broken SMTP) can be retried
+  confirmedAt  DateTime?
   createdAt    DateTime   @default(now())
 
   @@index([invitationId])

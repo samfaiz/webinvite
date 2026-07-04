@@ -68,8 +68,10 @@ export class RsvpService {
     rsvpId: string,
     email: string,
   ) {
+    // one confirmation per guest email — but only DELIVERED ones count, so a
+    // failed send (e.g. SMTP misconfigured at the time) can be retried later
     const earlier = await this.prisma.rsvp.count({
-      where: { invitationId: inv.id, email, NOT: { id: rsvpId } },
+      where: { invitationId: inv.id, email, confirmedAt: { not: null }, NOT: { id: rsvpId } },
     });
     if (earlier > 0) return;
 
@@ -86,13 +88,17 @@ export class RsvpService {
           ? `${this.origin()}/api/public/rsvps/${rsvpId}/unsubscribe`
           : undefined,
     });
-    await this.mail.send({
+    const result = await this.mail.send({
       to: email,
       subject: built.subject,
       text: built.text,
       html: built.html,
       replyTo: inv.ownerEmail || owner?.email || undefined,
     });
+    // stamp only real deliveries (dev/jsonTransport sends report sent=false)
+    if (result.sent) {
+      await this.prisma.rsvp.update({ where: { id: rsvpId }, data: { confirmedAt: new Date() } });
+    }
   }
 
   /** One-click unsubscribe (linked from guest emails; the cuid is the token). */
