@@ -113,17 +113,21 @@ export class AdminService {
   }
 
   async saveMailSettings(dto: MailSettingsDto) {
+    // trim everything — a trailing space pasted from a password manager or
+    // hosting panel otherwise reaches the SMTP server verbatim and fails
+    // auth (535) with no visible cause
     const entries: Record<string, string | undefined> = {
-      'mail.fromName': dto.fromName,
-      'mail.fromEmail': dto.fromEmail,
-      'mail.smtpHost': dto.smtpHost,
-      'mail.smtpPort': dto.smtpPort,
-      'mail.smtpUser': dto.smtpUser,
+      'mail.fromName': dto.fromName?.trim(),
+      'mail.fromEmail': dto.fromEmail?.trim(),
+      'mail.smtpHost': dto.smtpHost?.trim(),
+      'mail.smtpPort': dto.smtpPort?.trim(),
+      'mail.smtpUser': dto.smtpUser?.trim(),
       'mail.enabled': dto.enabled === undefined ? undefined : String(dto.enabled),
     };
     // only overwrite the stored password when a new, non-empty one is provided
-    if (dto.smtpPass !== undefined && dto.smtpPass !== '') {
-      entries['mail.smtpPass'] = dto.smtpPass;
+    const pass = dto.smtpPass?.trim();
+    if (pass) {
+      entries['mail.smtpPass'] = pass;
     }
     await this.settings.setMany(entries);
     return this.getMailSettings();
