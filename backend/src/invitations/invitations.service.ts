@@ -79,7 +79,14 @@ export class InvitationsService {
   }
 
   async update(userId: string, id: string, dto: SaveInvitationDto) {
-    await this.ensureOwner(userId, id);
+    const existing = await this.ensureOwner(userId, id);
+    // the assigned slug is authoritative once published — never let a stale
+    // meta.slug from the editor draft overwrite it (the RSVP form posts to
+    // meta.slug, so drift would send RSVPs to a different invitation)
+    const content = dto.content as { meta?: Record<string, unknown> };
+    if (existing.slug && content && typeof content === 'object') {
+      content.meta = { ...(content.meta || {}), slug: existing.slug };
+    }
     const { eventDate, expiryDate } = this.derive(dto.content);
     const inv = await this.prisma.invitation.update({
       where: { id },
@@ -188,11 +195,16 @@ export class InvitationsService {
       data: { views: { increment: 1 } },
     });
 
+    // stamp the real slug into the served content: the RSVP form posts to
+    // content.meta.slug, and the URL the guest is on is the source of truth
+    const content = JSON.parse(inv.contentJson);
+    content.meta = { ...(content.meta || {}), slug: inv.slug };
+
     return {
       templateId: inv.templateId,
       motifId: inv.motifId,
       theme: JSON.parse(inv.themeJson),
-      content: JSON.parse(inv.contentJson),
+      content,
     };
   }
 }
