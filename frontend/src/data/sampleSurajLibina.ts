@@ -75,7 +75,6 @@ export const sampleSurajLibina: InvitationContent = {
         time: "7:00 PM",
         venue: "Grand Arena",
         address: "Ettumanoor, Kottayam",
-        mapUrl: "https://maps.google.com/?q=Grand+Arena+Ettumanoor+Kottayam",
         icon: "lamp",
       },
       {
@@ -85,7 +84,6 @@ export const sampleSurajLibina: InvitationContent = {
         time: "3:00 PM",
         venue: "St. Joseph's Church, Pushpagiri",
         address: "Kottayam",
-        mapUrl: "https://maps.google.com/?q=St+Josephs+Church+Pushpagiri+Kottayam",
         verse: "Therefore what God has joined together, let no one separate.",
         verseRef: "Matthew 19:6",
         icon: "church",
@@ -97,7 +95,6 @@ export const sampleSurajLibina: InvitationContent = {
         time: "7:30 PM",
         venue: "Backwaters Ripples",
         address: "Kumarakom",
-        mapUrl: "https://maps.google.com/?q=Backwaters+Ripples+Kumarakom",
         icon: "cheers",
       },
     ],

@@ -765,8 +765,10 @@ export function ScheduleFields({ draft, update }: PanelProps) {
             <Field label="Date"><TextInput value={ev.date} onChange={(e) => update((d) => { d.content.schedule.events[i].date = e.target.value; })} /></Field>
             <Field label="Time"><TextInput value={ev.time} onChange={(e) => update((d) => { d.content.schedule.events[i].time = e.target.value; })} /></Field>
           </div>
-          <Field label="Venue"><TextInput value={ev.venue} onChange={(e) => update((d) => { d.content.schedule.events[i].venue = e.target.value; })} /></Field>
-          <Field label="Address"><TextInput value={ev.address ?? ""} onChange={(e) => update((d) => { d.content.schedule.events[i].address = e.target.value; })} /></Field>
+          {/* changing the venue/address invalidates any previously pasted map
+              link — clear it so guests are never directed to the old place */}
+          <Field label="Venue"><TextInput value={ev.venue} onChange={(e) => update((d) => { d.content.schedule.events[i].venue = e.target.value; d.content.schedule.events[i].mapUrl = ""; })} /></Field>
+          <Field label="Address"><TextInput value={ev.address ?? ""} onChange={(e) => update((d) => { d.content.schedule.events[i].address = e.target.value; d.content.schedule.events[i].mapUrl = ""; })} /></Field>
           <Field label="Map location (Get Directions)">
             <div className="space-y-1.5">
               <div className="flex gap-2">
@@ -785,7 +787,7 @@ export function ScheduleFields({ draft, update }: PanelProps) {
                 </a>
               </div>
               <p className="text-[10px] text-slate-400">
-                Leave blank to use the venue &amp; address. Guests’ “Get Directions” opens Apple Maps on iPhone and Google Maps on Android &amp; web.
+                A pasted link overrides the venue &amp; address search — use it when the venue is hard to find by name. Editing the venue or address clears it. Guests’ “Get Directions” opens Apple Maps on iPhone and Google Maps on Android &amp; web.
               </p>
             </div>
           </Field>

@@ -42,19 +42,25 @@ export function hasMapTarget(t: MapTarget): boolean {
 
 /**
  * Google Maps web search link — the universal default. On Android this also
- * opens the Google Maps app via App Links.
+ * opens the Google Maps app via App Links. An explicitly pasted link always
+ * wins over the venue text: a text search can land on the wrong place, the
+ * couple's own link can't.
  */
 export function googleMapsUrl(t: MapTarget): string {
-  const q = resolveQuery(t);
-  if (!q && t.url) return t.url; // opaque link (e.g. maps.app.goo.gl) — use as-is
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  const url = t.url?.trim();
+  if (url) return url;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resolveQuery(t))}`;
 }
 
-/** Apple Maps link — opens the native Maps app on iPhone/iPad. */
+/** Apple Maps link — opens the native Maps app on iPhone/iPad. When the couple
+ *  pasted a link we keep its exact query if it has one, else use it as-is. */
 export function appleMapsUrl(t: MapTarget): string {
-  const q = resolveQuery(t);
-  if (!q && t.url) return t.url;
-  return `https://maps.apple.com/?q=${encodeURIComponent(q)}`;
+  const url = t.url?.trim();
+  if (url) {
+    const q = queryFromUrl(url);
+    return q ? `https://maps.apple.com/?q=${encodeURIComponent(q)}` : url;
+  }
+  return `https://maps.apple.com/?q=${encodeURIComponent(resolveQuery(t))}`;
 }
 
 /** Detect the current device family (client only; "web" during SSR). */

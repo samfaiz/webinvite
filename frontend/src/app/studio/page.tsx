@@ -106,6 +106,12 @@ export default function StudioPage() {
           if (!prev) return prev;
           const next: Draft = structuredClone(prev);
           setByPath(next.content as unknown as Record<string, unknown>, e.data.path, e.data.value);
+          // an inline venue/address edit invalidates that event's pasted map
+          // link — clear it so Get Directions never points at the old place
+          const ev = /^schedule\.events\.(\d+)\.(venue|address)$/.exec(e.data.path);
+          if (ev && next.content.schedule.events[Number(ev[1])]) {
+            next.content.schedule.events[Number(ev[1])].mapUrl = "";
+          }
           return next;
         });
       }
