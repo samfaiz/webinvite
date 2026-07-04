@@ -345,8 +345,9 @@ export function ImageEditorModal({
     orient(0, false, false);
   };
 
+  // finger-sized on touch screens, tighter with a mouse
   const handleCls =
-    "absolute h-3.5 w-3.5 rounded-full border-2 border-white bg-slate-800 shadow";
+    "absolute h-5 w-5 rounded-full border-2 border-white bg-slate-800 shadow sm:h-3.5 sm:w-3.5";
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-3 sm:p-6" role="dialog" aria-modal="true">

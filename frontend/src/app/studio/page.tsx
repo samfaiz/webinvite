@@ -298,9 +298,11 @@ export default function StudioPage() {
         </div>
       </header>
 
+      {/* phones: preview pinned on top + panel scrolling below (same pattern as
+          the /create wizard) so couples never edit blind; desktop: panel left */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* controls */}
-        <aside className="flex w-full shrink-0 flex-col border-b border-slate-200 bg-white lg:w-[380px] lg:border-b-0 lg:border-r">
+        <aside className="order-2 flex min-h-0 w-full flex-1 flex-col border-t border-slate-200 bg-white lg:order-1 lg:w-[380px] lg:flex-none lg:border-r lg:border-t-0">
           <nav className="flex shrink-0 gap-1 overflow-x-auto border-b border-slate-100 px-2 py-2">
             {TABS.map((t) => (
               <button
@@ -322,9 +324,9 @@ export default function StudioPage() {
         </aside>
 
         {/* previews: editable (middle) + a read-only "guest view" (right, wide screens) */}
-        <main className="flex min-h-0 flex-1 bg-slate-200">
+        <main className="order-1 flex h-[42dvh] shrink-0 bg-slate-200 lg:order-2 lg:h-auto lg:min-h-0 lg:flex-1">
           {/* editable preview — click any text/photo to edit inline */}
-          <div className="flex min-h-0 flex-1 flex-col items-center p-3">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center p-3">
             <p className="mb-2 shrink-0 text-center text-[11px] font-medium text-slate-500">
               ✎ Edit — click any text or photo
             </p>
