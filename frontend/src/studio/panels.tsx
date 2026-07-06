@@ -1324,6 +1324,81 @@ export function PhotosPanel({ draft, update }: PanelProps) {
 
 /* ------------------------------ SETTINGS ------------------------------ */
 
+/** Link-share preview (the card WhatsApp/Telegram show for the invite URL).
+ *  Empty fields keep the template defaults. */
+function SharePreviewFields({ draft, update }: PanelProps) {
+  const c = draft.content;
+  const share = c.share ?? {};
+  const names =
+    c.couple.partner1?.name && c.couple.partner2?.name
+      ? `${c.couple.partner1.name} & ${c.couple.partner2.name}`
+      : "Your Names";
+  const storyPhotos = (c.story?.items ?? []).map((i) => i.photo).filter(Boolean) as string[];
+  const effectiveImage = share.image || c.guestEmails?.photo || storyPhotos[0] || "";
+  const setShare = (key: "title" | "description", v: string) =>
+    update((d) => { (d.content.share ??= {})[key] = v || undefined; });
+
+  return (
+    <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Share preview</p>
+      <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+        The card WhatsApp, Telegram &amp; iMessage show when your link is shared. Leave empty to use the defaults shown.
+      </p>
+      <Field label="Title">
+        <TextInput
+          value={share.title ?? ""}
+          placeholder={`${names} — Wedding Invitation`}
+          onChange={(e) => setShare("title", e.target.value)}
+        />
+      </Field>
+      <Field label="Description">
+        <TextInput
+          value={share.description ?? ""}
+          placeholder={c.envelope?.tagline || "You're invited to celebrate with us"}
+          onChange={(e) => setShare("description", e.target.value)}
+        />
+      </Field>
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Image</p>
+      <div className="flex items-center gap-2">
+        <div className="h-12 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white">
+          {effectiveImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={effectiveImage} alt="Share preview" className="h-full w-full object-cover" />
+          ) : (
+            <div className="grid h-full w-full place-items-center text-[9px] text-slate-400">None</div>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          {storyPhotos.slice(0, 4).map((p, i) => (
+            <button
+              key={i}
+              type="button"
+              title={`Use story photo ${i + 1}`}
+              onClick={() => update((d) => { (d.content.share ??= {}).image = p; })}
+              className={`h-9 w-9 shrink-0 overflow-hidden rounded border ${effectiveImage === p ? "border-[#2b3a67] ring-1 ring-[#2b3a67]/40" : "border-slate-200"}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p} alt="" className="h-full w-full object-cover" />
+            </button>
+          ))}
+          {share.image ? (
+            <button
+              type="button"
+              onClick={() => update((d) => { if (d.content.share) d.content.share.image = undefined; })}
+              className="text-[11px] text-slate-500 underline hover:text-slate-800"
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <p className="mt-1.5 text-[10px] text-slate-400">
+        Defaults to your guest-email photo or first story photo. Shows after you publish (messaging apps need a public photo URL).
+      </p>
+    </div>
+  );
+}
+
 export function SettingsPanel({ draft, update }: PanelProps) {
   const [autoExpiry, setAutoExpiry] = useState(true);
   const dt = draft.content.countdown.targetDate.slice(0, 16);
@@ -1349,6 +1424,8 @@ export function SettingsPanel({ draft, update }: PanelProps) {
       <Field label="Wedding date & time">
         <TextInput type="datetime-local" value={dt} onChange={(e) => onDate(e.target.value)} />
       </Field>
+
+      <SharePreviewFields draft={draft} update={update} />
 
       <label className="mb-2 flex items-center gap-2 text-sm text-slate-700">
         <input

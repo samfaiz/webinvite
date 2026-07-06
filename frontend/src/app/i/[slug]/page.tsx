@@ -18,17 +18,32 @@ export async function generateMetadata({
     const res = await fetch(`${API}/public/invitations/${slug}`, { cache: "no-store" });
     if (!res.ok) return fallback;
     const data = await res.json();
-    const c = data?.content?.couple;
+    const content = data?.content;
+    const c = content?.couple;
     const names =
       c?.partner1?.name && c?.partner2?.name ? `${c.partner1.name} & ${c.partner2.name}` : "Our Wedding";
-    const tagline = data?.content?.envelope?.tagline || `You're invited to celebrate the wedding of ${names}.`;
-    const title = `${names} — Wedding Invitation`;
+
+    // couple's custom share texts win; template-derived defaults otherwise
+    const share = content?.share ?? {};
+    const title = share.title?.trim() || `${names} — Wedding Invitation`;
+    const description =
+      share.description?.trim() ||
+      content?.envelope?.tagline ||
+      `You're invited to celebrate the wedding of ${names}.`;
+    // share image: custom, else the guest-email photo, else the first story
+    // photo. Only real URLs — data: previews can't be used by link crawlers.
+    const firstStoryPhoto = (content?.story?.items ?? []).find(
+      (it: { photo?: string }) => typeof it?.photo === "string" && it.photo,
+    )?.photo;
+    const rawImage = share.image || content?.guestEmails?.photo || firstStoryPhoto || "";
+    const image = /^https?:\/\//.test(rawImage) ? rawImage : undefined;
+
     return {
       title: { absolute: title },
-      description: tagline,
+      description,
       robots: { index: false, follow: true },
-      openGraph: { title, description: tagline, type: "website" },
-      twitter: { card: "summary_large_image", title, description: tagline },
+      openGraph: { title, description, type: "website", ...(image ? { images: [image] } : {}) },
+      twitter: { card: image ? "summary_large_image" : "summary", title, description, ...(image ? { images: [image] } : {}) },
     };
   } catch {
     return fallback;

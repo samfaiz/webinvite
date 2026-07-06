@@ -164,6 +164,14 @@ export interface InvitationContent {
     accept?: { subject?: string; heading?: string; message?: string };
     decline?: { subject?: string; heading?: string; message?: string };
   };
+  /** link-share preview (WhatsApp/Telegram/iMessage cards). Empty fields fall
+   *  back to the template defaults: "Names — Wedding Invitation", the envelope
+   *  tagline, and the guest-email/first story photo. */
+  share?: {
+    title?: string;
+    description?: string;
+    image?: string;
+  };
   /** section-first "design from scratch" body. When present and templateId is
    *  "custom", the invitation renders these composable sections instead of the
    *  fixed template layout. */
