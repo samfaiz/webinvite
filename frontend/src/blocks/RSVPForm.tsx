@@ -231,10 +231,15 @@ export function RSVPForm({
       ) : null}
 
       {(() => {
-        // directions to the primary (first) event venue; an explicit map link overrides
+        // directions target, most specific first: a pasted map link, then the
+        // manual location text, then the first event's venue
         const firstEv = content.schedule.events[0];
-        const target = firstEv ? targetFromEvent(firstEv) : { url: map.directionsUrl };
-        if (map.directionsUrl) target.url = map.directionsUrl;
+        const target = firstEv ? targetFromEvent(firstEv) : {};
+        if (map.directionsQuery?.trim()) {
+          target.query = map.directionsQuery.trim();
+          target.url = undefined; // manual text replaces the event's pasted link too
+        }
+        if (map.directionsUrl?.trim()) target.url = map.directionsUrl.trim();
         if (!hasMapTarget(target)) return null;
         return (
           <div className="mt-6 text-center">

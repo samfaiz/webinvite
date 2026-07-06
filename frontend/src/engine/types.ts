@@ -218,6 +218,9 @@ export interface InvitationContent {
   };
   map: {
     points: MapPoint[];
+    /** manual location text for the Get Directions button (overrides the
+     *  first event's venue; a pasted directionsUrl overrides both) */
+    directionsQuery?: string;
     directionsUrl?: string;
     directionsLabel?: string;
   };

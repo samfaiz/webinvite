@@ -846,6 +846,35 @@ export function RsvpFields({ draft, update }: PanelProps) {
           </div>
         ))}
       </div>
+
+      {/* the ♥ Get Directions button under the RSVP form */}
+      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Get Directions button</p>
+        <p className="mb-2 mt-0.5 text-[11px] text-slate-400">
+          Where the button under the RSVP takes guests. Leave empty to use your first event&apos;s venue automatically.
+        </p>
+        <Field label="Location (name or address)">
+          <TextInput
+            value={c.map.directionsQuery ?? ""}
+            placeholder="e.g. Hajar Ballroom, Salalah, Oman"
+            onChange={(e) => update((d) => { d.content.map.directionsQuery = e.target.value || undefined; })}
+          />
+        </Field>
+        <Field label="Or paste a map link" hint="A pasted link overrides the location text — use it when the venue is hard to find by name.">
+          <TextInput
+            value={c.map.directionsUrl ?? ""}
+            placeholder="https://maps.app.goo.gl/…"
+            onChange={(e) => update((d) => { d.content.map.directionsUrl = e.target.value || undefined; })}
+          />
+        </Field>
+        <Field label="Button label">
+          <TextInput
+            value={c.map.directionsLabel ?? ""}
+            placeholder="Get Directions"
+            onChange={(e) => update((d) => { d.content.map.directionsLabel = e.target.value || undefined; })}
+          />
+        </Field>
+      </div>
     </div>
   );
 }

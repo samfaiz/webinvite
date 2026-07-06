@@ -113,7 +113,6 @@ export const sampleSurajLibina: InvitationContent = {
       { label: "St. Joseph's Church", address: "Pushpagiri, Kottayam" },
       { label: "Backwaters Ripples", address: "Kumarakom" },
     ],
-    directionsUrl: "https://maps.google.com/?q=St+Josephs+Church+Pushpagiri+Kottayam",
     directionsLabel: "Get Directions",
   },
   music: {
