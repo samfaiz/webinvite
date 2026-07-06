@@ -1335,8 +1335,20 @@ function SharePreviewFields({ draft, update }: PanelProps) {
       : "Your Names";
   const storyPhotos = (c.story?.items ?? []).map((i) => i.photo).filter(Boolean) as string[];
   const effectiveImage = share.image || c.guestEmails?.photo || storyPhotos[0] || "";
+  const [photoEditor, setPhotoEditor] = useState<string | null>(null);
+  const [photoErr, setPhotoErr] = useState("");
   const setShare = (key: "title" | "description", v: string) =>
     update((d) => { (d.content.share ??= {})[key] = v || undefined; });
+
+  const pickUpload = async (file?: File) => {
+    if (!file) return;
+    setPhotoErr("");
+    try {
+      setPhotoEditor(await fileToScaledDataUrl(file, 1600, 0.95));
+    } catch (e) {
+      setPhotoErr((e as Error).message);
+    }
+  };
 
   return (
     <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
@@ -1381,6 +1393,13 @@ function SharePreviewFields({ draft, update }: PanelProps) {
               <img src={p} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
+          <label
+            className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded border border-dashed border-slate-300 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+            title="Upload a photo"
+          >
+            +
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => { pickUpload(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
           {share.image ? (
             <button
               type="button"
@@ -1392,9 +1411,25 @@ function SharePreviewFields({ draft, update }: PanelProps) {
           ) : null}
         </div>
       </div>
+      {photoErr ? <p className="mt-1.5 text-[11px] text-rose-600">{photoErr}</p> : null}
       <p className="mt-1.5 text-[10px] text-slate-400">
-        Defaults to your guest-email photo or first story photo. Shows after you publish (messaging apps need a public photo URL).
+        Defaults to your guest-email photo or first story photo. Landscape (roughly 1200×630) looks best in chat apps.
+        Shows after you publish (messaging apps need a public photo URL).
       </p>
+
+      {photoEditor ? (
+        <ImageEditorModal
+          src={photoEditor}
+          title="Edit share image"
+          mime="image/jpeg"
+          maxDim={1280}
+          onApply={(url) => {
+            update((d) => { (d.content.share ??= {}).image = url; });
+            setPhotoEditor(null);
+          }}
+          onClose={() => setPhotoEditor(null)}
+        />
+      ) : null}
     </div>
   );
 }
