@@ -17,7 +17,7 @@ export class ExportController {
     @Param('id') id: string,
     @Res() res: Response,
   ) {
-    const { buffer, filename } = await this.svc.download(id, user.id);
+    const { buffer, filename } = await this.svc.download(id, user.id, user.role === 'admin');
     res.set({
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -29,6 +29,6 @@ export class ExportController {
   /** Email the RSVP attendee list (Excel attached) to the invitation owner. */
   @Post(':id/send-export')
   send(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.emailById(id, user.id);
+    return this.svc.emailById(id, user.id, user.role === 'admin');
   }
 }

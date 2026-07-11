@@ -24,7 +24,9 @@ export function RSVPForm({
   content: InvitationContent;
   live?: boolean;
 }) {
-  const { rsvp, couple, map } = content;
+  const { rsvp, couple } = content;
+  // tolerate invitations saved without a map block (API-created / legacy data)
+  const map = content.map ?? { points: [] };
   const { editing } = usePreview();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

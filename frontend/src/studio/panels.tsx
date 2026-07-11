@@ -889,23 +889,23 @@ export function RsvpFields({ draft, update }: PanelProps) {
         </p>
         <Field label="Location (name or address)">
           <TextInput
-            value={c.map.directionsQuery ?? ""}
+            value={c.map?.directionsQuery ?? ""}
             placeholder="e.g. Hajar Ballroom, Salalah, Oman"
-            onChange={(e) => update((d) => { d.content.map.directionsQuery = e.target.value || undefined; })}
+            onChange={(e) => update((d) => { (d.content.map ??= { points: [] }).directionsQuery = e.target.value || undefined; })}
           />
         </Field>
         <Field label="Or paste a map link" hint="A pasted link overrides the location text — use it when the venue is hard to find by name.">
           <TextInput
-            value={c.map.directionsUrl ?? ""}
+            value={c.map?.directionsUrl ?? ""}
             placeholder="https://maps.app.goo.gl/…"
-            onChange={(e) => update((d) => { d.content.map.directionsUrl = e.target.value || undefined; })}
+            onChange={(e) => update((d) => { (d.content.map ??= { points: [] }).directionsUrl = e.target.value || undefined; })}
           />
         </Field>
         <Field label="Button label">
           <TextInput
-            value={c.map.directionsLabel ?? ""}
+            value={c.map?.directionsLabel ?? ""}
             placeholder="Get Directions"
-            onChange={(e) => update((d) => { d.content.map.directionsLabel = e.target.value || undefined; })}
+            onChange={(e) => update((d) => { (d.content.map ??= { points: [] }).directionsLabel = e.target.value || undefined; })}
           />
         </Field>
       </div>

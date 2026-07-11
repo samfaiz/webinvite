@@ -53,11 +53,37 @@ export class InvitationsService {
     }
   }
 
-  private async ensureOwner(userId: string, id: string): Promise<Invitation> {
+  /** The invitation, when `userId` owns it — or for platform admins, any
+   *  invitation (`asAdmin` comes from the verified JWT role). */
+  private async ensureOwner(userId: string, id: string, asAdmin = false): Promise<Invitation> {
     const inv = await this.prisma.invitation.findUnique({ where: { id } });
-    if (!inv || inv.userId !== userId)
+    if (!inv || (!asAdmin && inv.userId !== userId))
       throw new NotFoundException('Invitation not found');
     return inv;
+  }
+
+  /** Admin: every couple's invitation, newest first. */
+  async listAll() {
+    const rows = await this.prisma.invitation.findMany({
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        user: { select: { email: true, name: true } },
+        _count: { select: { rsvps: true } },
+      },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      status: r.status,
+      templateId: r.templateId,
+      names: this.names(r.contentJson),
+      ownerEmail: r.user?.email ?? '',
+      ownerName: r.user?.name ?? '',
+      eventDate: r.eventDate,
+      views: r.views,
+      rsvpCount: r._count.rsvps,
+      updatedAt: r.updatedAt,
+    }));
   }
 
   async create(userId: string, dto: SaveInvitationDto) {
@@ -99,8 +125,8 @@ export class InvitationsService {
     return slug;
   }
 
-  async update(userId: string, id: string, dto: SaveInvitationDto) {
-    const existing = await this.ensureOwner(userId, id);
+  async update(userId: string, id: string, dto: SaveInvitationDto, asAdmin = false) {
+    const existing = await this.ensureOwner(userId, id, asAdmin);
     // Once published, the DB slug and the content's slug must stay in lockstep
     // (the RSVP form posts to the content slug). A different, valid slug typed
     // in the editor is a deliberate rename — move both together. Anything
@@ -153,12 +179,12 @@ export class InvitationsService {
     }));
   }
 
-  async getOwned(userId: string, id: string) {
-    return this.full(await this.ensureOwner(userId, id));
+  async getOwned(userId: string, id: string, asAdmin = false) {
+    return this.full(await this.ensureOwner(userId, id, asAdmin));
   }
 
-  async publish(userId: string, id: string) {
-    const inv = await this.ensureOwner(userId, id);
+  async publish(userId: string, id: string, asAdmin = false) {
+    const inv = await this.ensureOwner(userId, id, asAdmin);
     const content = JSON.parse(inv.contentJson);
     const base = this.sanitizeSlug(String(content?.meta?.slug || '')) || 'invite';
     const slug = await this.uniqueSlug(base, id);
@@ -179,8 +205,8 @@ export class InvitationsService {
     return this.full(updated);
   }
 
-  async unpublish(userId: string, id: string) {
-    await this.ensureOwner(userId, id);
+  async unpublish(userId: string, id: string, asAdmin = false) {
+    await this.ensureOwner(userId, id, asAdmin);
     const inv = await this.prisma.invitation.update({
       where: { id },
       data: { status: 'draft' },
@@ -188,8 +214,8 @@ export class InvitationsService {
     return this.full(inv);
   }
 
-  async remove(userId: string, id: string) {
-    await this.ensureOwner(userId, id);
+  async remove(userId: string, id: string, asAdmin = false) {
+    await this.ensureOwner(userId, id, asAdmin);
     await this.prisma.invitation.delete({ where: { id } });
     return { ok: true };
   }

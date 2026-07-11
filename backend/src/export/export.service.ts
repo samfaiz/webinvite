@@ -30,12 +30,12 @@ export class ExportService {
     }
   }
 
-  private async ownedOrThrow(id: string, userId: string): Promise<InvWithUser> {
+  private async ownedOrThrow(id: string, userId: string, asAdmin = false): Promise<InvWithUser> {
     const inv = await this.prisma.invitation.findUnique({
       where: { id },
       include: { user: true },
     });
-    if (!inv || inv.userId !== userId)
+    if (!inv || (!asAdmin && inv.userId !== userId))
       throw new NotFoundException('Invitation not found');
     return inv;
   }
@@ -51,17 +51,17 @@ export class ExportService {
     return { buffer, filename, title, count: rsvps.length };
   }
 
-  /** Owner-authenticated download. */
-  async download(id: string, userId: string) {
-    const inv = await this.ownedOrThrow(id, userId);
+  /** Owner-authenticated download (admins can export any invitation). */
+  async download(id: string, userId: string, asAdmin = false) {
+    const inv = await this.ownedOrThrow(id, userId, asAdmin);
     return this.buildXlsx(inv);
   }
 
   /** Email the export. If userId is given, ownership is enforced (manual send);
    *  without it (system / cron) it sends for the given invitation. */
-  async emailById(id: string, userId?: string) {
+  async emailById(id: string, userId?: string, asAdmin = false) {
     const inv = userId
-      ? await this.ownedOrThrow(id, userId)
+      ? await this.ownedOrThrow(id, userId, asAdmin)
       : await this.prisma.invitation.findUnique({
           where: { id },
           include: { user: true },

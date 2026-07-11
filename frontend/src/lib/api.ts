@@ -117,6 +117,24 @@ export const api = {
   listDesigns: () => request<any[]>("/designs"),
   getDesign: (id: string) => request<any>(`/designs/${id}`),
 
+  // admin — all couples' invitations
+  adminListInvitations: () =>
+    request<
+      {
+        id: string;
+        slug: string | null;
+        status: string;
+        templateId: string;
+        names: string;
+        ownerEmail: string;
+        ownerName: string;
+        eventDate: string | null;
+        views: number;
+        rsvpCount: number;
+        updatedAt: string;
+      }[]
+    >("/admin/invitations", {}, true),
+
   // designs (admin)
   adminListDesigns: () => request<any[]>("/admin/designs", {}, true),
   createDesign: (body: any) =>

@@ -10,13 +10,25 @@ import {
 } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { SaveInvitationDto } from './invitations.dto';
-import { JwtAuthGuard } from '../auth/guards';
-import { CurrentUser } from '../auth/auth.decorators';
+import { JwtAuthGuard, RolesGuard } from '../auth/guards';
+import { CurrentUser, Roles } from '../auth/auth.decorators';
 import type { AuthUser } from '../auth/auth.decorators';
+
+const isAdmin = (u: AuthUser) => u.role === 'admin';
 
 @Controller()
 export class InvitationsController {
   constructor(private svc: InvitationsService) {}
+
+  /* ----------------------------- admin ----------------------------- */
+
+  /** Every couple's invitation — powers the admin "Invitations" screen. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin/invitations')
+  listAll() {
+    return this.svc.listAll();
+  }
 
   /* ----------------------------- owner ----------------------------- */
 
@@ -35,7 +47,7 @@ export class InvitationsController {
   @UseGuards(JwtAuthGuard)
   @Get('invitations/:id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.getOwned(user.id, id);
+    return this.svc.getOwned(user.id, id, isAdmin(user));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -45,25 +57,25 @@ export class InvitationsController {
     @Param('id') id: string,
     @Body() dto: SaveInvitationDto,
   ) {
-    return this.svc.update(user.id, id, dto);
+    return this.svc.update(user.id, id, dto, isAdmin(user));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('invitations/:id/publish')
   publish(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.publish(user.id, id);
+    return this.svc.publish(user.id, id, isAdmin(user));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('invitations/:id/unpublish')
   unpublish(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.unpublish(user.id, id);
+    return this.svc.unpublish(user.id, id, isAdmin(user));
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('invitations/:id')
   remove(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.remove(user.id, id);
+    return this.svc.remove(user.id, id, isAdmin(user));
   }
 
   /* ----------------------------- public ----------------------------- */

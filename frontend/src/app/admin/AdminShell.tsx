@@ -110,6 +110,12 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Couples",
+    items: [
+      { href: "/admin/invitations", label: "Invitations", icon: (c) => icon.heart(c) },
+    ],
+  },
+  {
     title: "Content",
     items: [
       { href: "/admin/content", label: "Blog posts", icon: (c) => icon.file(c), crumb: "Blog posts" },

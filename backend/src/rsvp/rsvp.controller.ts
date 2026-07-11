@@ -66,6 +66,6 @@ export class RsvpController {
   @UseGuards(JwtAuthGuard)
   @Get('invitations/:id/rsvps')
   list(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.svc.listForOwner(user.id, id);
+    return this.svc.listForOwner(user.id, id, user.role === 'admin');
   }
 }

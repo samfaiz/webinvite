@@ -163,11 +163,11 @@ export class RsvpService {
     });
   }
 
-  async listForOwner(userId: string, invitationId: string) {
+  async listForOwner(userId: string, invitationId: string, asAdmin = false) {
     const inv = await this.prisma.invitation.findUnique({
       where: { id: invitationId },
     });
-    if (!inv || inv.userId !== userId)
+    if (!inv || (!asAdmin && inv.userId !== userId))
       throw new NotFoundException('Invitation not found');
 
     const rsvps = await this.prisma.rsvp.findMany({
