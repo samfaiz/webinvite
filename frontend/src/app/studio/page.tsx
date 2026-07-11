@@ -219,13 +219,17 @@ export default function StudioPage() {
     try {
       const flushed = await flushMedia();
       if (serverId) {
-        await api.updateInvitation(serverId, buildBody(flushed));
+        const saved = await api.updateInvitation(serverId, buildBody(flushed));
+        // reflect the canonical slug (renames get uniquified server-side)
+        const canonical = saved?.content?.meta?.slug;
+        if (canonical) update((d) => { d.content.meta.slug = canonical; });
+        setMsg(saved?.slug ? `Saved ✓ — live at ${window.location.origin}/i/${saved.slug}` : "Saved to your account ✓");
       } else {
         const inv = await api.createInvitation(buildBody(flushed));
         setServerId(inv.id);
         window.history.replaceState(null, "", `/studio?id=${inv.id}`);
+        setMsg("Saved to your account ✓");
       }
-      setMsg("Saved to your account ✓");
     } catch (e) {
       setMsg((e as Error).message);
     } finally {
@@ -249,6 +253,8 @@ export default function StudioPage() {
         window.history.replaceState(null, "", `/studio?id=${id}`);
       }
       const pub = await api.publishInvitation(id!);
+      const canonical = pub?.content?.meta?.slug;
+      if (canonical) update((d) => { d.content.meta.slug = canonical; });
       setMsg(`Published → ${window.location.origin}/i/${pub.slug}`);
     } catch (e) {
       setMsg((e as Error).message);

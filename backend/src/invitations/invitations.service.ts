@@ -78,14 +78,42 @@ export class InvitationsService {
     return this.full(inv);
   }
 
+  /** URL-safe slug from free text ('' when nothing usable survives). */
+  private sanitizeSlug(raw: string): string {
+    return String(raw || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /** First free slug starting from `base` ("-2", "-3", … on collision). */
+  private async uniqueSlug(base: string, excludeId: string): Promise<string> {
+    let slug = base;
+    let n = 1;
+    while (
+      await this.prisma.invitation.findFirst({ where: { slug, NOT: { id: excludeId } } })
+    ) {
+      n += 1;
+      slug = `${base}-${n}`;
+    }
+    return slug;
+  }
+
   async update(userId: string, id: string, dto: SaveInvitationDto) {
     const existing = await this.ensureOwner(userId, id);
-    // the assigned slug is authoritative once published — never let a stale
-    // meta.slug from the editor draft overwrite it (the RSVP form posts to
-    // meta.slug, so drift would send RSVPs to a different invitation)
-    const content = dto.content as { meta?: Record<string, unknown> };
+    // Once published, the DB slug and the content's slug must stay in lockstep
+    // (the RSVP form posts to the content slug). A different, valid slug typed
+    // in the editor is a deliberate rename — move both together. Anything
+    // else (unchanged, empty, unsanitizable) keeps the assigned slug, which
+    // protects against stale drafts redirecting RSVPs.
+    const content = dto.content as { meta?: { slug?: unknown } };
+    let renamedSlug: string | undefined;
     if (existing.slug && content && typeof content === 'object') {
-      content.meta = { ...(content.meta || {}), slug: existing.slug };
+      const requested = this.sanitizeSlug(String(content.meta?.slug ?? ''));
+      if (requested && requested !== existing.slug) {
+        renamedSlug = await this.uniqueSlug(requested, id);
+      }
+      content.meta = { ...(content.meta || {}), slug: renamedSlug ?? existing.slug };
     }
     const { eventDate, expiryDate } = this.derive(dto.content);
     const inv = await this.prisma.invitation.update({
@@ -99,6 +127,7 @@ export class InvitationsService {
         ownerEmail: dto.ownerEmail,
         eventDate,
         expiryDate,
+        ...(renamedSlug ? { slug: renamedSlug } : {}),
       },
     });
     return this.full(inv);
@@ -131,18 +160,8 @@ export class InvitationsService {
   async publish(userId: string, id: string) {
     const inv = await this.ensureOwner(userId, id);
     const content = JSON.parse(inv.contentJson);
-    const base =
-      String(content?.meta?.slug || 'invite')
-        .toLowerCase()
-        .replace(/[^a-z0-9-]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'invite';
-
-    let slug = base;
-    let n = 1;
-    while (await this.prisma.invitation.findFirst({ where: { slug, NOT: { id } } })) {
-      n += 1;
-      slug = `${base}-${n}`;
-    }
+    const base = this.sanitizeSlug(String(content?.meta?.slug || '')) || 'invite';
+    const slug = await this.uniqueSlug(base, id);
 
     content.meta = { ...(content.meta || {}), slug };
     const { eventDate, expiryDate } = this.derive(content);
