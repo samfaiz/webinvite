@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/comm
 import { AdminService } from './admin.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/auth.decorators';
-import { MailSettingsDto, TestMailDto } from '../settings/settings.dto';
+import { MailSettingsDto, TestMailDto, UserPermissionsDto } from '../settings/settings.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
@@ -30,6 +30,12 @@ export class AdminController {
   @Post('users/:id/reset-password')
   resetPassword(@Param('id') id: string, @Body() dto: { password?: string }) {
     return this.svc.resetUserPassword(id, dto?.password);
+  }
+
+  /** Toggle per-user feature permissions, e.g. `{ canDuplicate: true }`. */
+  @Put('users/:id/permissions')
+  setPermissions(@Param('id') id: string, @Body() dto: UserPermissionsDto) {
+    return this.svc.setUserPermissions(id, dto);
   }
 
   /* outgoing-email configuration */

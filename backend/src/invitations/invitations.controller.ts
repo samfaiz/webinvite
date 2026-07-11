@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { SaveInvitationDto } from './invitations.dto';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { CurrentUser, Roles } from '../auth/auth.decorators';
+import { JwtAuthGuard } from '../auth/guards';
+import { CurrentUser } from '../auth/auth.decorators';
 import type { AuthUser } from '../auth/auth.decorators';
 
 const isAdmin = (u: AuthUser) => u.role === 'admin';
@@ -19,16 +19,6 @@ const isAdmin = (u: AuthUser) => u.role === 'admin';
 @Controller()
 export class InvitationsController {
   constructor(private svc: InvitationsService) {}
-
-  /* ----------------------------- admin ----------------------------- */
-
-  /** Every couple's invitation — powers the admin "Invitations" screen. */
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @Get('admin/invitations')
-  listAll() {
-    return this.svc.listAll();
-  }
 
   /* ----------------------------- owner ----------------------------- */
 
@@ -58,6 +48,12 @@ export class InvitationsController {
     @Body() dto: SaveInvitationDto,
   ) {
     return this.svc.update(user.id, id, dto, isAdmin(user));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('invitations/:id/duplicate')
+  duplicate(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.svc.duplicate(user.id, id, isAdmin(user));
   }
 
   @UseGuards(JwtAuthGuard)

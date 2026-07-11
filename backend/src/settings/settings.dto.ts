@@ -15,3 +15,8 @@ export class MailSettingsDto {
 export class TestMailDto {
   @IsString() to!: string;
 }
+
+/** Per-user feature permissions an admin can toggle. */
+export class UserPermissionsDto {
+  @IsOptional() @IsBoolean() canDuplicate?: boolean;
+}

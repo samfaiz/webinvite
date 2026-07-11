@@ -182,6 +182,15 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Link href={`/studio?id=${inv.id}`} className="rounded-full border border-[rgba(90,35,56,0.2)] px-3 py-1.5 text-[#5a2338] hover:bg-[#fdf4ec]">Edit</Link>
+                    {user.canDuplicate ? (
+                      <button
+                        onClick={() => act(() => api.duplicateInvitation(inv.id))}
+                        title="Copy this invitation's content into a new draft"
+                        className="rounded-full border border-[rgba(90,35,56,0.2)] px-3 py-1.5 text-[#5a2338] hover:bg-[#fdf4ec]"
+                      >
+                        Duplicate
+                      </button>
+                    ) : null}
                     {inv.status === "published" && inv.slug ? (
                       <a href={`/i/${inv.slug}`} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(90,35,56,0.2)] px-3 py-1.5 text-[#5a2338] hover:bg-[#fdf4ec]">View live ↗</a>
                     ) : null}

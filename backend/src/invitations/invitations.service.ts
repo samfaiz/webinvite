@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   GoneException,
   Injectable,
   NotFoundException,
@@ -62,28 +63,30 @@ export class InvitationsService {
     return inv;
   }
 
-  /** Admin: every couple's invitation, newest first. */
-  async listAll() {
-    const rows = await this.prisma.invitation.findMany({
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        user: { select: { email: true, name: true } },
-        _count: { select: { rsvps: true } },
+  /** Copy an invitation into a fresh draft (no slug/views/RSVPs). Gated by
+   *  the admin-granted per-user `canDuplicate` permission; admins may always
+   *  duplicate (the copy stays owned by the original couple). */
+  async duplicate(userId: string, id: string, asAdmin = false) {
+    const inv = await this.ensureOwner(userId, id, asAdmin);
+    if (!asAdmin) {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user?.canDuplicate)
+        throw new ForbiddenException('Duplicating invitations is not enabled for your account');
+    }
+    const copy = await this.prisma.invitation.create({
+      data: {
+        userId: inv.userId,
+        templateId: inv.templateId,
+        themeId: inv.themeId,
+        motifId: inv.motifId,
+        themeJson: inv.themeJson,
+        contentJson: inv.contentJson,
+        ownerEmail: inv.ownerEmail,
+        eventDate: inv.eventDate,
+        expiryDate: inv.expiryDate,
       },
     });
-    return rows.map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      status: r.status,
-      templateId: r.templateId,
-      names: this.names(r.contentJson),
-      ownerEmail: r.user?.email ?? '',
-      ownerName: r.user?.name ?? '',
-      eventDate: r.eventDate,
-      views: r.views,
-      rsvpCount: r._count.rsvps,
-      updatedAt: r.updatedAt,
-    }));
+    return this.full(copy);
   }
 
   async create(userId: string, dto: SaveInvitationDto) {

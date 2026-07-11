@@ -158,6 +158,7 @@ export default function AdminPage() {
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Role</th>
                 <th className="px-5 py-3">Invitations</th>
+                <th className="px-5 py-3">Can duplicate</th>
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -170,6 +171,27 @@ export default function AdminPage() {
                     <RolePill role={u.role} />
                   </td>
                   <td className="px-5 py-3 text-[#5a2338]">{u.invitations}</td>
+                  <td className="px-5 py-3">
+                    {/* per-user permission: duplicate own invitations (off by default) */}
+                    <button
+                      onClick={async () => {
+                        try {
+                          const r = await api.setUserPermissions(u.id, { canDuplicate: !u.canDuplicate });
+                          setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, canDuplicate: r.canDuplicate } : x)));
+                        } catch (e) {
+                          setError((e as Error).message);
+                        }
+                      }}
+                      title={u.canDuplicate ? "Click to revoke duplicating" : "Click to allow duplicating"}
+                      className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+                        u.canDuplicate
+                          ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                      }`}
+                    >
+                      {u.canDuplicate ? "Allowed ✓" : "Off"}
+                    </button>
+                  </td>
                   <td className="px-5 py-3 text-right">
                     <button
                       onClick={() => setResetUser({ id: u.id, email: u.email })}
@@ -182,7 +204,7 @@ export default function AdminPage() {
               ))}
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
+                  <td colSpan={6} className="px-5 py-8 text-center text-[rgba(90,35,56,0.45)]">
                     No users yet.
                   </td>
                 </tr>

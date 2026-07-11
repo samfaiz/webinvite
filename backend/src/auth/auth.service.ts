@@ -26,6 +26,7 @@ export class AuthService {
       email: user.email,
       name: user.name,
       role: user.role,
+      canDuplicate: user.canDuplicate,
       createdAt: user.createdAt,
     };
   }

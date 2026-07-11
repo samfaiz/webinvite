@@ -6,7 +6,18 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
-type Row = Awaited<ReturnType<typeof api.adminListInvitations>>[number];
+type Row = {
+  id: string;
+  slug: string | null;
+  status: string;
+  templateId: string;
+  names: string;
+  ownerEmail: string;
+  ownerName: string;
+  views: number;
+  rsvpCount: number;
+  updatedAt: string;
+};
 
 /** Admin — every couple's invitation, with full edit access via the Studio. */
 export default function AdminInvitationsPage() {
@@ -20,7 +31,7 @@ export default function AdminInvitationsPage() {
     if (loading) return;
     if (!user) return void router.push("/login");
     if (user.role !== "admin") return void router.push("/dashboard");
-    api.adminListInvitations().then(setRows).catch((e) => setMsg((e as Error).message));
+    api.adminInvitations().then(setRows).catch((e) => setMsg((e as Error).message));
   }, [loading, user, router]);
 
   const filtered = useMemo(() => {

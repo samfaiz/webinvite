@@ -32,9 +32,21 @@ export class AdminService {
     };
   }
 
+  /** Couple names out of an invitation's content JSON. */
+  private coupleNames(contentJson: string): string {
+    try {
+      const c = JSON.parse(contentJson)?.couple;
+      return c?.partner1?.name && c?.partner2?.name
+        ? `${c.partner1.name} & ${c.partner2.name}`
+        : 'Untitled invitation';
+    } catch {
+      return 'Untitled invitation';
+    }
+  }
+
   async listInvitations() {
     const rows = await this.prisma.invitation.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
       include: {
         user: { select: { email: true, name: true } },
         _count: { select: { rsvps: true } },
@@ -45,11 +57,15 @@ export class AdminService {
       slug: r.slug,
       status: r.status,
       templateId: r.templateId,
+      names: this.coupleNames(r.contentJson),
       owner: r.user.email,
+      ownerEmail: r.user.email,
+      ownerName: r.user.name ?? '',
       views: r.views,
       rsvpCount: r._count.rsvps,
       eventDate: r.eventDate,
       createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
     }));
   }
 
@@ -63,9 +79,23 @@ export class AdminService {
       email: u.email,
       name: u.name,
       role: u.role,
+      canDuplicate: u.canDuplicate,
       invitations: u._count.invitations,
       createdAt: u.createdAt,
     }));
+  }
+
+  /** Admin toggles per-user feature permissions (currently: duplicate). */
+  async setUserPermissions(userId: string, perms: { canDuplicate?: boolean }) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(perms.canDuplicate === undefined ? {} : { canDuplicate: perms.canDuplicate }),
+      },
+    });
+    return { id: updated.id, email: updated.email, canDuplicate: updated.canDuplicate };
   }
 
   /** Admin resets a user's password. If no password is supplied a secure

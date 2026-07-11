@@ -21,6 +21,8 @@ model User {
   name         String?
   passwordHash String
   role         String       @default("user") // "user" | "admin"
+  /// admin-granted: may duplicate their own invitations (off by default)
+  canDuplicate Boolean      @default(false)
   createdAt    DateTime     @default(now())
   invitations  Invitation[]
 }

@@ -44,6 +44,8 @@ export interface AuthUser {
   email: string;
   name?: string | null;
   role: string;
+  /** admin-granted: may duplicate their own invitations */
+  canDuplicate?: boolean;
 }
 
 export const api = {
@@ -117,23 +119,9 @@ export const api = {
   listDesigns: () => request<any[]>("/designs"),
   getDesign: (id: string) => request<any>(`/designs/${id}`),
 
-  // admin — all couples' invitations
-  adminListInvitations: () =>
-    request<
-      {
-        id: string;
-        slug: string | null;
-        status: string;
-        templateId: string;
-        names: string;
-        ownerEmail: string;
-        ownerName: string;
-        eventDate: string | null;
-        views: number;
-        rsvpCount: number;
-        updatedAt: string;
-      }[]
-    >("/admin/invitations", {}, true),
+  // duplicate an invitation into a new draft (needs the admin-granted permission)
+  duplicateInvitation: (id: string) =>
+    request<any>(`/invitations/${id}/duplicate`, { method: "POST" }, true),
 
   // designs (admin)
   adminListDesigns: () => request<any[]>("/admin/designs", {}, true),
@@ -244,6 +232,12 @@ export const api = {
     request<{ ok: boolean; email: string; password?: string }>(
       `/admin/users/${id}/reset-password`,
       { method: "POST", body: JSON.stringify({ password }) },
+      true,
+    ),
+  setUserPermissions: (id: string, perms: { canDuplicate?: boolean }) =>
+    request<{ id: string; email: string; canDuplicate: boolean }>(
+      `/admin/users/${id}/permissions`,
+      { method: "PUT", body: JSON.stringify(perms) },
       true,
     ),
 
