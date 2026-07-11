@@ -147,6 +147,9 @@ export interface InvitationContent {
   /** order of the middle sections (the opening scene stays first). Defaults to
    *  families → story → schedule → rsvp when unset. */
   sectionOrder?: SectionKey[];
+  /** middle sections the couple removed — they keep their content but don't
+   *  render on the invitation until re-enabled. */
+  hiddenSections?: SectionKey[];
   /** per-block nudge (px), keyed by block id or `edit:<data-edit path>` — lets
    *  couples drag blocks and individual text fields anywhere within their
    *  section. Plain numbers are legacy vertical-only offsets. */
@@ -285,11 +288,13 @@ export type FrameKey = "hero" | "families" | "story" | "schedule" | "rsvp";
 export const DEFAULT_SECTION_ORDER: SectionKey[] = ["families", "story", "schedule", "rsvp"];
 
 /** A complete, valid section order: the saved order (dropping unknown keys) plus
- *  any missing sections appended — so every section always renders exactly once. */
-export function orderedSections(order?: SectionKey[]): SectionKey[] {
+ *  any missing sections appended — every section appears exactly once. Pass
+ *  `hidden` (content.hiddenSections) to drop sections the couple removed. */
+export function orderedSections(order?: SectionKey[], hidden?: SectionKey[]): SectionKey[] {
   const base = (order ?? []).filter((k) => DEFAULT_SECTION_ORDER.includes(k));
   const seen = new Set(base);
-  return [...base, ...DEFAULT_SECTION_ORDER.filter((k) => !seen.has(k))];
+  const all = [...base, ...DEFAULT_SECTION_ORDER.filter((k) => !seen.has(k))];
+  return hidden?.length ? all.filter((k) => !hidden.includes(k)) : all;
 }
 
 /** Resolve the background image for a section (per-section, else `all`). */

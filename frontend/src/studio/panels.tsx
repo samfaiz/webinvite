@@ -127,6 +127,34 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   rsvp: "RSVP",
 };
 
+/** Toggle a middle section on/off (content is kept, it just stops rendering). */
+export function toggleSection(d: Draft, key: SectionKey) {
+  const hidden = new Set(d.content.hiddenSections ?? []);
+  if (hidden.has(key)) hidden.delete(key);
+  else hidden.add(key);
+  d.content.hiddenSections = [...hidden];
+}
+
+/** Small "Shown / Hidden" pill for a section — used in group headers, the
+ *  section-order list and the create wizard. */
+export function SectionTogglePill({ draft, update, section }: PanelProps & { section: SectionKey }) {
+  const hidden = draft.content.hiddenSections?.includes(section) ?? false;
+  return (
+    <button
+      type="button"
+      title={hidden ? "Hidden — click to show this section" : "Shown — click to remove this section"}
+      onClick={() => update((d) => toggleSection(d, section))}
+      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+        hidden
+          ? "border-slate-300 bg-slate-100 text-slate-400"
+          : "border-emerald-200 bg-emerald-50 text-emerald-700"
+      }`}
+    >
+      {hidden ? "🚫 Hidden" : "👁 Shown"}
+    </button>
+  );
+}
+
 /** Drag-to-reorder the middle sections (opening scene always stays first). */
 export function SectionOrderFields({ draft, update }: PanelProps) {
   const order = orderedSections(draft.content.sectionOrder);
@@ -134,32 +162,38 @@ export function SectionOrderFields({ draft, update }: PanelProps) {
   return (
     <div>
       <p className="mb-2 text-[11px] text-slate-400">
-        Drag to reorder. The opening screen (couple &amp; save-the-date) always stays first.
+        Drag to reorder, or hide a section you don&apos;t need. The opening screen (couple &amp; save-the-date) always stays first.
       </p>
-      {order.map((key, i) => (
-        <div
-          key={key}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            const from = dragIndex.current;
-            dragIndex.current = null;
-            if (from == null || from === i) return;
-            update((d) => { d.content.sectionOrder = moveItem(orderedSections(d.content.sectionOrder), from, i); });
-          }}
-          className="mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2.5"
-        >
-          <span
-            draggable
-            onDragStart={() => { dragIndex.current = i; }}
-            onDragEnd={() => { dragIndex.current = null; }}
-            title="Drag to reorder"
-            className="cursor-grab select-none text-slate-400 active:cursor-grabbing hover:text-slate-600"
+      {order.map((key, i) => {
+        const isHidden = draft.content.hiddenSections?.includes(key) ?? false;
+        return (
+          <div
+            key={key}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              const from = dragIndex.current;
+              dragIndex.current = null;
+              if (from == null || from === i) return;
+              update((d) => { d.content.sectionOrder = moveItem(orderedSections(d.content.sectionOrder), from, i); });
+            }}
+            className={`mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2.5 ${isHidden ? "opacity-60" : ""}`}
           >
-            ⠿
-          </span>
-          <span className="text-sm font-medium text-slate-700">{i + 1}. {SECTION_LABELS[key]}</span>
-        </div>
-      ))}
+            <span
+              draggable
+              onDragStart={() => { dragIndex.current = i; }}
+              onDragEnd={() => { dragIndex.current = null; }}
+              title="Drag to reorder"
+              className="cursor-grab select-none text-slate-400 active:cursor-grabbing hover:text-slate-600"
+            >
+              ⠿
+            </span>
+            <span className={`min-w-0 flex-1 text-sm font-medium ${isHidden ? "text-slate-400 line-through" : "text-slate-700"}`}>
+              {i + 1}. {SECTION_LABELS[key]}
+            </span>
+            <SectionTogglePill draft={draft} update={update} section={key} />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1156,11 +1190,11 @@ export function ContentPanel({ draft, update }: PanelProps) {
     <div>
       <Group title="Envelope & Intro" frame="frame-couple" open><EnvelopeFields draft={draft} update={update} /></Group>
       <Group title="Couple" frame="frame-couple"><CoupleFields draft={draft} update={update} /></Group>
-      <Group title="Families" frame="frame-families"><FamilyFields draft={draft} update={update} /></Group>
+      <Group title="Families" frame="frame-families" action={<SectionTogglePill draft={draft} update={update} section="families" />}><FamilyFields draft={draft} update={update} /></Group>
       <Group title="Save the date" frame="frame-couple"><SaveDateFields draft={draft} update={update} /></Group>
-      <Group title="Our Story" frame="frame-story"><StoryFields draft={draft} update={update} /></Group>
-      <Group title="Schedule of Events" frame="frame-schedule"><ScheduleFields draft={draft} update={update} /></Group>
-      <Group title="RSVP" frame="frame-rsvp"><RsvpFields draft={draft} update={update} /></Group>
+      <Group title="Our Story" frame="frame-story" action={<SectionTogglePill draft={draft} update={update} section="story" />}><StoryFields draft={draft} update={update} /></Group>
+      <Group title="Schedule of Events" frame="frame-schedule" action={<SectionTogglePill draft={draft} update={update} section="schedule" />}><ScheduleFields draft={draft} update={update} /></Group>
+      <Group title="RSVP" frame="frame-rsvp" action={<SectionTogglePill draft={draft} update={update} section="rsvp" />}><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
     </div>

@@ -16,9 +16,11 @@ import {
   CoverFields,
   SettingsPanel,
   FormatPanel,
+  toggleSection,
   type PanelProps,
   type SelectedText,
 } from "@/studio/panels";
+import type { SectionKey } from "@/engine/types";
 import { getTheme } from "@/themes";
 import { getMotif } from "@/motifs";
 import { useAuth } from "@/lib/auth";
@@ -51,6 +53,14 @@ type Step = {
   frame: string;
   title: string;
   Comp: ((p: PanelProps) => React.ReactNode) | null;
+};
+
+/** wizard steps whose section can be removed from the invitation */
+const STEP_SECTION: Record<string, SectionKey> = {
+  families: "families",
+  story: "story",
+  schedule: "schedule",
+  rsvp: "rsvp",
 };
 
 const STEPS: Step[] = [
@@ -498,6 +508,22 @@ export default function CreateWizard() {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
+            {STEP_SECTION[current.id] ? (
+              <label className="mb-3 flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                <span>
+                  Include this section
+                  {draft.content.hiddenSections?.includes(STEP_SECTION[current.id]) ? (
+                    <span className="block text-[11px] text-slate-400">Hidden — it won&apos;t appear on your invitation.</span>
+                  ) : null}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={!draft.content.hiddenSections?.includes(STEP_SECTION[current.id])}
+                  onChange={() => update((d) => toggleSection(d, STEP_SECTION[current.id]))}
+                  className="h-4 w-4 shrink-0"
+                />
+              </label>
+            ) : null}
             {isFinish || !current.Comp ? (
               <Review draft={draft} user={user} msg={msg} publishedUrl={publishedUrl} />
             ) : (

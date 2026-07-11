@@ -107,12 +107,15 @@ export function Group({
   children,
   open = false,
   frame,
+  action,
 }: {
   title: string;
   children: ReactNode;
   open?: boolean;
   /** when set, opening this group scrolls the live preview to that section frame */
   frame?: string;
+  /** right-aligned control in the header (clicks don't toggle the group) */
+  action?: ReactNode;
 }) {
   return (
     <details
@@ -133,6 +136,17 @@ export function Group({
       className="mb-2 rounded-lg border border-slate-200 bg-slate-50/60"
     >
       <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-slate-700">
+        {action ? (
+          <span
+            className="float-right"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            {action}
+          </span>
+        ) : null}
         {title}
       </summary>
       <div className="px-3 pb-3 pt-1">{children}</div>

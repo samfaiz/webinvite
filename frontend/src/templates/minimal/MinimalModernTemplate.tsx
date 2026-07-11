@@ -68,10 +68,18 @@ export function MinimalModernTemplate({
               />
             </FrameBg>
           </FrameBg>
-          <FrameBg id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>
-          <FrameBg id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryGrid content={content} /></FrameBg>
-          <TimelineSchedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
-          <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>
+          {content.hiddenSections?.includes("families") ? null : (
+            <FrameBg id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>
+          )}
+          {content.hiddenSections?.includes("story") ? null : (
+            <FrameBg id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryGrid content={content} /></FrameBg>
+          )}
+          {content.hiddenSections?.includes("schedule") ? null : (
+            <TimelineSchedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
+          )}
+          {content.hiddenSections?.includes("rsvp") ? null : (
+            <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>
+          )}
 
           <footer className="flex min-h-svh snap-start flex-col items-center justify-center px-6 py-16 text-center">
             <p

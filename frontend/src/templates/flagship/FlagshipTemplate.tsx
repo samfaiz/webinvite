@@ -98,7 +98,7 @@ export function FlagshipTemplate({
         </FrameBg>
 
         {/* middle sections in the couple's chosen order */}
-        {orderedSections(content.sectionOrder).map((key) => {
+        {orderedSections(content.sectionOrder, content.hiddenSections).map((key) => {
           if (key === "families")
             return <FrameBg key={key} id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>;
           if (key === "story")
