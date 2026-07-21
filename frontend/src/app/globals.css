@@ -4,21 +4,21 @@
   /* Theme tokens are injected at runtime by <ThemeProvider>; these are fallbacks.
      Marketing / auth / dashboard chrome uses these directly — the warm palette
      below is the site's default look. Per-invitation themes override at runtime. */
-  --c-bg: #fff8f0;
+  --c-bg: #f7f9fc;
   --c-surface: #ffffff;
-  --c-primary: #d95f48;     /* coral — buttons, CTAs */
-  --c-primary-soft: #fbe0d8;/* coral tint — chip backgrounds, hero panels */
+  --c-primary: #2b3a67;     /* coral — buttons, CTAs */
+  --c-primary-soft: #e3eaf5;/* coral tint — chip backgrounds, hero panels */
   --c-on-primary: #ffffff;  /* text on --c-primary */
-  --c-secondary: #c9497c;   /* pink — accent 2 */
-  --c-accent: #e3a23c;      /* marigold — highlights */
-  --c-text: #5a2338;        /* wine — headings & body */
+  --c-secondary: #5c7bb0;   /* pink — accent 2 */
+  --c-accent: #b08d57;      /* marigold — highlights */
+  --c-text: #2b3a67;        /* wine — headings & body */
   --c-muted: #8a5f6c;       /* muted wine */
-  --c-grad-from: #fbe0d8;
+  --c-grad-from: #e3eaf5;
   --c-grad-to: #f9dce9;
 
   /* Additional brand tokens used by the landing page + shared chrome. */
   --c-wine-deep: #4a1c2e;
-  --c-cream-warm: #fdf1e2;
+  --c-cream-warm: #e8edf5;
   --c-cream-gold: #fbecc9;
   --c-plum: #7a5ba6;
   --c-forest: #5c8a5e;

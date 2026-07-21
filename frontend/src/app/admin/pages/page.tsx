@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import { api, type CmsDoc } from "@/lib/api";
 import { normalizeBlocks, type Block } from "@/cms/blocks";
 
 /**
- * `/admin/pages` — inventory of every marketing page (ContentDoc where
+ * `/admin/pages` â€” inventory of every marketing page (ContentDoc where
  * type === "page"). Hero eyebrow / heading / image are pulled out of the
  * first "hero" block if present; otherwise we fall back to excerpt/title/
  * coverImage. Row-order acts as "sort" for now (real ordering is a follow-up).
@@ -99,7 +99,7 @@ export default function AdminPagesPage() {
           `${auto ? "Auto-seeded" : "Seeded"} ${res.created.length} default page${res.created.length === 1 ? "" : "s"} (${res.created.join(", ")}).`,
         );
       } else if (!auto) {
-        setSeedInfo("All default pages already exist — nothing to add.");
+        setSeedInfo("All default pages already exist â€” nothing to add.");
       }
     } catch (e) {
       setErr((e as Error).message);
@@ -217,10 +217,10 @@ export default function AdminPagesPage() {
   if (loading || !user || user.role !== "admin") {
     return (
       <div
-        className="flex h-[80vh] items-center justify-center text-[rgba(90,35,56,0.5)]"
+        className="flex h-[80vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        Loading…
+        Loadingâ€¦
       </div>
     );
   }
@@ -230,15 +230,15 @@ export default function AdminPagesPage() {
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(90,35,56,0.55)]">
-            <Link href="/admin" className="hover:text-[#d95f48]">Admin</Link>
-            <span className="text-[rgba(90,35,56,0.3)]">›</span>
-            <span className="text-[rgba(90,35,56,0.75)]">Pages</span>
-            <span className="text-[rgba(90,35,56,0.3)]">›</span>
-            <span className="text-[rgba(90,35,56,0.55)]">List</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
+            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
+            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.75)]">Pages</span>
+            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.55)]">List</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#5a2338] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Pages
@@ -249,21 +249,21 @@ export default function AdminPagesPage() {
             onClick={() => seedNow(false)}
             disabled={busy}
             title="Recreate any missing default pages (Home, About, Pricing, Contact, FAQ, Help, Privacy, Terms)."
-            className="rounded-full border border-[rgba(90,35,56,0.2)] px-4 py-2.5 text-[12.5px] font-medium text-[#5a2338] transition-colors hover:border-[#c9497c] hover:text-[#c9497c] disabled:opacity-60"
+            className="rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2.5 text-[12.5px] font-medium text-[#2b3a67] transition-colors hover:border-[#5c7bb0] hover:text-[#5c7bb0] disabled:opacity-60"
           >
             Seed defaults
           </button>
           <button
             onClick={createNew}
             disabled={busy}
-            className="rounded-full bg-[#d95f48] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(217,95,72,0.3)] transition-colors hover:bg-[#c14e38] disabled:opacity-60"
+            className="rounded-full bg-[#2b3a67] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
           >
-            {busy ? "Working…" : "+ New page"}
+            {busy ? "Workingâ€¦" : "+ New page"}
           </button>
         </div>
       </div>
 
-      {err ? <p className="mt-4 text-sm text-[#c14e38]">{err}</p> : null}
+      {err ? <p className="mt-4 text-sm text-[#b3423a]">{err}</p> : null}
       {seedInfo ? (
         <p className="mt-4 rounded-lg border border-[rgba(92,138,94,0.3)] bg-[#eaf6ea] px-4 py-2 text-[13px] text-[#2f6b50]">
           {seedInfo}
@@ -271,11 +271,11 @@ export default function AdminPagesPage() {
       ) : null}
 
       {/* Toolbar */}
-      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(122,44,44,0.05)]">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
         <button
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          title={`Sort by title (${sortDir === "asc" ? "A→Z" : "Z→A"})`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(90,35,56,0.12)] text-[rgba(90,35,56,0.6)] transition-colors hover:border-[#d95f48] hover:text-[#d95f48]"
+          title={`Sort by title (${sortDir === "asc" ? "Aâ†’Z" : "Zâ†’A"})`}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,58,103,0.12)] text-[rgba(43,58,103,0.6)] transition-colors hover:border-[#2b3a67] hover:text-[#2b3a67]"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             {sortDir === "asc" ? <path d="M7 4v16M7 4l-3 3M7 4l3 3M14 6h6M14 12h4M14 18h2" /> : <path d="M7 20V4M7 20l-3-3M7 20l3-3M14 6h6M14 12h4M14 18h2" />}
@@ -284,23 +284,23 @@ export default function AdminPagesPage() {
 
         {selected.size > 0 ? (
           <div className="flex items-center gap-2 text-[12px]">
-            <span className="text-[rgba(90,35,56,0.65)]">{selected.size} selected</span>
+            <span className="text-[rgba(43,58,103,0.65)]">{selected.size} selected</span>
             <button onClick={() => bulkPublish(true)} className="rounded-full border border-emerald-200 px-3 py-1 text-emerald-700 hover:bg-emerald-50">Publish</button>
             <button onClick={() => bulkPublish(false)} className="rounded-full border border-amber-200 px-3 py-1 text-amber-700 hover:bg-amber-50">Unpublish</button>
-            <button onClick={bulkDelete} className="rounded-full border border-[rgba(217,95,72,0.4)] px-3 py-1 text-[#c14e38] hover:bg-[#fbe0d8]">Delete</button>
+            <button onClick={bulkDelete} className="rounded-full border border-[rgba(190,60,50,0.4)] px-3 py-1 text-[#b3423a] hover:bg-[#f9e8e6]">Delete</button>
           </div>
         ) : null}
 
         <div className="ml-auto flex items-center gap-2">
-          <label className="flex items-center gap-2 rounded-full border border-[rgba(90,35,56,0.12)] bg-[#fdf4ec] px-3 py-1.5">
-            <svg className="h-3.5 w-3.5 text-[rgba(90,35,56,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <label className="flex items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-[#eef2f8] px-3 py-1.5">
+            <svg className="h-3.5 w-3.5 text-[rgba(43,58,103,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
             </svg>
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search"
-              className="w-40 border-none bg-transparent text-[13px] text-[#5a2338] outline-none placeholder:text-[rgba(90,35,56,0.4)]"
+              className="w-40 border-none bg-transparent text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
             />
           </label>
 
@@ -308,7 +308,7 @@ export default function AdminPagesPage() {
             <button
               onClick={() => setShowCols((v) => !v)}
               title="Show / hide columns"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(90,35,56,0.12)] text-[rgba(90,35,56,0.6)] transition-colors hover:border-[#c9497c] hover:text-[#c9497c]"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,58,103,0.12)] text-[rgba(43,58,103,0.6)] transition-colors hover:border-[#5c7bb0] hover:text-[#5c7bb0]"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="4" height="16" rx="1" />
@@ -317,9 +317,9 @@ export default function AdminPagesPage() {
               </svg>
             </button>
             {showCols ? (
-              <div className="absolute right-0 top-10 z-10 w-52 rounded-xl border border-[rgba(201,73,124,0.2)] bg-white p-2 shadow-[0_20px_40px_rgba(122,44,44,0.15)]">
+              <div className="absolute right-0 top-10 z-10 w-52 rounded-xl border border-[rgba(111,138,184,0.2)] bg-white p-2 shadow-[0_20px_40px_rgba(43,58,103,0.15)]">
                 {COL_KEYS.map((k) => (
-                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] text-[#5a2338] hover:bg-[#fdf4ec]">
+                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] text-[#2b3a67] hover:bg-[#eef2f8]">
                     <input
                       type="checkbox"
                       checked={visible.has(k)}
@@ -331,7 +331,7 @@ export default function AdminPagesPage() {
                           return next;
                         })
                       }
-                      className="accent-[#d95f48]"
+                      className="accent-[#2b3a67]"
                     />
                     <span>{COL_LABELS[k]}</span>
                   </label>
@@ -343,16 +343,16 @@ export default function AdminPagesPage() {
       </div>
 
       {/* Table */}
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white shadow-[0_10px_30px_rgba(122,44,44,0.05)]">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
         <table className="w-full text-left text-[13.5px]">
-          <thead className="bg-[#fdf4ec] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(90,35,56,0.55)]">
+          <thead className="bg-[#eef2f8] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.55)]">
             <tr>
               <th className="w-8 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={allOnPageSelected}
                   onChange={toggleAllOnPage}
-                  className="accent-[#d95f48]"
+                  className="accent-[#2b3a67]"
                 />
               </th>
               {visible.has("key") ? <th className="px-4 py-3">Key</th> : null}
@@ -365,7 +365,7 @@ export default function AdminPagesPage() {
                 <th className="px-4 py-3">
                   <button
                     onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-                    className="inline-flex items-center gap-1 uppercase tracking-[0.14em] hover:text-[#c9497c]"
+                    className="inline-flex items-center gap-1 uppercase tracking-[0.14em] hover:text-[#5c7bb0]"
                   >
                     Sort
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -380,16 +380,16 @@ export default function AdminPagesPage() {
           <tbody>
             {paged === null ? (
               <tr>
-                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(90,35,56,0.45)]">
-                  Loading pages…
+                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.45)]">
+                  Loading pagesâ€¦
                 </td>
               </tr>
             ) : paged.length === 0 ? (
               <tr>
-                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(90,35,56,0.5)]">
+                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.5)]">
                   {rows && rows.length > 0
                     ? "No pages match your search."
-                    : "No pages yet. Click “+ New page” to create your first."}
+                    : "No pages yet. Click â€œ+ New pageâ€ to create your first."}
                 </td>
               </tr>
             ) : (
@@ -400,8 +400,8 @@ export default function AdminPagesPage() {
                   <tr
                     key={r.doc.id}
                     className={
-                      "border-t border-[rgba(90,35,56,0.06)] transition-colors " +
-                      (isSelected ? "bg-[#fbe0d8]/40" : "hover:bg-[#fdf4ec]/60")
+                      "border-t border-[rgba(43,58,103,0.06)] transition-colors " +
+                      (isSelected ? "bg-[#e3eaf5]/40" : "hover:bg-[#eef2f8]/60")
                     }
                   >
                     <td className="px-4 py-3 align-middle">
@@ -416,42 +416,42 @@ export default function AdminPagesPage() {
                             return next;
                           })
                         }
-                        className="accent-[#d95f48]"
+                        className="accent-[#2b3a67]"
                       />
                     </td>
                     {visible.has("key") ? (
                       <td className="px-4 py-3 align-middle">
-                        <span className="rounded-md border border-[rgba(90,35,56,0.15)] bg-[#fdf4ec] px-2 py-0.5 font-mono text-[11.5px] text-[rgba(90,35,56,0.75)]">
+                        <span className="rounded-md border border-[rgba(43,58,103,0.15)] bg-[#eef2f8] px-2 py-0.5 font-mono text-[11.5px] text-[rgba(43,58,103,0.75)]">
                           {r.doc.slug}
                         </span>
                       </td>
                     ) : null}
                     {visible.has("title") ? (
-                      <td className="px-4 py-3 align-middle font-medium text-[#5a2338]">
-                        <Link href={`/admin/pages/${r.doc.id}`} className="hover:text-[#d95f48] hover:underline">
+                      <td className="px-4 py-3 align-middle font-medium text-[#2b3a67]">
+                        <Link href={`/admin/pages/${r.doc.id}`} className="hover:text-[#2b3a67] hover:underline">
                           {r.doc.title || "Untitled"}
                         </Link>
                       </td>
                     ) : null}
                     {visible.has("eyebrow") ? (
-                      <td className="px-4 py-3 align-middle text-[rgba(90,35,56,0.72)]">
+                      <td className="px-4 py-3 align-middle text-[rgba(43,58,103,0.72)]">
                         <Truncate value={r.heroEyebrow} />
                       </td>
                     ) : null}
                     {visible.has("heading") ? (
-                      <td className="px-4 py-3 align-middle text-[#5a2338]">
+                      <td className="px-4 py-3 align-middle text-[#2b3a67]">
                         <Truncate value={r.heroHeading} />
                       </td>
                     ) : null}
                     {visible.has("hero") ? (
                       <td className="px-4 py-3 align-middle">
                         {r.heroImage ? (
-                          <span className="inline-flex h-8 w-12 items-center justify-center overflow-hidden rounded-md border border-[rgba(90,35,56,0.1)] bg-[#fdf4ec]">
+                          <span className="inline-flex h-8 w-12 items-center justify-center overflow-hidden rounded-md border border-[rgba(43,58,103,0.1)] bg-[#eef2f8]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={r.heroImage} alt="" className="h-full w-full object-cover" />
                           </span>
                         ) : (
-                          <span className="text-[rgba(90,35,56,0.35)]">—</span>
+                          <span className="text-[rgba(43,58,103,0.35)]">â€”</span>
                         )}
                       </td>
                     ) : null}
@@ -459,7 +459,7 @@ export default function AdminPagesPage() {
                       <td className="px-4 py-3 align-middle">
                         <button
                           onClick={() => togglePublish(r)}
-                          title={r.doc.status === "published" ? `Published${publishedDate ? " on " + publishedDate : ""}` : "Draft — click to publish"}
+                          title={r.doc.status === "published" ? `Published${publishedDate ? " on " + publishedDate : ""}` : "Draft â€” click to publish"}
                           className="group inline-flex items-center gap-1"
                         >
                           {r.doc.status === "published" ? (
@@ -471,7 +471,7 @@ export default function AdminPagesPage() {
                               </svg>
                             </span>
                           ) : (
-                            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(90,35,56,0.15)] text-[rgba(90,35,56,0.35)] transition-colors group-hover:border-[#e3a23c] group-hover:text-[#c98f2e]">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(43,58,103,0.15)] text-[rgba(43,58,103,0.35)] transition-colors group-hover:border-[#b08d57] group-hover:text-[#b08d57]">
                               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="8" />
                               </svg>
@@ -481,7 +481,7 @@ export default function AdminPagesPage() {
                       </td>
                     ) : null}
                     {visible.has("sort") ? (
-                      <td className="px-4 py-3 align-middle text-[rgba(90,35,56,0.7)]">{r.doc.sortOrder ?? 0}</td>
+                      <td className="px-4 py-3 align-middle text-[rgba(43,58,103,0.7)]">{r.doc.sortOrder ?? 0}</td>
                     ) : null}
                     <td className="whitespace-nowrap px-4 py-3 align-middle text-right">
                       <div className="inline-flex items-center gap-4 text-[12.5px]">
@@ -489,7 +489,7 @@ export default function AdminPagesPage() {
                           href={`/p/${r.doc.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[#c9497c] hover:underline"
+                          className="inline-flex items-center gap-1 text-[#5c7bb0] hover:underline"
                         >
                           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 20h9M4 20h4l10-10-4-4L4 16z" />
@@ -498,7 +498,7 @@ export default function AdminPagesPage() {
                         </a>
                         <Link
                           href={`/admin/pages/${r.doc.id}`}
-                          className="inline-flex items-center gap-1 text-[#d95f48] hover:underline"
+                          className="inline-flex items-center gap-1 text-[#2b3a67] hover:underline"
                         >
                           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 20h9M4 20h4l10-10-4-4L4 16z" />
@@ -516,7 +516,7 @@ export default function AdminPagesPage() {
 
         {/* Paginator */}
         {filtered && filtered.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(90,35,56,0.08)] bg-[#fdf4ec]/50 px-5 py-3 text-[12.5px] text-[rgba(90,35,56,0.7)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(43,58,103,0.08)] bg-[#eef2f8]/50 px-5 py-3 text-[12.5px] text-[rgba(43,58,103,0.7)]">
             <span>
               Showing {rangeStart} to {rangeEnd} of {total} results
             </span>
@@ -526,7 +526,7 @@ export default function AdminPagesPage() {
                 <select
                   value={perPage}
                   onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-                  className="rounded-full border border-[rgba(90,35,56,0.15)] bg-white px-2.5 py-1 text-[12.5px] text-[#5a2338] outline-none focus:border-[#c9497c]"
+                  className="rounded-full border border-[rgba(43,58,103,0.15)] bg-white px-2.5 py-1 text-[12.5px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
                 >
                   {[10, 25, 50, 100].map((n) => (
                     <option key={n} value={n}>{n}</option>
@@ -537,16 +537,16 @@ export default function AdminPagesPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="rounded-full border border-[rgba(90,35,56,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#d95f48] hover:text-[#d95f48]"
+                  className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
                 >
-                  ← Prev
+                  â† Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => (p * perPage < total ? p + 1 : p))}
                   disabled={page * perPage >= total}
-                  className="rounded-full border border-[rgba(90,35,56,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#d95f48] hover:text-[#d95f48]"
+                  className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
                 >
-                  Next →
+                  Next â†’
                 </button>
               </div>
             </div>
@@ -558,7 +558,7 @@ export default function AdminPagesPage() {
 }
 
 function Truncate({ value, max = 60 }: { value?: string; max?: number }) {
-  if (!value) return <span className="text-[rgba(90,35,56,0.35)]">—</span>;
-  const s = value.length > max ? value.slice(0, max - 1) + "…" : value;
+  if (!value) return <span className="text-[rgba(43,58,103,0.35)]">â€”</span>;
+  const s = value.length > max ? value.slice(0, max - 1) + "â€¦" : value;
   return <span title={value.length > max ? value : undefined}>{s}</span>;
 }

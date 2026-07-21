@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -37,23 +37,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fff8f0] px-6">
-      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: "linear-gradient(90deg,#e3a23c,#e0705a,#c9497c,#7a5ba6)" }} />
-      <div className="w-full max-w-sm rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white p-8 shadow-[0_20px_50px_rgba(122,44,44,0.12)]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f9fc] px-6">
+      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: "linear-gradient(90deg,#b08d57,#5c7bb0,#5c7bb0,#7a5ba6)" }} />
+      <div className="w-full max-w-sm rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white p-8 shadow-[0_20px_50px_rgba(43,58,103,0.12)]">
         <Link
           href="/gallery"
-          className="text-xs text-[rgba(90,35,56,0.55)] hover:text-[#d95f48]"
+          className="text-xs text-[rgba(43,58,103,0.55)] hover:text-[#2b3a67]"
           style={{ fontFamily: "var(--f-body)" }}
         >
-          ← Browse designs
+          â† Browse designs
         </Link>
         <h1
-          className="mt-4 text-3xl font-medium italic text-[#5a2338]"
+          className="mt-4 text-3xl font-medium italic text-[#2b3a67]"
           style={{ fontFamily: "var(--f-serif)" }}
         >
           {mode === "login" ? "Welcome back" : "Create account"}
         </h1>
-        <p className="mt-1 text-sm text-[rgba(90,35,56,0.65)]" style={{ fontFamily: "var(--f-body)" }}>
+        <p className="mt-1 text-sm text-[rgba(43,58,103,0.65)]" style={{ fontFamily: "var(--f-body)" }}>
           {mode === "login"
             ? "Log in to manage your invitations."
             : "Sign up to build and publish your invitation."}
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <form onSubmit={submit} className="mt-6 space-y-3">
           {mode === "register" ? (
             <input
-              className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
+              className="w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-[#eef2f8] px-3 py-2.5 text-sm text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -72,7 +72,7 @@ export default function LoginPage() {
           <input
             type="email"
             required
-            className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
+            className="w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-[#eef2f8] px-3 py-2.5 text-sm text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -82,22 +82,22 @@ export default function LoginPage() {
             type="password"
             required
             minLength={6}
-            className="w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-[#fdf4ec] px-3 py-2.5 text-sm text-[#5a2338] outline-none focus:border-[#c9497c]"
+            className="w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-[#eef2f8] px-3 py-2.5 text-sm text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
             placeholder="Password (min 6 chars)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{ fontFamily: "var(--f-body)" }}
           />
 
-          {error ? <p className="text-sm text-[#c14e38]">{error}</p> : null}
+          {error ? <p className="text-sm text-[#b3423a]">{error}</p> : null}
 
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-full py-2.5 text-sm font-medium shadow-[0_10px_24px_rgba(217,95,72,0.3)] transition hover:brightness-95 disabled:opacity-60"
+            className="w-full rounded-full py-2.5 text-sm font-medium shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition hover:brightness-95 disabled:opacity-60"
             style={{ background: "var(--c-primary)", color: "var(--c-on-primary)", fontFamily: "var(--f-body)" }}
           >
-            {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
+            {busy ? "Please waitâ€¦" : mode === "login" ? "Log in" : "Sign up"}
           </button>
         </form>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
             setMode(mode === "login" ? "register" : "login");
             setError("");
           }}
-          className="mt-4 w-full text-center text-sm text-[rgba(90,35,56,0.6)] hover:text-[#c9497c]"
+          className="mt-4 w-full text-center text-sm text-[rgba(43,58,103,0.6)] hover:text-[#5c7bb0]"
           style={{ fontFamily: "var(--f-body)" }}
         >
           {mode === "login"

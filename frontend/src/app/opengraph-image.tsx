@@ -21,14 +21,14 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #fff8f0 0%, #fbe0d8 100%)",
-          color: "#5a2338",
+          background: "linear-gradient(135deg, #f7f9fc 0%, #e3eaf5 100%)",
+          color: "#2b3a67",
           fontFamily: "Georgia, serif",
           position: "relative",
         }}
       >
-        <div style={{ display: "flex", width: 90, height: 3, background: "#d95f48", marginBottom: 40 }} />
-        <div style={{ display: "flex", fontSize: 34, letterSpacing: 12, textTransform: "uppercase", color: "#c9497c" }}>
+        <div style={{ display: "flex", width: 90, height: 3, background: "#2b3a67", marginBottom: 40 }} />
+        <div style={{ display: "flex", fontSize: 34, letterSpacing: 12, textTransform: "uppercase", color: "#5c7bb0" }}>
           Wedding · Engagement · Anniversary
         </div>
         <div style={{ display: "flex", fontSize: 128, fontWeight: 700, marginTop: 10, fontStyle: "italic" }}>{SITE.name}</div>
@@ -45,8 +45,8 @@ export default function OpengraphImage() {
         >
           Animated invitation pages, in full colour — with live RSVPs.
         </div>
-        <div style={{ display: "flex", width: 90, height: 3, background: "#d95f48", marginTop: 40 }} />
-        <div style={{ display: "flex", position: "absolute", bottom: 42, fontSize: 26, letterSpacing: 6, color: "#c9497c" }}>
+        <div style={{ display: "flex", width: 90, height: 3, background: "#2b3a67", marginTop: 40 }} />
+        <div style={{ display: "flex", position: "absolute", bottom: 42, fontSize: 26, letterSpacing: 6, color: "#5c7bb0" }}>
           webinvite.co
         </div>
       </div>

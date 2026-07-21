@@ -64,7 +64,7 @@ export default async function ContentPageRoute({ params }: { params: Promise<{ s
     <PublicShell>
       <article className="mx-auto max-w-3xl px-6 py-12">
         <h1
-          className="text-4xl font-medium italic leading-tight text-[#5a2338] sm:text-5xl"
+          className="text-4xl font-medium italic leading-tight text-[#2b3a67] sm:text-5xl"
           style={{ fontFamily: "var(--f-serif)" }}
         >
           {page.title}

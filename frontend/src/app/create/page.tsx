@@ -94,9 +94,9 @@ function Review({
     const wa = `https://wa.me/?text=${encodeURIComponent(`💍 You're invited to ${names}'s wedding! ${publishedUrl}`)}`;
     return (
       <div className="text-center">
-        <p className="font-script text-3xl text-[#5a2338]">It's live! 🎉</p>
+        <p className="font-script text-3xl text-[#2b3a67]">It's live! 🎉</p>
         <p className="mt-1 text-sm text-slate-500">Share your invitation:</p>
-        <a href={publishedUrl} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-[#5a2338] underline">
+        <a href={publishedUrl} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-[#2b3a67] underline">
           {publishedUrl}
         </a>
         <div className="mt-4 flex flex-col gap-2">
@@ -379,10 +379,10 @@ export default function CreateWizard() {
   /* ============================ PHASE: CASTE ============================ */
   if (phase === "caste") {
     return (
-      <div className="min-h-dvh bg-[#fff8f0] px-6 py-10">
+      <div className="min-h-dvh bg-[#f7f9fc] px-6 py-10">
         <div className="mx-auto max-w-2xl">
           <Link href="/" className="text-sm text-slate-500 hover:text-slate-800">← Home</Link>
-          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#5a2338]">
+          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#2b3a67]">
             Create your invitation
           </h1>
           <p className="font-body mt-2 text-center text-lg italic text-slate-500">
@@ -393,9 +393,9 @@ export default function CreateWizard() {
               <button
                 key={c.id}
                 onClick={() => { setCommunity(c.id); setPhase("design"); }}
-                className="rounded-2xl border border-slate-200 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#d95f48] hover:shadow-lg"
+                className="rounded-2xl border border-slate-200 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#2b3a67] hover:shadow-lg"
               >
-                <p className="font-display text-lg tracking-[0.08em] text-[#5a2338]">{c.label}</p>
+                <p className="font-display text-lg tracking-[0.08em] text-[#2b3a67]">{c.label}</p>
                 <p className="mt-1 text-sm text-slate-500">{c.sub}</p>
               </button>
             ))}
@@ -409,10 +409,10 @@ export default function CreateWizard() {
   if (phase === "design") {
     const opts = optionsFor(community);
     return (
-      <div className="min-h-dvh bg-[#fff8f0] px-6 py-10">
+      <div className="min-h-dvh bg-[#f7f9fc] px-6 py-10">
         <div className="mx-auto max-w-4xl">
           <button onClick={() => setPhase("caste")} className="text-sm text-slate-500 hover:text-slate-800">← Community</button>
-          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#5a2338]">
+          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#2b3a67]">
             Choose a design
           </h1>
           <p className="font-body mt-2 text-center text-lg italic text-slate-500">
@@ -434,8 +434,8 @@ export default function CreateWizard() {
                   ) : null}
                 </div>
                 <div className="p-4 text-center">
-                  <p className="font-display text-sm uppercase tracking-[0.12em] text-[#5a2338]">{o.name}</p>
-                  <span className="font-display mt-2 inline-block text-[11px] uppercase tracking-[0.16em] text-[#c98f2e] group-hover:underline">Preview →</span>
+                  <p className="font-display text-sm uppercase tracking-[0.12em] text-[#2b3a67]">{o.name}</p>
+                  <span className="font-display mt-2 inline-block text-[11px] uppercase tracking-[0.16em] text-[#b08d57] group-hover:underline">Preview →</span>
                 </div>
               </button>
             ))}
@@ -452,7 +452,7 @@ export default function CreateWizard() {
       <div className="flex h-dvh flex-col bg-[#dbe6ef]">
         <header className="flex shrink-0 items-center justify-between gap-2 bg-white px-4 py-2.5 shadow-sm">
           <button onClick={() => setPhase("design")} className="text-sm text-slate-500 hover:text-slate-800">← Designs</button>
-          <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#5a2338]">{chosen.name}</span>
+          <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">{chosen.name}</span>
           <span className="w-16" />
         </header>
         <main className="flex min-h-0 flex-1 items-center justify-center p-3">
@@ -461,7 +461,7 @@ export default function CreateWizard() {
           </div>
         </main>
         <div className="shrink-0 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center shadow-[0_-8px_24px_rgba(20,30,60,0.1)]">
-          <button onClick={selectChosen} className="rounded-lg bg-[#d95f48] px-8 py-3 text-sm font-medium text-white hover:bg-[#c14e38]">
+          <button onClick={selectChosen} className="rounded-lg bg-[#2b3a67] px-8 py-3 text-sm font-medium text-white hover:bg-[#22305a]">
             Select this design →
           </button>
         </div>
@@ -482,11 +482,11 @@ export default function CreateWizard() {
     <div className="flex h-dvh flex-col bg-[#dbe6ef]">
       <header className="flex shrink-0 items-center justify-between gap-2 bg-white px-4 py-2.5 shadow-sm">
         <Link href="/" className="text-sm text-slate-500 hover:text-slate-800">← Exit</Link>
-        <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#5a2338]">Create your invitation</span>
+        <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">Create your invitation</span>
         <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">✏️ You can edit live</span>
       </header>
       <div className="h-1 w-full bg-slate-200">
-        <div className="h-full bg-[#d95f48] transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-full bg-[#2b3a67] transition-all" style={{ width: `${pct}%` }} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
@@ -500,9 +500,9 @@ export default function CreateWizard() {
         {/* form panel */}
         <aside className="flex min-h-0 flex-1 flex-col border-t border-slate-200 bg-white lg:w-[400px] lg:flex-none lg:border-l lg:border-t-0">
           <div className="flex items-center gap-2 px-5 pt-3">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#d95f48] text-xs text-white">✎</span>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#2b3a67] text-xs text-white">✎</span>
             <div>
-              <p className="font-display text-[13px] uppercase tracking-[0.12em] text-[#5a2338]">{current.title}</p>
+              <p className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">{current.title}</p>
               <p className="text-[11px] text-slate-400">Step {step + 1} of {STEPS.length} · or click text on the preview to edit</p>
             </div>
           </div>
@@ -547,19 +547,19 @@ export default function CreateWizard() {
                     <button onClick={() => save(false)} disabled={busy} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60">
                       {busy ? "…" : "Save draft"}
                     </button>
-                    <button onClick={() => save(true)} disabled={busy} className="rounded-lg bg-[#d95f48] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#c14e38] disabled:opacity-60">
+                    <button onClick={() => save(true)} disabled={busy} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#22305a] disabled:opacity-60">
                       {busy ? "…" : "Publish"}
                     </button>
                   </div>
                 ) : (
-                  <Link href={`/login?redirect=${encodeURIComponent("/create?resume=1")}`} className="rounded-lg bg-[#d95f48] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#c14e38]">
+                  <Link href={`/login?redirect=${encodeURIComponent("/create?resume=1")}`} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#22305a]">
                     Log in to publish
                   </Link>
                 )
               ) : (
                 <button
                   onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
-                  className="rounded-lg bg-[#d95f48] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#c14e38]"
+                  className="rounded-lg bg-[#2b3a67] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#22305a]"
                 >
                   Next →
                 </button>

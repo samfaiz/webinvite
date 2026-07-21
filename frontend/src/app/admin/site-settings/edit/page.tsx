@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ import { ImageEditorModal, urlToDataUrl, dataUrlToFile } from "@/components/Imag
 import { fileToScaledDataUrl } from "@/lib/image";
 
 /**
- * `/admin/site-settings/edit` — tabbed form for the singleton site settings.
+ * `/admin/site-settings/edit` â€” tabbed form for the singleton site settings.
  * Only the Branding tab is wired for now; the other tabs render an "in
  * progress" hint and are safe to click without side effects.
  */
@@ -99,7 +99,7 @@ export default function EditSiteSettingsPage() {
   // siteSettings on Save so the SEO tab can be a single click.
   const [intPatch, setIntPatch] = useState<IntegrationsUpdate>({});
 
-  // SEO Algorithm — loaded lazily the first time the Algo tab opens so the
+  // SEO Algorithm â€” loaded lazily the first time the Algo tab opens so the
   // main site-settings load isn't slowed by two extra queries + a possible
   // AI-improve draft download.
   const [algo, setAlgo] = useState<SeoAlgorithm | null>(null);
@@ -194,10 +194,10 @@ export default function EditSiteSettingsPage() {
   if (loading || !data) {
     return (
       <div
-        className="flex h-[70vh] items-center justify-center text-[rgba(90,35,56,0.5)]"
+        className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        {loading ? "Loading…" : error || "Loading site settings…"}
+        {loading ? "Loadingâ€¦" : error || "Loading site settingsâ€¦"}
       </div>
     );
   }
@@ -207,15 +207,15 @@ export default function EditSiteSettingsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(90,35,56,0.55)]">
-            <Link href="/admin" className="hover:text-[#d95f48]">Admin</Link>
-            <span className="text-[rgba(90,35,56,0.3)]">›</span>
-            <Link href="/admin/site-settings" className="hover:text-[#d95f48]">Site Settings</Link>
-            <span className="text-[rgba(90,35,56,0.3)]">›</span>
-            <span className="text-[rgba(90,35,56,0.55)]">Edit</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
+            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
+            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <Link href="/admin/site-settings" className="hover:text-[#2b3a67]">Site Settings</Link>
+            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.55)]">Edit</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#5a2338] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Edit Site Setting
@@ -230,12 +230,12 @@ export default function EditSiteSettingsPage() {
         </button>
       </div>
 
-      {error ? <div className="mt-4 rounded-lg border border-[rgba(217,95,72,0.4)] bg-[#fbe0d8] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
+      {error ? <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.4)] bg-[#e3eaf5] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
       {success ? <div className="mt-4 rounded-lg border border-[rgba(92,138,94,0.3)] bg-[#eaf6ea] px-4 py-2 text-sm text-[#2f6b50]">{success}</div> : null}
 
       {/* Tab strip */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-[rgba(201,73,124,0.15)] bg-white shadow-[0_10px_30px_rgba(122,44,44,0.05)]">
-        <div className="flex overflow-x-auto border-b border-[rgba(90,35,56,0.08)] bg-[#fdf4ec]/60">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+        <div className="flex overflow-x-auto border-b border-[rgba(43,58,103,0.08)] bg-[#eef2f8]/60">
           {TABS.map((t) => {
             const on = tab === t.id;
             return (
@@ -245,8 +245,8 @@ export default function EditSiteSettingsPage() {
                 className={
                   "flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[13px] font-medium transition-colors " +
                   (on
-                    ? "border-[#d95f48] bg-white text-[#5a2338]"
-                    : "border-transparent text-[rgba(90,35,56,0.6)] hover:bg-white/60 hover:text-[#5a2338]")
+                    ? "border-[#2b3a67] bg-white text-[#2b3a67]"
+                    : "border-transparent text-[rgba(43,58,103,0.6)] hover:bg-white/60 hover:text-[#2b3a67]")
                 }
               >
                 <TabIcon name={t.icon} active={on} />
@@ -296,13 +296,13 @@ export default function EditSiteSettingsPage() {
         <button
           onClick={save}
           disabled={saving}
-          className="rounded-full bg-[#d95f48] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(217,95,72,0.3)] transition-colors hover:bg-[#c14e38] disabled:opacity-60"
+          className="rounded-full bg-[#2b3a67] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
         >
-          {saving ? "Saving…" : "Save changes"}
+          {saving ? "Savingâ€¦" : "Save changes"}
         </button>
         <Link
           href="/admin/site-settings"
-          className="rounded-full border border-[rgba(90,35,56,0.2)] px-4 py-2.5 text-[13px] font-medium text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+          className="rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2.5 text-[13px] font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
         >
           Cancel
         </Link>
@@ -356,7 +356,7 @@ function BrandingTab({
         </Field>
       </div>
 
-      <Field label="Favicon" hint="Browser tab icon (square, e.g. 512×512).">
+      <Field label="Favicon" hint="Browser tab icon (square, e.g. 512Ã—512).">
         <FileDrop
           value={value.favicon}
           onChange={(url) => patch("favicon", url)}
@@ -393,7 +393,7 @@ function HeroTab({ value, onChange }: { value: SiteHero; onChange: (v: SiteHero)
         />
       </Field>
 
-      <Field label="Hero subheadline" hint="Prose shown below the headline (1–2 sentences).">
+      <Field label="Hero subheadline" hint="Prose shown below the headline (1â€“2 sentences).">
         <textarea
           value={value.heroSubheadline}
           onChange={(e) => patch("heroSubheadline", e.target.value)}
@@ -416,7 +416,7 @@ function HeroTab({ value, onChange }: { value: SiteHero; onChange: (v: SiteHero)
           value={value.mission}
           onChange={(e) => patch("mission", e.target.value)}
           className={inputCls + " min-h-[110px] resize-y"}
-          placeholder="Why you exist and what you stand for — the story that guides every design decision."
+          placeholder="Why you exist and what you stand for â€” the story that guides every design decision."
         />
       </Field>
 
@@ -503,7 +503,7 @@ function ContactTab({ value, onChange }: { value: SiteContact; onChange: (v: Sit
           value={value.officeHours}
           onChange={(e) => patch("officeHours", e.target.value)}
           className={inputCls}
-          placeholder="Monday–Friday, 9 AM – 5 PM (GCC)"
+          placeholder="Mondayâ€“Friday, 9 AM â€“ 5 PM (GCC)"
         />
       </Field>
 
@@ -512,7 +512,7 @@ function ContactTab({ value, onChange }: { value: SiteContact; onChange: (v: Sit
           value={value.calendarUrl}
           onChange={(e) => patch("calendarUrl", e.target.value)}
           className={inputCls}
-          placeholder="https://cal.com/…"
+          placeholder="https://cal.com/â€¦"
         />
       </Field>
     </div>
@@ -553,46 +553,46 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
     <div className="space-y-6">
       {/* Social links table */}
       <div>
-        <p className="mb-2 text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">Social links</p>
+        <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Social links</p>
         <datalist id="wi-platform-suggestions">
           {PLATFORM_SUGGESTIONS.map((p) => (
             <option key={p} value={p} />
           ))}
         </datalist>
-        <div className="overflow-hidden rounded-lg border border-[rgba(90,35,56,0.15)]">
-          <div className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(90,35,56,0.1)] bg-[#fdf4ec] px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(90,35,56,0.55)]">
+        <div className="overflow-hidden rounded-lg border border-[rgba(43,58,103,0.15)]">
+          <div className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,58,103,0.1)] bg-[#eef2f8] px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.55)]">
             <span>Platform</span>
             <span>URL</span>
             <span aria-hidden />
           </div>
           {value.links.length === 0 ? (
-            <div className="px-3 py-6 text-center text-[13px] text-[rgba(90,35,56,0.5)]">
+            <div className="px-3 py-6 text-center text-[13px] text-[rgba(43,58,103,0.5)]">
               No social links yet. Click <em>Add social link</em> below.
             </div>
           ) : (
             value.links.map((l, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(90,35,56,0.08)] px-3 py-2 last:border-b-0"
+                className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,58,103,0.08)] px-3 py-2 last:border-b-0"
               >
                 <input
                   list="wi-platform-suggestions"
                   value={l.platform}
                   onChange={(e) => patchLink(i, { platform: e.target.value })}
-                  className="w-full rounded-md border-none bg-transparent px-2 py-1 font-mono text-[13px] text-[#5a2338] outline-none focus:bg-[#fdf4ec]"
+                  className="w-full rounded-md border-none bg-transparent px-2 py-1 font-mono text-[13px] text-[#2b3a67] outline-none focus:bg-[#eef2f8]"
                   placeholder="instagram"
                 />
                 <input
                   value={l.url}
                   onChange={(e) => patchLink(i, { url: e.target.value })}
-                  className="w-full rounded-md border-none bg-transparent px-2 py-1 text-[13px] text-[#5a2338] outline-none focus:bg-[#fdf4ec]"
-                  placeholder="https://instagram.com/…"
+                  className="w-full rounded-md border-none bg-transparent px-2 py-1 text-[13px] text-[#2b3a67] outline-none focus:bg-[#eef2f8]"
+                  placeholder="https://instagram.com/â€¦"
                 />
                 <button
                   type="button"
                   onClick={() => removeLink(i)}
                   aria-label={`Remove ${l.platform || "link"}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-[rgba(217,47,47,0.8)] transition-colors hover:bg-[#fbe0d8] hover:text-[#d92f2f]"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-[rgba(217,47,47,0.8)] transition-colors hover:bg-[#e3eaf5] hover:text-[#d92f2f]"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
@@ -604,13 +604,13 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           <button
             type="button"
             onClick={addLink}
-            className="flex w-full items-center justify-center border-t border-[rgba(90,35,56,0.1)] bg-[#fdf4ec]/40 px-3 py-2 text-[13px] font-medium text-[#c9497c] transition-colors hover:bg-[#fbe0d8]/60"
+            className="flex w-full items-center justify-center border-t border-[rgba(43,58,103,0.1)] bg-[#eef2f8]/40 px-3 py-2 text-[13px] font-medium text-[#5c7bb0] transition-colors hover:bg-[#e3eaf5]/60"
           >
             + Add social link
           </button>
         </div>
-        <p className="mt-1.5 text-[11.5px] text-[rgba(90,35,56,0.55)]">
-          e.g. <code className="font-mono">instagram</code> → <code className="font-mono">https://instagram.com/…</code>
+        <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+          e.g. <code className="font-mono">instagram</code> â†’ <code className="font-mono">https://instagram.com/â€¦</code>
         </p>
       </div>
 
@@ -619,7 +619,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           value={value.footerMessage}
           onChange={(e) => onChange({ ...value, footerMessage: e.target.value })}
           className={inputCls + " min-h-[90px] resize-y"}
-          placeholder="A short line that sums up what your brand does — shown at the bottom of every marketing page."
+          placeholder="A short line that sums up what your brand does â€” shown at the bottom of every marketing page."
         />
       </Field>
 
@@ -628,7 +628,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           value={value.copyrightText}
           onChange={(e) => onChange({ ...value, copyrightText: e.target.value })}
           className={inputCls}
-          placeholder={`© ${new Date().getFullYear()} Your Brand Name`}
+          placeholder={`Â© ${new Date().getFullYear()} Your Brand Name`}
         />
       </Field>
     </div>
@@ -643,44 +643,44 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
 
   return (
     <div className="space-y-6">
-      {/* Accent colors — light */}
-      <div className="rounded-xl border border-[rgba(90,35,56,0.1)] p-5">
+      {/* Accent colors â€” light */}
+      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
         <div className="mb-1">
-          <p className="text-[15px] font-medium text-[#5a2338]">Accent colors</p>
-          <p className="text-[12.5px] text-[rgba(90,35,56,0.6)]">
+          <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors</p>
+          <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
             Brand accent used for buttons, links and highlights. Leave blank to keep the default coral.
           </p>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <ColorField label="Accent" value={value.accent} onChange={(v) => patch("accent", v)} placeholder="#d95f48" />
-          <ColorField label="Accent (soft)" value={value.accentSoft} onChange={(v) => patch("accentSoft", v)} placeholder="#fbe0d8" />
+          <ColorField label="Accent" value={value.accent} onChange={(v) => patch("accent", v)} placeholder="#2b3a67" />
+          <ColorField label="Accent (soft)" value={value.accentSoft} onChange={(v) => patch("accentSoft", v)} placeholder="#e3eaf5" />
           <ColorField label="Text on accent" value={value.textOnAccent} onChange={(v) => patch("textOnAccent", v)} placeholder="#ffffff" />
         </div>
       </div>
 
-      {/* Accent colors — dark mode (collapsible) */}
-      <div className="rounded-xl border border-[rgba(90,35,56,0.1)]">
+      {/* Accent colors â€” dark mode (collapsible) */}
+      <div className="rounded-xl border border-[rgba(43,58,103,0.1)]">
         <button
           type="button"
           onClick={() => setDarkOpen((v) => !v)}
           className="flex w-full items-start justify-between gap-3 p-5 text-left"
         >
           <div>
-            <p className="text-[15px] font-medium text-[#5a2338]">Accent colors — dark mode</p>
-            <p className="text-[12.5px] text-[rgba(90,35,56,0.6)]">
+            <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors â€” dark mode</p>
+            <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
               Optional overrides applied only when the site is in dark mode.
             </p>
           </div>
           <svg
-            className={"mt-1 h-4 w-4 text-[rgba(90,35,56,0.5)] transition-transform " + (darkOpen ? "rotate-180" : "")}
+            className={"mt-1 h-4 w-4 text-[rgba(43,58,103,0.5)] transition-transform " + (darkOpen ? "rotate-180" : "")}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
           >
             <path d="M6 9l6 6 6-6" />
           </svg>
         </button>
         {darkOpen ? (
-          <div className="grid gap-4 border-t border-[rgba(90,35,56,0.08)] p-5 sm:grid-cols-3">
-            <ColorField label="Accent" value={value.accentDark} onChange={(v) => patch("accentDark", v)} placeholder="#e0705a" />
+          <div className="grid gap-4 border-t border-[rgba(43,58,103,0.08)] p-5 sm:grid-cols-3">
+            <ColorField label="Accent" value={value.accentDark} onChange={(v) => patch("accentDark", v)} placeholder="#5c7bb0" />
             <ColorField label="Accent (soft)" value={value.accentSoftDark} onChange={(v) => patch("accentSoftDark", v)} placeholder="#3a1620" />
             <ColorField label="Text on accent" value={value.textOnAccentDark} onChange={(v) => patch("textOnAccentDark", v)} placeholder="#ffffff" />
           </div>
@@ -688,10 +688,10 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
       </div>
 
       {/* Fonts */}
-      <div className="rounded-xl border border-[rgba(90,35,56,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
         <div className="mb-1">
-          <p className="text-[15px] font-medium text-[#5a2338]">Fonts</p>
-          <p className="text-[12.5px] text-[rgba(90,35,56,0.6)]">
+          <p className="text-[15px] font-medium text-[#2b3a67]">Fonts</p>
+          <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
             Pick from a curated set. Leave blank to keep the defaults.
           </p>
         </div>
@@ -721,20 +721,20 @@ function ColorField({
 
   return (
     <label className="block">
-      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">{label}</span>
-      <div className="flex items-center gap-2 rounded-lg border border-[rgba(90,35,56,0.2)] bg-white pr-1">
+      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">{label}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white pr-1">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 border-none bg-transparent px-3 py-2 font-mono text-[13.5px] text-[#5a2338] outline-none placeholder:text-[rgba(90,35,56,0.35)]"
+          className="flex-1 border-none bg-transparent px-3 py-2 font-mono text-[13.5px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.35)]"
         />
         {/* Native colour picker; its output overwrites the text field. */}
         <input
           type="color"
           value={isValidHex ? value.trim().slice(0, 7) : "#ffffff"}
           onChange={(e) => onChange(e.target.value)}
-          className="h-7 w-7 shrink-0 cursor-pointer rounded-full border border-[rgba(90,35,56,0.15)]"
+          className="h-7 w-7 shrink-0 cursor-pointer rounded-full border border-[rgba(43,58,103,0.15)]"
           style={{ background: swatch, padding: 0 }}
           aria-label={`${label} colour picker`}
         />
@@ -758,7 +758,7 @@ function FontField({
   const def = FONT_DEFAULT[role];
   return (
     <label className="block">
-      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">{label}</span>
+      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -823,7 +823,7 @@ function SeoTab({
           value={value.metaTitle}
           onChange={(e) => patchField("metaTitle", e.target.value)}
           className={inputCls}
-          placeholder="Your brand — tagline"
+          placeholder="Your brand â€” tagline"
         />
       </Field>
       <Field label="Meta description">
@@ -834,7 +834,7 @@ function SeoTab({
           placeholder="One or two sentences summarising the site."
         />
       </Field>
-      <Field label="Og image" hint="Default social share image (1200×630).">
+      <Field label="Og image" hint="Default social share image (1200Ã—630).">
         <FileDrop value={value.ogImage} onChange={(url) => patchField("ogImage", url)} onError={onError} accept="image/*" />
       </Field>
 
@@ -893,8 +893,8 @@ function SeoTab({
               className={inputCls}
               placeholder={
                 integrations?.ai.hasKey
-                  ? `${integrations.ai.keyPreview || "•••••••••••"} saved — type a new key to replace it`
-                  : "sk-ant-…"
+                  ? `${integrations.ai.keyPreview || "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"} saved â€” type a new key to replace it`
+                  : "sk-ant-â€¦"
               }
             />
             {integrations?.ai.hasKey && !aiKeyDraft ? (
@@ -903,7 +903,7 @@ function SeoTab({
                 onClick={() => {
                   onIntPatch({ clearAiApiKey: true, aiApiKey: undefined });
                 }}
-                className="mt-1 text-[11.5px] text-[#c14e38] hover:underline"
+                className="mt-1 text-[11.5px] text-[#22305a] hover:underline"
               >
                 Clear saved key
               </button>
@@ -970,7 +970,7 @@ function SeoTab({
       >
         <Field
           label="GA4 Property ID"
-          hint="The numeric Property ID from GA4 Admin → Property settings (not the G-XXXX tag)."
+          hint="The numeric Property ID from GA4 Admin â†’ Property settings (not the G-XXXX tag)."
         >
           <input
             value={gaPropertyId}
@@ -996,28 +996,28 @@ function SeoTab({
             className={inputCls + " min-h-[140px] resize-y font-mono text-[12px]"}
             placeholder={
               integrations?.ga.hasServiceAccount
-                ? "A key is saved — paste new JSON to replace it"
-                : '{ "type": "service_account", "private_key": "…", "client_email": "…@…iam.gserviceaccount.com" }'
+                ? "A key is saved â€” paste new JSON to replace it"
+                : '{ "type": "service_account", "private_key": "â€¦", "client_email": "â€¦@â€¦iam.gserviceaccount.com" }'
             }
           />
           {integrations?.ga.hasServiceAccount && !gaJsonDraft ? (
             <button
               type="button"
               onClick={() => onIntPatch({ clearGaServiceAccount: true, gaServiceAccountJson: undefined })}
-              className="mt-1 text-[11.5px] text-[#c14e38] hover:underline"
+              className="mt-1 text-[11.5px] text-[#22305a] hover:underline"
             >
               Clear saved service account
             </button>
           ) : null}
         </Field>
 
-        <div className="mt-4 rounded-lg border border-[rgba(90,35,56,0.1)] bg-[#fdf4ec] p-4 text-[13px] text-[rgba(90,35,56,0.75)]">
-          <p className="mb-2 font-medium text-[#5a2338]">How to connect</p>
+        <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.1)] bg-[#eef2f8] p-4 text-[13px] text-[rgba(43,58,103,0.75)]">
+          <p className="mb-2 font-medium text-[#2b3a67]">How to connect</p>
           <ol className="list-decimal space-y-1 pl-5">
             <li>In <strong>Google Cloud Console</strong>, create (or pick) a project and enable the <strong>Google Analytics Data API</strong>.</li>
-            <li>Create a <strong>Service Account</strong> → add a <strong>JSON key</strong> → download it.</li>
+            <li>Create a <strong>Service Account</strong> â†’ add a <strong>JSON key</strong> â†’ download it.</li>
             <li>Paste the JSON above and enter your numeric GA4 Property ID.</li>
-            <li>In GA4 → Admin → <strong>Property access management</strong>, add the service account&rsquo;s email as a <strong>Viewer</strong>.</li>
+            <li>In GA4 â†’ Admin â†’ <strong>Property access management</strong>, add the service account&rsquo;s email as a <strong>Viewer</strong>.</li>
             <li>Save. The dashboard charts populate within a few minutes (cached ~15 min).</li>
           </ol>
         </div>
@@ -1047,7 +1047,7 @@ function KeywordChips({
     onDraft("");
   };
   return (
-    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(90,35,56,0.2)] bg-white px-2 py-1.5">
+    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-2 py-1.5">
       {value.map((k, i) => (
         <span
           key={k + i}
@@ -1057,10 +1057,10 @@ function KeywordChips({
           <button
             type="button"
             onClick={() => onChange(value.filter((_, j) => j !== i))}
-            className="hover:text-[#5a2338]"
+            className="hover:text-[#2b3a67]"
             aria-label={`Remove ${k}`}
           >
-            ×
+            Ã—
           </button>
         </span>
       ))}
@@ -1077,7 +1077,7 @@ function KeywordChips({
         }}
         onBlur={commit}
         placeholder={value.length ? "" : "Add a keyword"}
-        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[#5a2338] outline-none placeholder:text-[rgba(90,35,56,0.4)]"
+        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
       />
     </div>
   );
@@ -1099,24 +1099,24 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-[rgba(90,35,56,0.1)]">
+    <div className="rounded-xl border border-[rgba(43,58,103,0.1)]">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full items-start justify-between gap-3 p-5 text-left"
       >
         <div>
-          <p className="text-[15px] font-medium text-[#5a2338]">{title}</p>
-          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(90,35,56,0.6)]">{description}</p> : null}
+          <p className="text-[15px] font-medium text-[#2b3a67]">{title}</p>
+          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">{description}</p> : null}
         </div>
         <svg
-          className={"mt-1 h-4 w-4 shrink-0 text-[rgba(90,35,56,0.5)] transition-transform " + (open ? "rotate-180" : "")}
+          className={"mt-1 h-4 w-4 shrink-0 text-[rgba(43,58,103,0.5)] transition-transform " + (open ? "rotate-180" : "")}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
-      {open ? <div className="space-y-4 border-t border-[rgba(90,35,56,0.08)] p-5">{children}</div> : null}
+      {open ? <div className="space-y-4 border-t border-[rgba(43,58,103,0.08)] p-5">{children}</div> : null}
     </div>
   );
 }
@@ -1151,8 +1151,8 @@ function AlgoTab({
 
   if (!value) {
     return (
-      <div className="flex h-40 items-center justify-center text-[13px] text-[rgba(90,35,56,0.55)]">
-        Loading SEO algorithm…
+      <div className="flex h-40 items-center justify-center text-[13px] text-[rgba(43,58,103,0.55)]">
+        Loading SEO algorithmâ€¦
       </div>
     );
   }
@@ -1172,7 +1172,7 @@ function AlgoTab({
     try {
       const r = await api.improveSeoAlgorithmDraft();
       onPatch({ algorithm: r.algorithm, learningMemory: r.learningMemory });
-      onSuccess(`AI drafted an improved rubric. ${r.rationale ? `— ${r.rationale}` : ""} Review, then Save.`);
+      onSuccess(`AI drafted an improved rubric. ${r.rationale ? `â€” ${r.rationale}` : ""} Review, then Save.`);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1188,7 +1188,7 @@ function AlgoTab({
       const r = await api.runSeoAlgorithmNow();
       onChange(r.dto);
       onPatch({}); // clear stale drafts
-      onSuccess(`Improvement run complete. ${r.rationale ? `— ${r.rationale}` : ""}`);
+      onSuccess(`Improvement run complete. ${r.rationale ? `â€” ${r.rationale}` : ""}`);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1237,7 +1237,7 @@ function AlgoTab({
       const next = await api.restoreSeoAlgorithmVersion(id);
       onChange(next);
       onPatch({});
-      onSuccess("Restored — this version is now current.");
+      onSuccess("Restored â€” this version is now current.");
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1248,16 +1248,16 @@ function AlgoTab({
   return (
     <div className="space-y-6">
       {/* Automatic weekly improvement */}
-      <div className="rounded-xl border border-[rgba(90,35,56,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
         <div className="mb-4 flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fdf1e2] text-[#c98f2e]">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-3.5-7.1" /><path d="M21 4v5h-5" />
             </svg>
           </span>
           <div>
-            <p className="text-[15px] font-medium text-[#5a2338]">Automatic weekly improvement</p>
-            <p className="mt-0.5 text-[12.5px] text-[rgba(90,35,56,0.6)]">
+            <p className="text-[15px] font-medium text-[#2b3a67]">Automatic weekly improvement</p>
+            <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">
               Let AI research and refresh the algorithm on a schedule, archiving every previous version so you can
               compare and revert. Each run also updates the AI&rsquo;s learning memory, so results compound over time.
             </p>
@@ -1265,13 +1265,13 @@ function AlgoTab({
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">Auto-improve with AI</p>
+            <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Auto-improve with AI</p>
             <Toggle
               checked={eff.autoImprove}
               onChange={(v) => onPatch({ autoImprove: v })}
               label={eff.autoImprove ? "On" : "Off"}
             />
-            <p className="mt-2 text-[11.5px] text-[rgba(90,35,56,0.55)]">
+            <p className="mt-2 text-[11.5px] text-[rgba(43,58,103,0.55)]">
               When on, the algorithm is researched and replaced automatically at the cadence below.
             </p>
           </div>
@@ -1295,7 +1295,7 @@ function AlgoTab({
         </div>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          <Field label="Versions to keep in history" hint="Older versions beyond this are pruned (5–365). Default 90.">
+          <Field label="Versions to keep in history" hint="Older versions beyond this are pruned (5â€“365). Default 90.">
             <input
               type="number"
               min={5}
@@ -1306,11 +1306,11 @@ function AlgoTab({
             />
           </Field>
           <div>
-            <p className="mb-1 text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">Last AI run</p>
-            <p className="text-[14px] text-[#5a2338]">
+            <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Last AI run</p>
+            <p className="text-[14px] text-[#2b3a67]">
               {value.lastRunAt ? formatDateTime(value.lastRunAt) : "Never run yet"}
               {value.lastRunNote ? (
-                <span className="ml-1 text-[12.5px] text-[rgba(90,35,56,0.55)]">— {value.lastRunNote}</span>
+                <span className="ml-1 text-[12.5px] text-[rgba(43,58,103,0.55)]">â€” {value.lastRunNote}</span>
               ) : null}
             </p>
           </div>
@@ -1326,24 +1326,24 @@ function AlgoTab({
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 2 3 14h9l-1 8 10-12h-9z" />
             </svg>
-            {busy === "run" ? "Running…" : "Run improvement now"}
+            {busy === "run" ? "Runningâ€¦" : "Run improvement now"}
           </button>
         </div>
       </div>
 
       {/* AI audit & optimisation algorithm */}
-      <div className="rounded-xl border border-[rgba(90,35,56,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
         <div className="mb-4 flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fdf1e2] text-[#c98f2e]">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" />
             </svg>
           </span>
           <div>
-            <p className="text-[15px] font-medium text-[#5a2338]">AI audit &amp; optimisation algorithm</p>
-            <p className="mt-0.5 text-[12.5px] text-[rgba(90,35,56,0.6)]">
-              The strategy and 0–100 scoring rubric Claude follows when auditing and optimising every page. A strong
-              default is provided — tune it, or let AI improve it. Save to apply across all content editors; every
+            <p className="text-[15px] font-medium text-[#2b3a67]">AI audit &amp; optimisation algorithm</p>
+            <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">
+              The strategy and 0â€“100 scoring rubric Claude follows when auditing and optimising every page. A strong
+              default is provided â€” tune it, or let AI improve it. Save to apply across all content editors; every
               save is archived as a version.
             </p>
           </div>
@@ -1358,25 +1358,25 @@ function AlgoTab({
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z" />
             </svg>
-            {busy === "improve" ? "Thinking…" : "Improve editor text with AI"}
+            {busy === "improve" ? "Thinkingâ€¦" : "Improve editor text with AI"}
           </button>
           <button
             type="button"
             onClick={resetToDefault}
             disabled={busy !== null}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(90,35,56,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#5a2338] transition-colors hover:border-[#d95f48] hover:text-[#d95f48] disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(43,58,103,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#2b3a67] transition-colors hover:border-[#2b3a67] hover:text-[#2b3a67] disabled:opacity-60"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v6h6" />
             </svg>
-            {busy === "reset" ? "Resetting…" : "Reset to default"}
+            {busy === "reset" ? "Resettingâ€¦" : "Reset to default"}
           </button>
         </div>
         <textarea
           value={eff.algorithm}
           onChange={(e) => onPatch({ algorithm: e.target.value })}
           className={
-            "mt-4 w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#c9497c]"
+            "mt-4 w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#5c7bb0]"
           }
           rows={18}
           spellCheck={false}
@@ -1391,7 +1391,7 @@ function AlgoTab({
         description="Every version is archived with its source and SEO performance (average audit score). Restore any earlier version, or load it into the editor to compare."
       >
         <div>
-          <p className="mb-1 text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">Saved versions (newest first)</p>
+          <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Saved versions (newest first)</p>
           <select
             value={selectedVersion}
             onChange={(e) => setSelectedVersion(e.target.value)}
@@ -1401,15 +1401,15 @@ function AlgoTab({
                 "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23855f6c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>\")",
             }}
           >
-            <option value="">Select a version…</option>
+            <option value="">Select a versionâ€¦</option>
             {value.versions.map((v, i) => (
               <option key={v.id} value={v.id}>
                 {formatVersionLabel(value.versions.length - i, v)}
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-[11.5px] text-[rgba(90,35,56,0.55)]">
-            &ldquo;•&rdquo; marks the version currently in use.
+          <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+            &ldquo;â€¢&rdquo; marks the version currently in use.
           </p>
         </div>
         {selectedVersion ? (
@@ -1418,7 +1418,7 @@ function AlgoTab({
               type="button"
               onClick={() => loadVersionIntoEditor(selectedVersion)}
               disabled={busy !== null}
-              className="rounded-full border border-[rgba(90,35,56,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#5a2338] hover:border-[#c9497c] hover:text-[#c9497c] disabled:opacity-60"
+              className="rounded-full border border-[rgba(43,58,103,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#2b3a67] hover:border-[#5c7bb0] hover:text-[#5c7bb0] disabled:opacity-60"
             >
               Load into editor
             </button>
@@ -1426,7 +1426,7 @@ function AlgoTab({
               type="button"
               onClick={() => restoreVersion(selectedVersion)}
               disabled={busy !== null || value.versions.find((v) => v.id === selectedVersion)?.isCurrent}
-              className="rounded-full bg-[#d95f48] px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-[#c14e38] disabled:opacity-60"
+              className="rounded-full bg-[#2b3a67] px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-[#22305a] disabled:opacity-60"
             >
               Restore as current
             </button>
@@ -1439,18 +1439,18 @@ function AlgoTab({
         open={memoryOpen}
         onToggle={() => setMemoryOpen((v) => !v)}
         title="AI learning memory"
-        description="Notes the AI keeps and rewrites after each improvement run — durable principles, what correlates with higher audit scores, and pitfalls to avoid. This is how the system improves itself over time. You can read and lightly edit it."
+        description="Notes the AI keeps and rewrites after each improvement run â€” durable principles, what correlates with higher audit scores, and pitfalls to avoid. This is how the system improves itself over time. You can read and lightly edit it."
       >
         <textarea
           value={eff.learningMemory}
           onChange={(e) => onPatch({ learningMemory: e.target.value })}
           className={
-            "w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#c9497c]"
+            "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#5c7bb0]"
           }
           rows={14}
           spellCheck={false}
         />
-        <p className="mt-1.5 text-[11.5px] text-[rgba(90,35,56,0.55)]">
+        <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
           Passed to the AI before each run so improvements build on prior learnings.
         </p>
       </Section>
@@ -1459,10 +1459,10 @@ function AlgoTab({
 }
 
 function formatVersionLabel(index: number, v: SeoAlgorithmVersion): string {
-  const dot = v.isCurrent ? "• " : "";
-  const score = v.avgAuditScore != null ? ` — avg ${Math.round(v.avgAuditScore)}` : "";
+  const dot = v.isCurrent ? "â€¢ " : "";
+  const score = v.avgAuditScore != null ? ` â€” avg ${Math.round(v.avgAuditScore)}` : "";
   const src = v.source === "manual" ? "" : ` [${v.source}]`;
-  return `${dot}v${index} — ${formatDateTime(v.createdAt)}${src}${score}`;
+  return `${dot}v${index} â€” ${formatDateTime(v.createdAt)}${src}${score}`;
 }
 
 function versionLabel(versions: SeoAlgorithmVersion[], id: string): string {
@@ -1504,7 +1504,7 @@ function Toggle({
         aria-checked={checked}
         className={
           "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors " +
-          (checked ? "bg-[#d95f48]" : "bg-[rgba(90,35,56,0.25)]")
+          (checked ? "bg-[#2b3a67]" : "bg-[rgba(43,58,103,0.25)]")
         }
       >
         <span
@@ -1514,26 +1514,26 @@ function Toggle({
           }
         />
       </button>
-      {label ? <span className="text-[13px] text-[#5a2338]">{label}</span> : null}
+      {label ? <span className="text-[13px] text-[#2b3a67]">{label}</span> : null}
     </label>
   );
 }
 
 function ComingSoon({ tab }: { tab: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[rgba(90,35,56,0.2)] px-6 py-14 text-center">
-      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#fdf1e2] text-[#c98f2e]">
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[rgba(43,58,103,0.2)] px-6 py-14 text-center">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 8v4l3 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" />
         </svg>
       </span>
       <p
-        className="text-lg font-medium italic text-[#5a2338]"
+        className="text-lg font-medium italic text-[#2b3a67]"
         style={{ fontFamily: "var(--f-serif)" }}
       >
-        {tab} — coming next
+        {tab} â€” coming next
       </p>
-      <p className="max-w-md text-[13.5px] text-[rgba(90,35,56,0.65)]">
+      <p className="max-w-md text-[13.5px] text-[rgba(43,58,103,0.65)]">
         Share the fields you want in this tab and I'll wire them to the same site-settings record.
       </p>
     </div>
@@ -1543,7 +1543,7 @@ function ComingSoon({ tab }: { tab: string }) {
 /* --------------------------- shared bits --------------------------------- */
 
 const inputCls =
-  "w-full rounded-lg border border-[rgba(90,35,56,0.2)] bg-white px-3 py-2 text-[14px] text-[#5a2338] outline-none focus:border-[#c9497c]";
+  "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-3 py-2 text-[14px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]";
 
 function Field({
   label,
@@ -1558,12 +1558,12 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(90,35,56,0.75)]">
+      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">
         {label}
-        {required ? <span className="text-[#d95f48]">*</span> : null}
+        {required ? <span className="text-[#2b3a67]">*</span> : null}
       </span>
       {children}
-      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(90,35,56,0.55)]">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(43,58,103,0.55)]">{hint}</span> : null}
     </label>
   );
 }
@@ -1608,7 +1608,7 @@ function FileDrop({
     try {
       setEditorSrc(await urlToDataUrl(value));
     } catch {
-      onError("Couldn't load the saved image for editing — upload it again instead.");
+      onError("Couldn't load the saved image for editing â€” upload it again instead.");
     }
   };
 
@@ -1638,26 +1638,26 @@ function FileDrop({
           if (f) upload(f);
         }}
         onClick={() => inputRef.current?.click()}
-        className="flex min-h-[92px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(90,35,56,0.25)] bg-[#fdf4ec] px-4 py-4 text-center text-[13px] text-[rgba(90,35,56,0.7)] transition-colors hover:border-[#d95f48] hover:bg-[#fbe0d8]/40 hover:text-[#5a2338]"
+        className="flex min-h-[92px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,58,103,0.25)] bg-[#eef2f8] px-4 py-4 text-center text-[13px] text-[rgba(43,58,103,0.7)] transition-colors hover:border-[#2b3a67] hover:bg-[#e3eaf5]/40 hover:text-[#2b3a67]"
       >
         {uploading ? (
-          <span>Uploading…</span>
+          <span>Uploadingâ€¦</span>
         ) : value ? (
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
               alt=""
-              className="h-14 w-14 rounded-md border border-[rgba(90,35,56,0.1)] bg-white object-contain p-1"
+              className="h-14 w-14 rounded-md border border-[rgba(43,58,103,0.1)] bg-white object-contain p-1"
             />
             <span className="text-left">
-              <span className="block text-[13px] font-medium text-[#5a2338]">Replace</span>
-              <span className="block text-[11.5px] text-[rgba(90,35,56,0.55)]">Drag &amp; drop or click to change</span>
+              <span className="block text-[13px] font-medium text-[#2b3a67]">Replace</span>
+              <span className="block text-[11.5px] text-[rgba(43,58,103,0.55)]">Drag &amp; drop or click to change</span>
             </span>
           </div>
         ) : (
           <span>
-            Drag &amp; Drop your files or <span className="text-[#c9497c] underline">Browse</span>
+            Drag &amp; Drop your files or <span className="text-[#5c7bb0] underline">Browse</span>
           </span>
         )}
         <input
@@ -1672,14 +1672,14 @@ function FileDrop({
         />
       </div>
       {value ? (
-        <div className="mt-2 flex items-center justify-between text-[11.5px] text-[rgba(90,35,56,0.55)]">
+        <div className="mt-2 flex items-center justify-between text-[11.5px] text-[rgba(43,58,103,0.55)]">
           <span className="truncate">{value}</span>
           <span className="ml-2 flex shrink-0 gap-1.5">
             {editable ? (
               <button
                 type="button"
                 onClick={editCurrent}
-                className="rounded-full border border-[rgba(90,35,56,0.2)] px-2 py-0.5 text-[11px] text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+                className="rounded-full border border-[rgba(43,58,103,0.2)] px-2 py-0.5 text-[11px] text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
               >
                 Edit
               </button>
@@ -1687,7 +1687,7 @@ function FileDrop({
             <button
               type="button"
               onClick={() => onChange("")}
-              className="rounded-full border border-[rgba(217,47,47,0.35)] px-2 py-0.5 text-[11px] text-[#c14e38] hover:bg-[#fbe0d8]"
+              className="rounded-full border border-[rgba(217,47,47,0.35)] px-2 py-0.5 text-[11px] text-[#b3423a] hover:bg-[#f9e8e6]"
             >
               Remove
             </button>
@@ -1712,7 +1712,7 @@ function FileDrop({
 /* --------------------------- tab icons ----------------------------------- */
 
 function TabIcon({ name, active }: { name: string; active: boolean }) {
-  const stroke = active ? "#d95f48" : "currentColor";
+  const stroke = active ? "#2b3a67" : "currentColor";
   const cls = "h-4 w-4";
   switch (name) {
     case "img":

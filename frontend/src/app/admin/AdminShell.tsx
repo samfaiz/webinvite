@@ -203,22 +203,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
     .join("");
 
   return (
-    <div className="flex min-h-svh bg-[#fff8f0] text-[#5a2338]" style={{ fontFamily: "var(--f-body)" }}>
+    <div className="flex min-h-svh bg-[#f7f9fc] text-[#2b3a67]" style={{ fontFamily: "var(--f-body)" }}>
       {/* ─────────────────────── Sidebar ─────────────────────── */}
-      <aside className="hidden w-[240px] shrink-0 flex-col border-r border-[rgba(90,35,56,0.1)] bg-white lg:flex">
-        <div className="flex items-center gap-2 border-b border-[rgba(90,35,56,0.08)] px-5 py-[18px]">
+      <aside className="hidden w-[240px] shrink-0 flex-col border-r border-[rgba(43,58,103,0.1)] bg-white lg:flex">
+        <div className="flex items-center gap-2 border-b border-[rgba(43,58,103,0.08)] px-5 py-[18px]">
           <Link
             href="/dashboard"
             aria-label="Back to my invitations"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[rgba(90,35,56,0.55)] transition-colors hover:bg-[#fdf1e2] hover:text-[#d95f48]"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-[rgba(43,58,103,0.55)] transition-colors hover:bg-[#e8edf5] hover:text-[#2b3a67]"
           >
             {icon.back()}
           </Link>
           <Link href="/admin" className="flex items-baseline gap-1.5">
-            <span className="text-[18px] font-semibold italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+            <span className="text-[18px] font-semibold italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
               Web Invite
             </span>
-            <span className="h-[4px] w-[4px] rotate-45 bg-[#e0705a]" />
+            <span className="h-[4px] w-[4px] rotate-45 bg-[#5c7bb0]" />
           </Link>
         </div>
 
@@ -232,7 +232,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <button
                     type="button"
                     onClick={() => setClosed((c) => ({ ...c, [key]: !isClosed }))}
-                    className="mb-1 flex w-full items-center justify-between px-2 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[rgba(90,35,56,0.45)] transition-colors hover:text-[#c9497c]"
+                    className="mb-1 flex w-full items-center justify-between px-2 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.45)] transition-colors hover:text-[#5c7bb0]"
                   >
                     <span>{group.title}</span>
                     <span className={"transition-transform " + (isClosed ? "-rotate-90" : "")}>
@@ -251,13 +251,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                           className={
                             "group mt-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] transition " +
                             (on
-                              ? "font-medium shadow-[0_6px_16px_rgba(217,95,72,0.28)] hover:brightness-95"
-                              : "text-[rgba(90,35,56,0.78)] hover:bg-[#fdf1e2] hover:text-[#5a2338]")
+                              ? "font-medium shadow-[0_6px_16px_rgba(43,58,103,0.28)] hover:brightness-95"
+                              : "text-[rgba(43,58,103,0.78)] hover:bg-[#e8edf5] hover:text-[#2b3a67]")
                           }
                           style={on ? { background: "var(--c-primary)", color: "var(--c-on-primary)" } : undefined}
                         >
                           <span
-                            className={on ? "" : "text-[rgba(90,35,56,0.55)] group-hover:text-[#c9497c]"}
+                            className={on ? "" : "text-[rgba(43,58,103,0.55)] group-hover:text-[#5c7bb0]"}
                             style={on ? { color: "var(--c-on-primary)" } : undefined}
                           >
                             {item.icon("h-4 w-4")}
@@ -267,7 +267,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             <span
                               className={
                                 "min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10.5px] font-semibold " +
-                                (on ? "" : "bg-[#e3a23c] text-white")
+                                (on ? "" : "bg-[#b08d57] text-white")
                               }
                               style={on ? { background: "var(--c-on-primary)", color: "var(--c-primary)" } : undefined}
                             >
@@ -282,14 +282,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
             );
           })}
 
-          <div className="mt-6 border-t border-[rgba(90,35,56,0.08)] pt-4">
+          <div className="mt-6 border-t border-[rgba(43,58,103,0.08)] pt-4">
             {OUTBOUND.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] text-[rgba(90,35,56,0.78)] transition-colors hover:bg-[#fdf1e2] hover:text-[#c9497c]"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] text-[rgba(43,58,103,0.78)] transition-colors hover:bg-[#e8edf5] hover:text-[#5c7bb0]"
               >
-                <span className="text-[rgba(90,35,56,0.55)]">{item.icon("h-4 w-4")}</span>
+                <span className="text-[rgba(43,58,103,0.55)]">{item.icon("h-4 w-4")}</span>
                 <span>{item.label}</span>
               </Link>
             ))}
@@ -300,38 +300,38 @@ export function AdminShell({ children }: { children: ReactNode }) {
       {/* ─────────────────────── Main column ─────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="flex items-center gap-3 border-b border-[rgba(90,35,56,0.08)] bg-white px-4 py-3 sm:px-6">
+        <header className="flex items-center gap-3 border-b border-[rgba(43,58,103,0.08)] bg-white px-4 py-3 sm:px-6">
           {/* Breadcrumb (mobile only shows current) */}
-          <nav className="flex items-center gap-1.5 text-[13px] text-[rgba(90,35,56,0.55)]">
-            <Link href="/admin" className="hidden hover:text-[#d95f48] sm:inline">Admin</Link>
-            <span className="hidden text-[rgba(90,35,56,0.3)] sm:inline">›</span>
-            <span className="font-medium text-[#5a2338]">{active.crumb || active.label}</span>
+          <nav className="flex items-center gap-1.5 text-[13px] text-[rgba(43,58,103,0.55)]">
+            <Link href="/admin" className="hidden hover:text-[#2b3a67] sm:inline">Admin</Link>
+            <span className="hidden text-[rgba(43,58,103,0.3)] sm:inline">›</span>
+            <span className="font-medium text-[#2b3a67]">{active.crumb || active.label}</span>
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <label className="hidden items-center gap-2 rounded-full border border-[rgba(90,35,56,0.12)] bg-[#fdf4ec] px-3 py-1.5 md:flex">
-              <span className="text-[rgba(90,35,56,0.5)]">{icon.search("h-3.5 w-3.5")}</span>
+            <label className="hidden items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-[#eef2f8] px-3 py-1.5 md:flex">
+              <span className="text-[rgba(43,58,103,0.5)]">{icon.search("h-3.5 w-3.5")}</span>
               <input
-                className="w-40 border-none bg-transparent text-[13px] text-[#5a2338] outline-none placeholder:text-[rgba(90,35,56,0.4)]"
+                className="w-40 border-none bg-transparent text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
                 placeholder="Search"
               />
             </label>
 
-            <div className="flex items-center gap-2 rounded-full border border-[rgba(90,35,56,0.12)] bg-white px-2 py-1">
+            <div className="flex items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-white px-2 py-1">
               <span
                 className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                style={{ background: "linear-gradient(135deg,#d95f48,#c9497c)" }}
+                style={{ background: "linear-gradient(135deg,#2b3a67,#5c7bb0)" }}
               >
                 {initials || "?"}
               </span>
-              <span className="hidden pr-1 text-[13px] text-[rgba(90,35,56,0.75)] sm:inline">
+              <span className="hidden pr-1 text-[13px] text-[rgba(43,58,103,0.75)] sm:inline">
                 {user?.name || user?.email?.split("@")[0]}
               </span>
             </div>
 
             <button
               onClick={logout}
-              className="rounded-full border border-[rgba(217,95,72,0.35)] px-3 py-1.5 text-[12px] font-medium text-[#c14e38] transition-colors hover:bg-[#fbe0d8]"
+              className="rounded-full border border-[rgba(43,58,103,0.35)] px-3 py-1.5 text-[12px] font-medium text-[#22305a] transition-colors hover:bg-[#e3eaf5]"
             >
               Log out
             </button>

@@ -16,7 +16,7 @@ function inlineMd(raw: string): string {
   s = s.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+|\/[^\s)]*)\)/g,
     (_m, text: string, url: string) =>
-      `<a href="${url}" class="text-[#c9497c] underline underline-offset-2 hover:text-[#d95f48]"${
+      `<a href="${url}" class="text-[#5c7bb0] underline underline-offset-2 hover:text-[#2b3a67]"${
         url.startsWith("http") ? ' target="_blank" rel="noopener noreferrer"' : ""
       }>${text}</a>`,
   );
@@ -35,7 +35,7 @@ function BlockView({ block }: { block: Block }) {
     case "hero": {
       const crop = block.imageCrop || "center";
       return (
-        <section className="relative overflow-hidden rounded-2xl border border-[rgba(201,73,124,0.2)] bg-[#fdf1e2] px-6 py-14 text-center sm:px-12 sm:py-20">
+        <section className="relative overflow-hidden rounded-2xl border border-[rgba(111,138,184,0.2)] bg-[#e8edf5] px-6 py-14 text-center sm:px-12 sm:py-20">
           {block.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -48,21 +48,21 @@ function BlockView({ block }: { block: Block }) {
           <div className="relative">
             {block.sub ? (
               <p
-                className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#c9497c]"
+                className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#5c7bb0]"
                 style={{ fontFamily: "var(--f-body)" }}
               >
                 {block.sub}
               </p>
             ) : null}
             <h1
-              className="mt-3 text-3xl font-medium italic text-[#5a2338] sm:text-5xl"
+              className="mt-3 text-3xl font-medium italic text-[#2b3a67] sm:text-5xl"
               style={{ fontFamily: "var(--f-serif)" }}
             >
               {block.heading}
             </h1>
             {block.subHeading ? (
               <p
-                className="mx-auto mt-4 max-w-2xl text-pretty text-[16px] font-light leading-[1.65] text-[rgba(90,35,56,0.72)] sm:text-[18px]"
+                className="mx-auto mt-4 max-w-2xl text-pretty text-[16px] font-light leading-[1.65] text-[rgba(43,58,103,0.72)] sm:text-[18px]"
                 style={{ fontFamily: "var(--f-body)" }}
               >
                 {block.subHeading}
@@ -73,7 +73,7 @@ function BlockView({ block }: { block: Block }) {
                 {block.ctaLabel && block.ctaHref ? (
                   <a
                     href={block.ctaHref}
-                    className="inline-block rounded-full bg-[#d95f48] px-7 py-3 text-sm font-medium text-white shadow-[0_10px_24px_rgba(217,95,72,0.3)] hover:bg-[#c14e38]"
+                    className="inline-block rounded-full bg-[#2b3a67] px-7 py-3 text-sm font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] hover:bg-[#22305a]"
                     style={{ fontFamily: "var(--f-body)" }}
                   >
                     {block.ctaLabel}
@@ -82,7 +82,7 @@ function BlockView({ block }: { block: Block }) {
                 {block.secondaryCtaLabel && block.secondaryCtaHref ? (
                   <a
                     href={block.secondaryCtaHref}
-                    className="inline-block rounded-full border border-[rgba(90,35,56,0.35)] px-6 py-3 text-sm font-medium text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
+                    className="inline-block rounded-full border border-[rgba(43,58,103,0.35)] px-6 py-3 text-sm font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
                     style={{ fontFamily: "var(--f-body)" }}
                   >
                     {block.secondaryCtaLabel}
@@ -97,19 +97,19 @@ function BlockView({ block }: { block: Block }) {
     case "heading": {
       if (block.level === 3)
         return (
-          <h3 className="text-xl font-medium italic text-[#5a2338]" style={{ fontFamily: "var(--f-serif)" }}>
+          <h3 className="text-xl font-medium italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
             {block.text}
           </h3>
         );
       return (
-        <h2 className="text-2xl font-medium italic text-[#5a2338] sm:text-3xl" style={{ fontFamily: "var(--f-serif)" }}>
+        <h2 className="text-2xl font-medium italic text-[#2b3a67] sm:text-3xl" style={{ fontFamily: "var(--f-serif)" }}>
           {block.text}
         </h2>
       );
     }
     case "paragraph":
       return (
-        <p className="leading-relaxed text-[rgba(90,35,56,0.8)]" style={{ fontFamily: "var(--f-body)" }}>
+        <p className="leading-relaxed text-[rgba(43,58,103,0.8)]" style={{ fontFamily: "var(--f-body)" }}>
           <Html text={block.text} />
         </p>
       );
@@ -117,9 +117,9 @@ function BlockView({ block }: { block: Block }) {
       return block.url ? (
         <figure className="my-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={block.url} alt={block.alt || ""} className="w-full rounded-xl border border-[rgba(90,35,56,0.1)]" />
+          <img src={block.url} alt={block.alt || ""} className="w-full rounded-xl border border-[rgba(43,58,103,0.1)]" />
           {block.caption ? (
-            <figcaption className="mt-2 text-center text-sm text-[rgba(90,35,56,0.5)]" style={{ fontFamily: "var(--f-body)" }}>
+            <figcaption className="mt-2 text-center text-sm text-[rgba(43,58,103,0.5)]" style={{ fontFamily: "var(--f-body)" }}>
               {block.caption}
             </figcaption>
           ) : null}
@@ -128,12 +128,12 @@ function BlockView({ block }: { block: Block }) {
     case "quote":
       return (
         <blockquote
-          className="border-l-4 border-[#e3a23c] pl-5 text-lg italic text-[rgba(90,35,56,0.85)]"
+          className="border-l-4 border-[#b08d57] pl-5 text-lg italic text-[rgba(43,58,103,0.85)]"
           style={{ fontFamily: "var(--f-serif)" }}
         >
           <Html text={block.text} />
           {block.cite ? (
-            <cite className="mt-2 block text-sm not-italic text-[rgba(90,35,56,0.55)]" style={{ fontFamily: "var(--f-body)" }}>
+            <cite className="mt-2 block text-sm not-italic text-[rgba(43,58,103,0.55)]" style={{ fontFamily: "var(--f-body)" }}>
               — {block.cite}
             </cite>
           ) : null}
@@ -143,7 +143,7 @@ function BlockView({ block }: { block: Block }) {
       const Tag = block.ordered ? "ol" : "ul";
       return (
         <Tag
-          className={`space-y-1 pl-6 text-[rgba(90,35,56,0.8)] ${block.ordered ? "list-decimal" : "list-disc"}`}
+          className={`space-y-1 pl-6 text-[rgba(43,58,103,0.8)] ${block.ordered ? "list-decimal" : "list-disc"}`}
           style={{ fontFamily: "var(--f-body)" }}
         >
           {block.items.map((it, i) => (
@@ -159,8 +159,8 @@ function BlockView({ block }: { block: Block }) {
             href={block.href}
             className={
               block.variant === "ghost"
-                ? "inline-block rounded-full border border-[rgba(90,35,56,0.25)] px-5 py-2.5 text-sm font-medium text-[#5a2338] hover:border-[#d95f48] hover:text-[#d95f48]"
-                : "inline-block rounded-full bg-[#d95f48] px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(217,95,72,0.3)] hover:bg-[#c14e38]"
+                ? "inline-block rounded-full border border-[rgba(43,58,103,0.25)] px-5 py-2.5 text-sm font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
+                : "inline-block rounded-full bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(43,58,103,0.3)] hover:bg-[#22305a]"
             }
             style={{ fontFamily: "var(--f-body)" }}
           >
@@ -169,7 +169,7 @@ function BlockView({ block }: { block: Block }) {
         </div>
       );
     case "divider":
-      return <hr className="border-[rgba(90,35,56,0.15)]" />;
+      return <hr className="border-[rgba(43,58,103,0.15)]" />;
     default:
       return null;
   }
