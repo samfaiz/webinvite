@@ -55,6 +55,21 @@
   --f-brand: var(--font-karla), system-ui, sans-serif;
 }
 
+/**
+ * Site chrome on the maroon/cream brand — landing, gallery, auth, dashboard,
+ * create, contact. Put this on a page's root element.
+ *
+ * `body` deliberately keeps the --c-* tokens, because those belong to
+ * invitation rendering and ThemeProvider overrides them per design. Without
+ * this class a chrome page inherits the invitation default (navy) for any text
+ * that does not set a colour of its own.
+ */
+.brand-page {
+  background: var(--b-bg);
+  color: var(--b-body);
+  font-family: var(--f-brand);
+}
+
 /* Optional dark-mode accent overrides (applied when <html data-theme="dark">). */
 [data-theme="dark"] {
   --c-primary: var(--c-primary-dark, var(--c-primary));

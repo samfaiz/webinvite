@@ -94,9 +94,9 @@ function Review({
     const wa = `https://wa.me/?text=${encodeURIComponent(`💍 You're invited to ${names}'s wedding! ${publishedUrl}`)}`;
     return (
       <div className="text-center">
-        <p className="font-script text-3xl text-[#2b3a67]">It's live! 🎉</p>
-        <p className="mt-1 text-sm text-slate-500">Share your invitation:</p>
-        <a href={publishedUrl} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-[#2b3a67] underline">
+        <p className="font-script text-3xl text-[var(--b-ink)]">It's live! 🎉</p>
+        <p className="mt-1 text-sm text-[var(--b-muted)]">Share your invitation:</p>
+        <a href={publishedUrl} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-lg bg-[var(--b-tint)] px-3 py-2 text-sm text-[var(--b-ink)] underline">
           {publishedUrl}
         </a>
         <div className="mt-4 flex flex-col gap-2">
@@ -105,11 +105,11 @@ function Review({
           </a>
           <button
             onClick={() => navigator.clipboard?.writeText(publishedUrl).then(() => setCopied(true))}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="rounded-lg border border-[var(--b-border)] px-4 py-2.5 text-sm font-medium text-[var(--b-ink)] hover:bg-[var(--b-tint)]"
           >
             {copied ? "Copied ✓" : "Copy link"}
           </button>
-          <Link href="/dashboard" className="mt-1 text-sm text-slate-500 underline">My invitations →</Link>
+          <Link href="/dashboard" className="mt-1 text-sm text-[var(--b-muted)] underline">My invitations →</Link>
         </div>
       </div>
     );
@@ -124,11 +124,11 @@ function Review({
   ];
   return (
     <div>
-      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+      <ul className="divide-y divide-[var(--b-tint)] rounded-lg border border-[var(--b-border)]">
         {rows.map(([k, v]) => (
           <li key={k} className="flex justify-between px-3 py-1.5 text-sm">
-            <span className="text-slate-500">{k}</span>
-            <span className="text-right font-medium text-slate-800">{v}</span>
+            <span className="text-[var(--b-muted)]">{k}</span>
+            <span className="text-right font-medium text-[var(--b-ink)]">{v}</span>
           </li>
         ))}
       </ul>
@@ -137,7 +137,7 @@ function Review({
           Log in or sign up to publish — your design is saved and reopens right after.
         </p>
       ) : null}
-      {msg ? <p className="mt-3 text-sm text-slate-600">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-sm text-[var(--b-body)]">{msg}</p> : null}
     </div>
   );
 }
@@ -379,13 +379,13 @@ export default function CreateWizard() {
   /* ============================ PHASE: CASTE ============================ */
   if (phase === "caste") {
     return (
-      <div className="min-h-dvh bg-[#f7f9fc] px-6 py-10">
+      <div className="brand-page min-h-dvh px-6 py-10">
         <div className="mx-auto max-w-2xl">
-          <Link href="/" className="text-sm text-slate-500 hover:text-slate-800">← Home</Link>
-          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#2b3a67]">
+          <Link href="/" className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Home</Link>
+          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[var(--b-ink)]">
             Create your invitation
           </h1>
-          <p className="font-body mt-2 text-center text-lg italic text-slate-500">
+          <p className="font-body mt-2 text-center text-lg italic text-[var(--b-muted)]">
             Which community is the wedding?
           </p>
           <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -393,10 +393,10 @@ export default function CreateWizard() {
               <button
                 key={c.id}
                 onClick={() => { setCommunity(c.id); setPhase("design"); }}
-                className="rounded-2xl border border-slate-200 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#2b3a67] hover:shadow-lg"
+                className="rounded-2xl border border-[var(--b-border)] bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[var(--b-primary)] hover:shadow-lg"
               >
-                <p className="font-display text-lg tracking-[0.08em] text-[#2b3a67]">{c.label}</p>
-                <p className="mt-1 text-sm text-slate-500">{c.sub}</p>
+                <p className="font-display text-lg tracking-[0.08em] text-[var(--b-ink)]">{c.label}</p>
+                <p className="mt-1 text-sm text-[var(--b-muted)]">{c.sub}</p>
               </button>
             ))}
           </div>
@@ -409,13 +409,13 @@ export default function CreateWizard() {
   if (phase === "design") {
     const opts = optionsFor(community);
     return (
-      <div className="min-h-dvh bg-[#f7f9fc] px-6 py-10">
+      <div className="min-h-dvh bg-[var(--b-bg)] px-6 py-10">
         <div className="mx-auto max-w-4xl">
-          <button onClick={() => setPhase("caste")} className="text-sm text-slate-500 hover:text-slate-800">← Community</button>
-          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[#2b3a67]">
+          <button onClick={() => setPhase("caste")} className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Community</button>
+          <h1 className="font-display mt-6 text-center text-2xl uppercase tracking-[0.12em] text-[var(--b-ink)]">
             Choose a design
           </h1>
-          <p className="font-body mt-2 text-center text-lg italic text-slate-500">
+          <p className="font-body mt-2 text-center text-lg italic text-[var(--b-muted)]">
             {COMMUNITIES.find((c) => c.id === community)?.label} — pick a style to preview
           </p>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -434,12 +434,12 @@ export default function CreateWizard() {
                   ) : null}
                 </div>
                 <div className="p-4 text-center">
-                  <p className="font-display text-sm uppercase tracking-[0.12em] text-[#2b3a67]">{o.name}</p>
-                  <span className="font-display mt-2 inline-block text-[11px] uppercase tracking-[0.16em] text-[#b08d57] group-hover:underline">Preview →</span>
+                  <p className="font-display text-sm uppercase tracking-[0.12em] text-[var(--b-ink)]">{o.name}</p>
+                  <span className="font-display mt-2 inline-block text-[11px] uppercase tracking-[0.16em] text-[var(--b-gold)] group-hover:underline">Preview →</span>
                 </div>
               </button>
             ))}
-            {opts.length === 0 ? <p className="col-span-full text-center text-slate-400">No designs for this community yet.</p> : null}
+            {opts.length === 0 ? <p className="col-span-full text-center text-[var(--b-muted)]">No designs for this community yet.</p> : null}
           </div>
         </div>
       </div>
@@ -449,19 +449,19 @@ export default function CreateWizard() {
   /* ============================ PHASE: PREVIEW ============================ */
   if (phase === "preview" && chosen) {
     return (
-      <div className="flex h-dvh flex-col bg-[#dbe6ef]">
+      <div className="flex h-dvh flex-col bg-[var(--b-border)]">
         <header className="flex shrink-0 items-center justify-between gap-2 bg-white px-4 py-2.5 shadow-sm">
-          <button onClick={() => setPhase("design")} className="text-sm text-slate-500 hover:text-slate-800">← Designs</button>
-          <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">{chosen.name}</span>
+          <button onClick={() => setPhase("design")} className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Designs</button>
+          <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[var(--b-ink)]">{chosen.name}</span>
           <span className="w-16" />
         </header>
         <main className="flex min-h-0 flex-1 items-center justify-center p-3">
-          <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+          <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-[var(--b-border)] bg-white shadow-2xl">
             <iframe src={`/preview/${chosen.id}`} title="Live sample" className="h-full w-full border-0" />
           </div>
         </main>
         <div className="shrink-0 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center shadow-[0_-8px_24px_rgba(20,30,60,0.1)]">
-          <button onClick={selectChosen} className="rounded-lg bg-[#2b3a67] px-8 py-3 text-sm font-medium text-white hover:bg-[#22305a]">
+          <button onClick={selectChosen} className="rounded-lg bg-[var(--b-primary)] px-8 py-3 text-sm font-medium text-white hover:bg-[var(--b-primary-deep)]">
             Select this design →
           </button>
         </div>
@@ -471,7 +471,7 @@ export default function CreateWizard() {
 
   /* ============================ PHASE: BUILD ============================ */
   if (!draft) {
-    return <div className="flex h-dvh items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex h-dvh items-center justify-center text-[var(--b-muted)]">Loading…</div>;
   }
 
   const current = STEPS[step];
@@ -479,41 +479,41 @@ export default function CreateWizard() {
   const pct = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <div className="flex h-dvh flex-col bg-[#dbe6ef]">
+    <div className="flex h-dvh flex-col bg-[var(--b-border)]">
       <header className="flex shrink-0 items-center justify-between gap-2 bg-white px-4 py-2.5 shadow-sm">
-        <Link href="/" className="text-sm text-slate-500 hover:text-slate-800">← Exit</Link>
-        <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">Create your invitation</span>
+        <Link href="/" className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Exit</Link>
+        <span className="font-display text-[13px] uppercase tracking-[0.12em] text-[var(--b-ink)]">Create your invitation</span>
         <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">✏️ You can edit live</span>
       </header>
-      <div className="h-1 w-full bg-slate-200">
-        <div className="h-full bg-[#2b3a67] transition-all" style={{ width: `${pct}%` }} />
+      <div className="h-1 w-full bg-[var(--b-border)]">
+        <div className="h-full bg-[var(--b-primary)] transition-all" style={{ width: `${pct}%` }} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* device-frame live editable preview */}
         <main className="flex h-[46dvh] shrink-0 items-center justify-center p-3 lg:h-auto lg:min-h-0 lg:flex-1">
-          <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-slate-300 bg-white shadow-2xl">
+          <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-[1.75rem] border border-[var(--b-border)] bg-white shadow-2xl">
             <iframe ref={iframeRef} src="/studio/embed?edit=1" title="Live preview — click any text to edit" className="h-full w-full border-0" />
           </div>
         </main>
 
         {/* form panel */}
-        <aside className="flex min-h-0 flex-1 flex-col border-t border-slate-200 bg-white lg:w-[400px] lg:flex-none lg:border-l lg:border-t-0">
+        <aside className="flex min-h-0 flex-1 flex-col border-t border-[var(--b-border)] bg-white lg:w-[400px] lg:flex-none lg:border-l lg:border-t-0">
           <div className="flex items-center gap-2 px-5 pt-3">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#2b3a67] text-xs text-white">✎</span>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--b-primary)] text-xs text-white">✎</span>
             <div>
-              <p className="font-display text-[13px] uppercase tracking-[0.12em] text-[#2b3a67]">{current.title}</p>
-              <p className="text-[11px] text-slate-400">Step {step + 1} of {STEPS.length} · or click text on the preview to edit</p>
+              <p className="font-display text-[13px] uppercase tracking-[0.12em] text-[var(--b-ink)]">{current.title}</p>
+              <p className="text-[11px] text-[var(--b-muted)]">Step {step + 1} of {STEPS.length} · or click text on the preview to edit</p>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
             {STEP_SECTION[current.id] ? (
-              <label className="mb-3 flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <label className="mb-3 flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-[var(--b-border)] bg-[var(--b-tint)] px-3 py-2 text-sm text-[var(--b-body)]">
                 <span>
                   Include this section
                   {draft.content.hiddenSections?.includes(STEP_SECTION[current.id]) ? (
-                    <span className="block text-[11px] text-slate-400">Hidden — it won&apos;t appear on your invitation.</span>
+                    <span className="block text-[11px] text-[var(--b-muted)]">Hidden — it won&apos;t appear on your invitation.</span>
                   ) : null}
                 </span>
                 <input
@@ -532,11 +532,11 @@ export default function CreateWizard() {
           </div>
 
           {!publishedUrl ? (
-            <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex items-center justify-between gap-2 border-t border-[var(--b-tint)] px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <button
                 disabled={step === 0}
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                className="rounded-lg border border-[var(--b-border)] px-5 py-2.5 text-sm text-[var(--b-body)] hover:bg-[var(--b-tint)] disabled:opacity-40"
               >
                 ← Back
               </button>
@@ -544,22 +544,22 @@ export default function CreateWizard() {
               {isFinish ? (
                 user ? (
                   <div className="flex gap-2">
-                    <button onClick={() => save(false)} disabled={busy} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60">
+                    <button onClick={() => save(false)} disabled={busy} className="rounded-lg border border-[var(--b-border)] px-4 py-2.5 text-sm font-medium text-[var(--b-ink)] hover:bg-[var(--b-tint)] disabled:opacity-60">
                       {busy ? "…" : "Save draft"}
                     </button>
-                    <button onClick={() => save(true)} disabled={busy} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#22305a] disabled:opacity-60">
+                    <button onClick={() => save(true)} disabled={busy} className="rounded-lg bg-[var(--b-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--b-primary-deep)] disabled:opacity-60">
                       {busy ? "…" : "Publish"}
                     </button>
                   </div>
                 ) : (
-                  <Link href={`/login?redirect=${encodeURIComponent("/create?resume=1")}`} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#22305a]">
+                  <Link href={`/login?redirect=${encodeURIComponent("/create?resume=1")}`} className="rounded-lg bg-[var(--b-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--b-primary-deep)]">
                     Log in to publish
                   </Link>
                 )
               ) : (
                 <button
                   onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
-                  className="rounded-lg bg-[#2b3a67] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#22305a]"
+                  className="rounded-lg bg-[var(--b-primary)] px-8 py-2.5 text-sm font-medium text-white hover:bg-[var(--b-primary-deep)]"
                 >
                   Next →
                 </button>

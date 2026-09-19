@@ -27,20 +27,20 @@ export default function ContactPage() {
         {/* Intro */}
         <div className="text-center">
           <span
-            className="text-[11px] font-medium tracking-[0.28em] text-[#5c7bb0]"
+            className="text-[11px] font-medium tracking-[0.28em] text-[var(--b-gold)]"
             style={{ fontFamily: "var(--f-body)" }}
           >
             CONTACT
           </span>
           <h1
-            className="mt-3 text-4xl font-medium italic text-[#2b3a67] sm:text-5xl"
+            className="mt-3 text-4xl font-medium italic text-[var(--b-ink)] sm:text-5xl"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             {heroHeadline}
           </h1>
           {c?.responseTime ? (
             <p
-              className="mt-3 text-[15px] font-light text-[rgba(43,58,103,0.7)]"
+              className="mt-3 text-[15px] font-light text-[rgba(43,27,18,0.7)]"
               style={{ fontFamily: "var(--f-body)" }}
             >
               {c.responseTime}
@@ -51,7 +51,7 @@ export default function ContactPage() {
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_1.2fr]">
           {/* Contact info */}
           <div
-            className="space-y-6 rounded-2xl border border-[rgba(111,138,184,0.15)] bg-[#e8edf5] p-6 sm:p-8"
+            className="space-y-6 rounded-2xl border border-[rgba(43,27,18,0.15)] bg-[var(--b-tint)] p-6 sm:p-8"
             style={{ fontFamily: "var(--f-body)" }}
           >
             <InfoRow label="Contact email" value={c?.contactEmail} href={c?.contactEmail ? `mailto:${c.contactEmail}` : undefined} />
@@ -64,7 +64,7 @@ export default function ContactPage() {
                 href={c.calendarUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#2b3a67] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a]"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--b-primary)] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,27,18,0.3)] transition-colors hover:bg-[var(--b-primary-deep)]"
               >
                 <span>Book a discovery call</span>
                 <span aria-hidden>→</span>
@@ -83,16 +83,16 @@ export default function ContactPage() {
 function InfoRow({ label, value, href }: { label: string; value?: string | null; href?: string }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[rgba(43,58,103,0.55)]">{label}</p>
-      <div className="mt-1 text-[15px] text-[#2b3a67]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[rgba(43,27,18,0.55)]">{label}</p>
+      <div className="mt-1 text-[15px] text-[var(--b-ink)]">
         {value ? (
           href ? (
-            <a href={href} className="hover:text-[#2b3a67] hover:underline">{value}</a>
+            <a href={href} className="hover:text-[var(--b-ink)] hover:underline">{value}</a>
           ) : (
             <span>{value}</span>
           )
         ) : (
-          <span className="text-[rgba(43,58,103,0.4)]">— not set —</span>
+          <span className="text-[rgba(43,27,18,0.4)]">— not set —</span>
         )}
       </div>
     </div>
@@ -142,7 +142,7 @@ function ContactForm({ brandName }: { brandName: string }) {
   if (sent) {
     return (
       <div
-        className="flex flex-col items-center gap-3 rounded-2xl border border-[rgba(92,138,94,0.3)] bg-white p-10 text-center shadow-[0_10px_30px_rgba(43,58,103,0.05)]"
+        className="flex flex-col items-center gap-3 rounded-2xl border border-[rgba(92,138,94,0.3)] bg-white p-10 text-center shadow-[0_10px_30px_rgba(43,27,18,0.05)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eaf6ea] text-[#2f6b50]">
@@ -150,15 +150,15 @@ function ContactForm({ brandName }: { brandName: string }) {
             <path d="M5 12l5 5 9-11" />
           </svg>
         </span>
-        <h2 className="text-2xl font-medium italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
+        <h2 className="text-2xl font-medium italic text-[var(--b-ink)]" style={{ fontFamily: "var(--f-serif)" }}>
           Message received
         </h2>
-        <p className="max-w-md text-[14.5px] text-[rgba(43,58,103,0.7)]">
+        <p className="max-w-md text-[14.5px] text-[rgba(43,27,18,0.7)]">
           Thanks — the {brandName} team will be in touch soon. We usually reply within a business day.
         </p>
         <button
           onClick={() => setSent(null)}
-          className="mt-2 rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2 text-[13px] font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
+          className="mt-2 rounded-full border border-[rgba(43,27,18,0.2)] px-4 py-2 text-[13px] font-medium text-[var(--b-ink)] hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
         >
           Send another
         </button>
@@ -169,7 +169,7 @@ function ContactForm({ brandName }: { brandName: string }) {
   return (
     <form
       onSubmit={submit}
-      className="space-y-4 rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white p-6 shadow-[0_10px_30px_rgba(43,58,103,0.05)] sm:p-8"
+      className="space-y-4 rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white p-6 shadow-[0_10px_30px_rgba(43,27,18,0.05)] sm:p-8"
       style={{ fontFamily: "var(--f-body)" }}
     >
       <div className="grid gap-4 sm:grid-cols-2">
@@ -223,17 +223,17 @@ function ContactForm({ brandName }: { brandName: string }) {
       </FormField>
 
       {error ? (
-        <p className="rounded-lg border border-[rgba(43,58,103,0.4)] bg-[#e3eaf5] px-3 py-2 text-sm text-[#7a2418]">{error}</p>
+        <p className="rounded-lg border border-[rgba(43,27,18,0.4)] bg-[var(--b-tint)] px-3 py-2 text-sm text-[#7a2418]">{error}</p>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[12px] text-[rgba(43,58,103,0.55)]">
+        <p className="text-[12px] text-[rgba(43,27,18,0.55)]">
           By sending, you agree we can email you back about this message.
         </p>
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#2b3a67] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
+          className="rounded-full bg-[var(--b-primary)] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,27,18,0.3)] transition-colors hover:bg-[var(--b-primary-deep)] disabled:opacity-60"
         >
           {busy ? "Sending…" : "Send message"}
         </button>
@@ -243,14 +243,14 @@ function ContactForm({ brandName }: { brandName: string }) {
 }
 
 const fieldCls =
-  "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-3 py-2 text-[14px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]";
+  "w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-3 py-2 text-[14px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]";
 
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">
+      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">
         {label}
-        {required ? <span className="text-[#2b3a67]">*</span> : null}
+        {required ? <span className="text-[var(--b-ink)]">*</span> : null}
       </span>
       {children}
     </label>
