@@ -84,6 +84,12 @@ const icon = {
       <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
     </svg>
   ),
+  users: (c = "h-4 w-4") => (
+    <svg className={c} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" />
+    </svg>
+  ),
   chevron: (c = "h-3 w-3") => (
     <svg className={c} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 9l6 6 6-6" />
@@ -113,6 +119,7 @@ const NAV: NavGroup[] = [
     title: "Couples",
     items: [
       { href: "/admin/invitations", label: "Invitations", icon: (c) => icon.heart(c) },
+      { href: "/admin/users", label: "Users", icon: (c) => icon.users(c) },
     ],
   },
   {
