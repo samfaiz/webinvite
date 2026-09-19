@@ -42,6 +42,29 @@ const LABELS: Record<string, string> = {
 };
 const titleise = (s?: string) => (s ? LABELS[s] ?? s.replace(/-/g, " ") : "");
 
+const GUEST_KEY = "wi-guest-key";
+
+/**
+ * A stable id for a signed-out visitor, so their likes survive a reload and
+ * a second tap removes the like rather than counting twice. Browser-local and
+ * anonymous — it identifies a browser, not a person.
+ */
+function guestKey(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    let k = localStorage.getItem(GUEST_KEY);
+    if (!k) {
+      k = crypto.randomUUID();
+      localStorage.setItem(GUEST_KEY, k);
+    }
+    return k;
+  } catch {
+    // private mode / blocked storage: likes still register, they just will not
+    // be remembered across reloads
+    return undefined;
+  }
+}
+
 /** Code presets as a fallback so the feed still works before any design is saved. */
 function presetFeed(): ExploreDesign[] {
   const seen = new Set<string>();
@@ -111,10 +134,11 @@ export default function ExplorePage() {
     scrollerRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
+  // Hydrate reactions for whoever this is — a signed-in account or just this
+  // browser. Guests have likes too, so this is not gated on `user`.
   useEffect(() => {
-    if (!user) return;
     api
-      .myDesignReactions()
+      .myDesignReactions(user ? undefined : guestKey())
       .then((r) => {
         setLiked(new Set(r.likes));
         setSaved(new Set(r.saves));
@@ -129,7 +153,9 @@ export default function ExplorePage() {
 
   const react = useCallback(
     async (design: ExploreDesign, kind: "like" | "save") => {
-      if (!user) {
+      // Liking is open to everyone. Saving needs an account, because there has
+      // to be somewhere to save it to.
+      if (kind === "save" && !user) {
         setNeedsAuth(true);
         return;
       }
@@ -151,7 +177,7 @@ export default function ExplorePage() {
         ) ?? prev,
       );
       try {
-        const r = await api.reactToDesign(design.id, kind);
+        const r = await api.reactToDesign(design.id, kind, user ? undefined : guestKey());
         setFeed((prev) =>
           prev?.map((d) => (d.id === design.id ? { ...d, likes: r.likes, saves: r.saves } : d)) ?? prev,
         );

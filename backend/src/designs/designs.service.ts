@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SaveDesignDto } from './designs.dto';
 import type { Design } from '@prisma/client';
@@ -97,10 +102,14 @@ export class DesignsService {
     return rows.map((d) => this.toDto(d));
   }
 
-  /** Which designs this user has liked / saved, for hydrating the feed. */
-  async myReactions(userId: string) {
+  /**
+   * Which designs this actor has liked / saved, for hydrating the feed.
+   * Takes the actor rather than a user id so a signed-out guest still gets
+   * their own likes back (they are keyed on a browser-local id).
+   */
+  async reactionsFor(actor: string) {
     const rows = await this.prisma.designReaction.findMany({
-      where: { userId },
+      where: { actor },
       select: { designId: true, kind: true },
     });
     return {
@@ -114,14 +123,24 @@ export class DesignsService {
    * of truth and the counter on Design is updated in the same transaction, so
    * a double-tap can never drift the count.
    */
-  async react(userId: string, designId: string, kind: string) {
+  async react(
+    { userId, guestKey }: { userId?: string; guestKey?: string },
+    designId: string,
+    kind: string,
+  ) {
     if (kind !== 'like' && kind !== 'save')
       throw new BadRequestException('kind must be "like" or "save"');
+    // Liking is open to everyone; saving needs somewhere to save to.
+    if (kind === 'save' && !userId)
+      throw new UnauthorizedException('Sign in to save designs');
+    const actor = userId ? `u:${userId}` : guestKey ? `g:${guestKey}` : null;
+    if (!actor) throw new BadRequestException('guestKey is required when signed out');
+
     const design = await this.prisma.design.findUnique({ where: { id: designId } });
     if (!design) throw new NotFoundException('Design not found');
 
     const existing = await this.prisma.designReaction.findUnique({
-      where: { designId_userId_kind: { designId, userId, kind } },
+      where: { designId_actor_kind: { designId, actor, kind } },
     });
     const field = kind === 'like' ? 'likes' : 'saves';
     const delta = existing ? -1 : 1;
@@ -129,7 +148,9 @@ export class DesignsService {
     const [, updated] = await this.prisma.$transaction([
       existing
         ? this.prisma.designReaction.delete({ where: { id: existing.id } })
-        : this.prisma.designReaction.create({ data: { designId, userId, kind } }),
+        : this.prisma.designReaction.create({
+            data: { designId, actor, userId: userId ?? null, kind },
+          }),
       this.prisma.design.update({
         where: { id: designId },
         // guard against a negative count if a row was ever removed out of band

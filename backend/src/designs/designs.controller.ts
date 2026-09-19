@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { DesignsService } from './designs.service';
 import { ReactDto, SaveDesignDto } from './designs.dto';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
+import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard } from '../auth/guards';
 import { CurrentUser, Roles, type AuthUser } from '../auth/auth.decorators';
 
 @Controller()
@@ -34,21 +34,26 @@ export class DesignsController {
     return this.svc.explore({ category, community, country });
   }
 
-  /* reactions — signed-in guests only */
-  @UseGuards(JwtAuthGuard)
+  /* Reactions. Liking is open to everyone — a signed-out guest is identified
+     by a key their browser generates — so these use optional auth rather than
+     requiring a session. Saving still needs an account; the service enforces
+     that, not the guard. */
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('designs/reactions/mine')
-  myReactions(@CurrentUser() user: AuthUser) {
-    return this.svc.myReactions(user.id);
+  myReactions(@CurrentUser() user: AuthUser | undefined, @Query('guestKey') guestKey?: string) {
+    const actor = user ? `u:${user.id}` : guestKey ? `g:${guestKey}` : null;
+    if (!actor) return { likes: [], saves: [] };
+    return this.svc.reactionsFor(actor);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Post('designs/:id/react')
   react(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: AuthUser | undefined,
     @Param('id') id: string,
     @Body() dto: ReactDto,
   ) {
-    return this.svc.react(user.id, id, dto.kind);
+    return this.svc.react({ userId: user?.id, guestKey: dto.guestKey }, id, dto.kind);
   }
 
   @Get('designs/:id')

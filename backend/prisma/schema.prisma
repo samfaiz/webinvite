@@ -78,19 +78,27 @@ model Design {
   @@index([category, country])
 }
 
-/// One guest's like or save of a design. The unique constraint makes the
-/// toggle idempotent, and `Design.likes`/`saves` are kept in step in the
-/// same transaction.
+/// One like or save of a design. The unique constraint makes the toggle
+/// idempotent, and `Design.likes`/`saves` are kept in step in the same
+/// transaction.
+///
+/// Liking does not require an account, so the actor is not always a user:
+/// `actor` is "u:<userId>" when signed in and "g:<browserKey>" for a guest.
+/// It is a single non-null column precisely so the unique index works for
+/// both — SQL treats NULLs as distinct, so a nullable userId could not
+/// deduplicate anonymous likes.
 model DesignReaction {
   id        String   @id @default(cuid())
   designId  String
   design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor     String
+  /// set only for signed-in reactions, so "my saves" can still be listed
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   kind      String // "like" | "save"
   createdAt DateTime @default(now())
 
-  @@unique([designId, userId, kind])
+  @@unique([designId, actor, kind])
   @@index([userId, kind])
 }
 

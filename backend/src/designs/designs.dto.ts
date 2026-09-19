@@ -44,4 +44,9 @@ export class ReactDto {
   /** "like" | "save" */
   @IsString()
   kind!: string;
+
+  /** Browser-generated id, sent when the visitor is not signed in. */
+  @IsOptional()
+  @IsString()
+  guestKey?: string;
 }

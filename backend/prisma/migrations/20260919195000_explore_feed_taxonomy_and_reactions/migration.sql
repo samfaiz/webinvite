@@ -18,11 +18,16 @@ ALTER TABLE "Design" ADD COLUMN "saves" INTEGER NOT NULL DEFAULT 0;
 -- CreateIndex
 CREATE INDEX "Design_category_country_idx" ON "Design"("category", "country");
 
--- CreateTable: one row per (design, user, kind)
+-- CreateTable: one row per (design, actor, kind).
+-- `actor` is "u:<userId>" when signed in and "g:<browserKey>" for a guest,
+-- because liking does not require an account. It is a single non-null column
+-- so the unique index deduplicates both cases — a nullable userId could not,
+-- since SQL treats NULLs as distinct.
 CREATE TABLE "DesignReaction" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "designId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "actor" TEXT NOT NULL,
+    "userId" TEXT,
     "kind" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "DesignReaction_designId_fkey" FOREIGN KEY ("designId") REFERENCES "Design" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -31,4 +36,4 @@ CREATE TABLE "DesignReaction" (
 
 -- CreateIndex
 CREATE INDEX "DesignReaction_userId_kind_idx" ON "DesignReaction"("userId", "kind");
-CREATE UNIQUE INDEX "DesignReaction_designId_userId_kind_key" ON "DesignReaction"("designId", "userId", "kind");
+CREATE UNIQUE INDEX "DesignReaction_designId_actor_kind_key" ON "DesignReaction"("designId", "actor", "kind");

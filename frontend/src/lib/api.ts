@@ -126,11 +126,15 @@ export const api = {
     ).toString();
     return request<any[]>(`/designs/explore${q ? `?${q}` : ""}`);
   },
-  myDesignReactions: () => request<{ likes: string[]; saves: string[] }>("/designs/reactions/mine"),
-  reactToDesign: (id: string, kind: "like" | "save") =>
+  myDesignReactions: (guestKey?: string) =>
+    request<{ likes: string[]; saves: string[] }>(
+      `/designs/reactions/mine${guestKey ? `?guestKey=${encodeURIComponent(guestKey)}` : ""}`,
+    ),
+  /** Liking needs no account — `guestKey` identifies a signed-out visitor. */
+  reactToDesign: (id: string, kind: "like" | "save", guestKey?: string) =>
     request<{ kind: string; on: boolean; likes: number; saves: number }>(
       `/designs/${id}/react`,
-      { method: "POST", body: JSON.stringify({ kind }) },
+      { method: "POST", body: JSON.stringify({ kind, guestKey }) },
     ),
 
   // duplicate an invitation into a new draft (needs the admin-granted permission)
