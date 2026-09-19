@@ -77,7 +77,16 @@ export function ExploreCard({
     <div
       onClick={flip}
       className="relative flex flex-1 flex-col items-center justify-center overflow-hidden pl-7 pr-16 text-center"
-      style={{ background: surface, fontFamily: "var(--f-brand)" }}
+      style={{
+        // inset from the chrome so the card reads as a card, with a hairline in
+        // the design's own accent so the rounded edge stays visible whatever
+        // the theme's colours are
+        margin: "6px 14px",
+        borderRadius: 18,
+        border: `1px solid ${c.accent}59`,
+        background: surface,
+        fontFamily: "var(--f-brand)",
+      }}
     >
       {bgImage ? (
         <div

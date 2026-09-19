@@ -442,7 +442,7 @@ export default function Landing() {
         <Link
           href="/create"
           className="rounded-full px-10 py-4 text-[15px] font-medium tracking-[0.04em] shadow-[0_12px_30px_rgba(43,27,18,0.35)] transition hover:brightness-95"
-          style={{ background: "var(--c-primary)", color: "var(--c-on-primary)" }}
+          style={{ background: "var(--b-primary)", color: "var(--b-bg)" }}
         >
           Start free
         </Link>
