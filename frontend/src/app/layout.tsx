@@ -33,7 +33,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#2b3a67",
+  themeColor: "#7a2e2a", // brand maroon — tints the mobile browser chrome
 };
 
 const cinzel = Cinzel({
