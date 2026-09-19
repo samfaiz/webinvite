@@ -46,6 +46,9 @@ const COMMUNITY_OF: Record<string, string> = {
   interfaith: "secular",
 };
 
+/** Page container — matches the footer's width so every band lines up. */
+const CONTAINER = "mx-auto w-full max-w-[1240px]";
+
 const SAMPLE = { eyebrow: "SAVE THE DATE", names: "Aarav & Meera", line: "12.12.2026 · Jaipur" };
 
 /** A row from `GET /designs` (see the backend's DesignsService.toDto). */
@@ -148,9 +151,13 @@ export function LandingTop() {
     <div style={{ background: "var(--b-bg)", fontFamily: "var(--f-brand)" }}>
       {/* ---------------------------------------------------------- Nav */}
       <nav
-        className="flex items-center justify-between px-6 py-[18px] sm:px-12"
+        className="py-[18px]"
         style={{ borderBottom: "1px solid rgba(43,27,18,.08)" }}
       >
+        {/* The rule spans the viewport; the content stays in the page container.
+            The gutter lives on the inner element, not the nav, so the logo lines
+            up with the hero rather than sitting a gutter-width further out. */}
+        <div className={`${CONTAINER} flex items-center justify-between px-6 sm:px-12`}>
         <Link href="/" className="flex items-baseline gap-[2px]">
           <span
             className="text-[22px] font-bold"
@@ -188,7 +195,10 @@ export function LandingTop() {
             Create invite
           </Link>
         </div>
+        </div>
       </nav>
+
+      <div className={CONTAINER}>
 
       {/* --------------------------------------------------------- Hero */}
       <section className="grid items-center gap-10 px-6 pb-12 pt-10 sm:px-12 lg:grid-cols-[1fr_460px] lg:pt-14">
@@ -412,6 +422,7 @@ export function LandingTop() {
           <span className="text-[11px]">phone preview</span>
         </div>
       </section>
+      </div>
     </div>
   );
 }

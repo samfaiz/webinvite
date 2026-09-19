@@ -227,7 +227,7 @@ export default function Landing() {
       <LandingTop />
 
       {/* How it works */}
-      <section id="how" className="mx-auto max-w-[1140px] px-6 pb-16 pt-20 sm:px-16 sm:pb-20 sm:pt-24">
+      <section id="how" className="mx-auto max-w-[1240px] px-6 pb-16 pt-20 sm:px-16 sm:pb-20 sm:pt-24">
         <div className="mb-12 flex flex-col items-center gap-3 text-center">
           <span className="text-[11px] font-medium tracking-[0.28em] text-[var(--b-gold)]" style={{ fontFamily: "var(--f-body)" }}>
             HOW IT WORKS
@@ -290,7 +290,7 @@ export default function Landing() {
       </section>
 
       {/* Live RSVP demo */}
-      <section className="mx-auto max-w-[1140px] px-6 pb-20 sm:grid sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16">
+      <section className="mx-auto max-w-[1240px] px-6 pb-20 sm:grid sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16">
         <div className="flex flex-col gap-3.5 rounded-2xl border border-[rgba(111,138,184,0.25)] bg-white p-7 shadow-[0_20px_50px_rgba(43,27,18,0.08)]">
           <div className="flex items-baseline justify-between">
             <span className="text-[12px] font-medium tracking-[0.18em] text-[rgba(43,27,18,0.55)]" style={{ fontFamily: "var(--f-body)" }}>
@@ -343,7 +343,7 @@ export default function Landing() {
 
       {/* Customization */}
       <section className="bg-[var(--b-tint)]">
-        <div className="mx-auto max-w-[1140px] px-6 py-20 sm:grid sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-24">
+        <div className="mx-auto max-w-[1240px] px-6 py-20 sm:grid sm:grid-cols-2 sm:items-center sm:gap-16 sm:px-16 sm:py-24">
           <div className="flex max-w-[440px] flex-col gap-4">
             <span className="text-[11px] font-medium tracking-[0.28em] text-[var(--b-gold)]" style={{ fontFamily: "var(--f-body)" }}>
               FULL CUSTOMIZATION
