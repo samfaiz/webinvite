@@ -119,6 +119,20 @@ export const api = {
   listDesigns: () => request<any[]>("/designs"),
   getDesign: (id: string) => request<any>(`/designs/${id}`),
 
+  /* explore feed */
+  exploreDesigns: (f: { category?: string; community?: string; country?: string } = {}) => {
+    const q = new URLSearchParams(
+      Object.entries(f).filter(([, v]) => !!v) as [string, string][],
+    ).toString();
+    return request<any[]>(`/designs/explore${q ? `?${q}` : ""}`);
+  },
+  myDesignReactions: () => request<{ likes: string[]; saves: string[] }>("/designs/reactions/mine"),
+  reactToDesign: (id: string, kind: "like" | "save") =>
+    request<{ kind: string; on: boolean; likes: number; saves: number }>(
+      `/designs/${id}/react`,
+      { method: "POST", body: JSON.stringify({ kind }) },
+    ),
+
   // duplicate an invitation into a new draft (needs the admin-granted permission)
   duplicateInvitation: (id: string) =>
     request<any>(`/invitations/${id}/duplicate`, { method: "POST" }, true),

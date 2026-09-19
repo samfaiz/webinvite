@@ -25,6 +25,7 @@ model User {
   canDuplicate Boolean      @default(false)
   createdAt    DateTime     @default(now())
   invitations  Invitation[]
+  reactions    DesignReaction[]
 }
 
 model Invitation {
@@ -63,7 +64,34 @@ model Design {
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
 
+  /// explore-feed taxonomy. `community` already carries religion; these two
+  /// add the other axes the landing chips and the feed filter by.
+  category       String   @default("wedding") // wedding | birthday | baby-shower | engagement | housewarming | anniversary | corporate | festival | graduation
+  country        String   @default("india")
+  /// denormalised counters so the feed can order by popularity without
+  /// aggregating reactions on every request
+  likes          Int      @default(0)
+  saves          Int      @default(0)
+  reactions      DesignReaction[]
+
   @@index([community])
+  @@index([category, country])
+}
+
+/// One guest's like or save of a design. The unique constraint makes the
+/// toggle idempotent, and `Design.likes`/`saves` are kept in step in the
+/// same transaction.
+model DesignReaction {
+  id        String   @id @default(cuid())
+  designId  String
+  design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String // "like" | "save"
+  createdAt DateTime @default(now())
+
+  @@unique([designId, userId, kind])
+  @@index([userId, kind])
 }
 
 model Rsvp {

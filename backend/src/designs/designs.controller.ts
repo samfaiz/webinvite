@@ -6,12 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { DesignsService } from './designs.service';
-import { SaveDesignDto } from './designs.dto';
+import { ReactDto, SaveDesignDto } from './designs.dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/auth.decorators';
+import { CurrentUser, Roles, type AuthUser } from '../auth/auth.decorators';
 
 @Controller()
 export class DesignsController {
@@ -21,6 +22,33 @@ export class DesignsController {
   @Get('designs')
   list() {
     return this.svc.listActive();
+  }
+
+  /** Explore feed. Declared before `designs/:id` so "explore" is not read as an id. */
+  @Get('designs/explore')
+  explore(
+    @Query('category') category?: string,
+    @Query('community') community?: string,
+    @Query('country') country?: string,
+  ) {
+    return this.svc.explore({ category, community, country });
+  }
+
+  /* reactions — signed-in guests only */
+  @UseGuards(JwtAuthGuard)
+  @Get('designs/reactions/mine')
+  myReactions(@CurrentUser() user: AuthUser) {
+    return this.svc.myReactions(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('designs/:id/react')
+  react(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: ReactDto,
+  ) {
+    return this.svc.react(user.id, id, dto.kind);
   }
 
   @Get('designs/:id')

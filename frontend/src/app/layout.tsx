@@ -10,6 +10,7 @@ import {
   Dancing_Script,
   Parisienne,
   Inter,
+  Karla,
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
@@ -67,12 +68,14 @@ const ebGaramond = EB_Garamond({ variable: "--font-ebgaramond", subsets: ["latin
 const dancing = Dancing_Script({ variable: "--font-dancing", subsets: ["latin"], weight: ["400", "700"] });
 const parisienne = Parisienne({ variable: "--font-parisienne", subsets: ["latin"], weight: ["400"] });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
+// Karla — body face for the maroon/cream brand direction
+const karla = Karla({ variable: "--font-karla", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 const spaceMono = Space_Mono({ variable: "--font-space-mono", subsets: ["latin"], weight: ["400", "700"] });
 
 const fontVars = [
   cinzel, cormorant, greatVibes, jost, playfair, marcellus, ebGaramond, dancing, parisienne,
-  inter, spaceGrotesk, spaceMono,
+  inter, karla, spaceGrotesk, spaceMono,
 ]
   .map((f) => f.variable)
   .join(" ");

@@ -29,6 +29,30 @@
   --f-headings: var(--font-space-grotesk), system-ui, sans-serif;
   --f-mono: var(--font-space-mono), ui-monospace, monospace;
   --f-serif: var(--font-cormorant), serif;
+
+  /* ---------------------------------------------------------------------
+     Brand: maroon / cream (design handoff, turn 1).
+     Kept as its own token set rather than overwriting --c-* so the two can
+     coexist while surfaces are migrated screen by screen. Shared by the
+     landing page, explore feed and the admin chrome.
+     --------------------------------------------------------------------- */
+  --b-bg: #faf6ef;        /* page background — warm cream */
+  --b-surface: #fbf3e4;   /* raised surface */
+  --b-tint: #f5ead6;      /* chip / panel tint */
+  --b-sand: #f0dcbb;      /* active chip, warm fill */
+  --b-primary: #7a2e2a;   /* maroon — CTAs, selected chips */
+  --b-primary-deep: #4d1a17;
+  --b-primary-lift: #8f3a34;
+  --b-ink: #2b1b12;       /* espresso — headings */
+  --b-body: #4a382c;      /* body copy */
+  --b-muted: #8a7563;     /* secondary copy */
+  --b-gold: #c39b4e;      /* accent */
+  --b-gold-soft: #e2c186;
+  --b-gold-deep: #a4763a;
+  --b-green: #1d7a4f;     /* live RSVP / confirmed */
+  --b-border: #e0c9b0;
+  --b-border-soft: #c9b499;
+  --f-brand: var(--font-karla), system-ui, sans-serif;
 }
 
 /* Optional dark-mode accent overrides (applied when <html data-theme="dark">). */

@@ -7,6 +7,15 @@ export class SaveDesignDto {
   @IsString()
   community!: string;
 
+  /** explore taxonomy — optional so existing admin payloads keep working */
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
   @IsString()
   templateId!: string;
 
@@ -29,4 +38,10 @@ export class SaveDesignDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+}
+
+export class ReactDto {
+  /** "like" | "save" */
+  @IsString()
+  kind!: string;
 }
