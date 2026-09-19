@@ -101,7 +101,7 @@ export default function AdminDesignsPage() {
   }, [embedReady, templateId, name, colors, fonts, particles, backgrounds, community]);
 
   if (loading || !user || user.role !== "admin") {
-    return <div className="flex h-dvh items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex h-dvh items-center justify-center text-[var(--b-muted)]">Loading…</div>;
   }
 
   const refresh = () => api.adminListDesigns().then(setDesigns).catch(() => {});
@@ -185,10 +185,10 @@ export default function AdminDesignsPage() {
 
   return (
     <div className="min-h-dvh bg-[#f4f1ea]">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+      <header className="flex items-center justify-between border-b border-[var(--b-border)] bg-white px-6 py-3">
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="text-sm text-slate-500 hover:text-slate-800">← Admin</Link>
-          <span className="font-display text-lg uppercase tracking-[0.12em] text-[#2b3a67]">Designs</span>
+          <Link href="/admin" className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Admin</Link>
+          <span className="font-display text-lg uppercase tracking-[0.12em] text-[var(--b-ink)]">Designs</span>
         </div>
       </header>
 
@@ -196,22 +196,22 @@ export default function AdminDesignsPage() {
         {/* form */}
         <div>
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl uppercase tracking-[0.1em] text-[#2b3a67]">
+            <h2 className="font-display text-xl uppercase tracking-[0.1em] text-[var(--b-ink)]">
               {editingId ? "Edit design" : "Create a design"}
             </h2>
             {editingId ? (
-              <button onClick={resetForm} className="text-xs text-slate-500 underline hover:text-slate-800">
+              <button onClick={resetForm} className="text-xs text-[var(--b-muted)] underline hover:text-[var(--b-ink)]">
                 Cancel edit · start new
               </button>
             ) : null}
           </div>
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-4 text-sm text-[var(--b-muted)]">
             {editingId
               ? "Replace any background image, tweak the colours & fonts, then save your changes."
               : "Upload background art per section, set the colours & fonts, and assign a community. Couples will pick this and just fill in their details."}
           </p>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="rounded-xl border border-[var(--b-border)] bg-white p-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Design name"><TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Royal Lake Como" /></Field>
               <Field label="Community / caste"><Select value={community} onChange={setCommunity} options={COMMUNITIES} /></Field>
@@ -219,21 +219,21 @@ export default function AdminDesignsPage() {
               <Field label="Prefill colours from theme"><Select value="" onChange={(v) => v && prefill(v)} options={[{ value: "", label: "— choose —" }, ...themeList.map((t) => ({ value: t.id, label: t.name }))]} /></Field>
             </div>
 
-            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Background art</p>
+            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--b-muted)]">Background art</p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {SECTIONS.map((s) => (
-                <div key={s.key} className="flex items-center gap-2 rounded-lg border border-slate-200 p-2">
-                  <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-slate-100">
+                <div key={s.key} className="flex items-center gap-2 rounded-lg border border-[var(--b-border)] p-2">
+                  <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-[var(--b-tint)]">
                     {backgrounds[s.key] ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={backgrounds[s.key]} alt={s.label} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[9px] text-slate-400">none</div>
+                      <div className="flex h-full w-full items-center justify-center text-[9px] text-[var(--b-muted)]">none</div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-slate-600">{s.label}</p>
-                    <input type="file" accept="image/*" onChange={(e) => upload(e.target.files?.[0], s.key)} className="mt-1 block w-full text-[11px] text-slate-500 file:mr-2 file:rounded file:border-0 file:bg-slate-800 file:px-2 file:py-1 file:text-white" />
+                    <p className="truncate text-xs font-medium text-[var(--b-body)]">{s.label}</p>
+                    <input type="file" accept="image/*" onChange={(e) => upload(e.target.files?.[0], s.key)} className="mt-1 block w-full text-[11px] text-[var(--b-muted)] file:mr-2 file:rounded file:border-0 file:bg-[var(--b-ink)] file:px-2 file:py-1 file:text-white" />
                     {status[s.key] ? (
                       <p className="mt-0.5 text-[10px]" style={{ color: status[s.key].startsWith("⚠") ? "#dc2626" : "#16a34a" }}>
                         {status[s.key]}
@@ -244,7 +244,7 @@ export default function AdminDesignsPage() {
               ))}
             </div>
 
-            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Colours</p>
+            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--b-muted)]">Colours</p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {COLOR_TOKENS.map((t) => (
                 <Field key={t.key} label={t.label}>
@@ -253,7 +253,7 @@ export default function AdminDesignsPage() {
               ))}
             </div>
 
-            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Fonts & particles</p>
+            <p className="mb-2 mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--b-muted)]">Fonts & particles</p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Field label="Display"><Select value={fonts.display} onChange={(v) => setFonts((f) => ({ ...f, display: v }))} options={FONTS} /></Field>
               <Field label="Script"><Select value={fonts.script} onChange={(v) => setFonts((f) => ({ ...f, script: v }))} options={FONTS} /></Field>
@@ -263,31 +263,31 @@ export default function AdminDesignsPage() {
 
             <div className="mt-5 flex items-center gap-3">
               <Btn variant="primary" onClick={save} {...(busy ? { disabled: true } : {})}>{busy ? "Saving…" : editingId ? "Save changes" : "Save design"}</Btn>
-              {msg ? <span className="text-sm text-slate-500">{msg}</span> : null}
+              {msg ? <span className="text-sm text-[var(--b-muted)]">{msg}</span> : null}
             </div>
           </div>
 
           {/* existing designs */}
-          <h3 className="font-display mt-8 text-lg uppercase tracking-[0.1em] text-[#2b3a67]">Existing designs ({designs.length})</h3>
+          <h3 className="font-display mt-8 text-lg uppercase tracking-[0.1em] text-[var(--b-ink)]">Existing designs ({designs.length})</h3>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {designs.map((d) => (
               <div
                 key={d.id}
-                className={`overflow-hidden rounded-lg border bg-white ${editingId === d.id ? "border-[#2b3a67] ring-2 ring-[#2b3a67]/30" : "border-slate-200"}`}
+                className={`overflow-hidden rounded-lg border bg-white ${editingId === d.id ? "border-[var(--b-primary)] ring-2 ring-[var(--b-primary)]/30" : "border-[var(--b-border)]"}`}
               >
-                <div className="h-24 bg-slate-100">
+                <div className="h-24 bg-[var(--b-tint)]">
                   {d.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={d.previewUrl} alt={d.name} className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="p-2">
-                  <p className="truncate text-xs font-medium text-slate-700">{d.name}</p>
-                  <p className="text-[10px] text-slate-400">{getMotif(d.community).name}</p>
+                  <p className="truncate text-xs font-medium text-[var(--b-body)]">{d.name}</p>
+                  <p className="text-[10px] text-[var(--b-muted)]">{getMotif(d.community).name}</p>
                   <div className="mt-1 flex items-center gap-3">
                     <button
                       onClick={() => startEdit(d)}
-                      className="text-[10px] font-medium text-[#2b3a67] hover:underline"
+                      className="text-[10px] font-medium text-[var(--b-ink)] hover:underline"
                     >
                       Edit
                     </button>
@@ -301,14 +301,14 @@ export default function AdminDesignsPage() {
                 </div>
               </div>
             ))}
-            {designs.length === 0 ? <p className="text-sm text-slate-400">No designs yet.</p> : null}
+            {designs.length === 0 ? <p className="text-sm text-[var(--b-muted)]">No designs yet.</p> : null}
           </div>
         </div>
 
         {/* live device preview */}
         <div className="lg:sticky lg:top-6 lg:self-start">
-          <p className="mb-2 text-center text-[11px] uppercase tracking-[0.16em] text-slate-400">Live preview</p>
-          <div className="mx-auto aspect-[9/16] w-full max-w-[300px] overflow-hidden rounded-[1.5rem] border border-slate-300 bg-white shadow-xl">
+          <p className="mb-2 text-center text-[11px] uppercase tracking-[0.16em] text-[var(--b-muted)]">Live preview</p>
+          <div className="mx-auto aspect-[9/16] w-full max-w-[300px] overflow-hidden rounded-[1.5rem] border border-[var(--b-border-soft)] bg-white shadow-xl">
             <iframe ref={iframeRef} src="/studio/embed" title="Live preview" className="h-full w-full border-0" />
           </div>
         </div>

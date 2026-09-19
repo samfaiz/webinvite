@@ -68,7 +68,7 @@ export default function AdminContactMessagesPage() {
   if (loading || items === null) {
     return (
       <div
-        className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
+        className="flex h-[70vh] items-center justify-center text-[rgba(43,27,18,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         Loading messages…
@@ -88,15 +88,15 @@ export default function AdminContactMessagesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
-            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.55)]">Inbox</span>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.75)]">Contact Messages</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,27,18,0.55)]">
+            <Link href="/admin" className="hover:text-[var(--b-ink)]">Admin</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.55)]">Inbox</span>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.75)]">Contact Messages</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[var(--b-ink)] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Contact Messages
@@ -104,10 +104,10 @@ export default function AdminContactMessagesPage() {
         </div>
       </div>
 
-      {err ? <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.4)] bg-[#e3eaf5] px-4 py-2 text-sm text-[#7a2418]">{err}</div> : null}
+      {err ? <div className="mt-4 rounded-lg border border-[rgba(43,27,18,0.4)] bg-[var(--b-tint)] px-4 py-2 text-sm text-[#7a2418]">{err}</div> : null}
 
       {/* Filter tabs */}
-      <div className="mt-6 flex flex-wrap gap-1 rounded-full border border-[rgba(111,138,184,0.15)] bg-white p-1">
+      <div className="mt-6 flex flex-wrap gap-1 rounded-full border border-[rgba(43,27,18,0.15)] bg-white p-1">
         {(["all", "new", "read", "replied"] as Filter[]).map((f) => {
           const on = filter === f;
           return (
@@ -116,7 +116,7 @@ export default function AdminContactMessagesPage() {
               onClick={() => setFilter(f)}
               className={
                 "rounded-full px-4 py-1.5 text-[12.5px] font-medium capitalize transition-colors " +
-                (on ? "bg-[#2b3a67] text-white shadow-[0_6px_14px_rgba(43,58,103,0.25)]" : "text-[rgba(43,58,103,0.7)] hover:bg-[#eef2f8]")
+                (on ? "bg-[var(--b-primary)] text-white shadow-[0_6px_14px_rgba(43,27,18,0.25)]" : "text-[rgba(43,27,18,0.7)] hover:bg-[var(--b-tint)]")
               }
             >
               {f} <span className="ml-1 opacity-60">{counts[f]}</span>
@@ -127,15 +127,15 @@ export default function AdminContactMessagesPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(280px,360px)_1fr]">
         {/* List */}
-        <div className="overflow-hidden rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+        <div className="overflow-hidden rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
           {visible.length === 0 ? (
-            <p className="px-4 py-10 text-center text-[13px] text-[rgba(43,58,103,0.5)]">
+            <p className="px-4 py-10 text-center text-[13px] text-[rgba(43,27,18,0.5)]">
               {items.length === 0
                 ? "No messages yet."
                 : `No ${filter === "all" ? "" : filter + " "}messages.`}
             </p>
           ) : (
-            <ul className="divide-y divide-[rgba(43,58,103,0.06)]">
+            <ul className="divide-y divide-[rgba(43,27,18,0.06)]">
               {visible.map((m) => {
                 const on = m.id === selectedId;
                 return (
@@ -144,24 +144,24 @@ export default function AdminContactMessagesPage() {
                       onClick={() => setSelectedId(m.id)}
                       className={
                         "flex w-full flex-col items-start gap-1 px-4 py-3 text-left transition-colors " +
-                        (on ? "bg-[#e3eaf5]/50" : "hover:bg-[#eef2f8]/60")
+                        (on ? "bg-[var(--b-tint)]/50" : "hover:bg-[var(--b-tint)]/60")
                       }
                     >
                       <span className="flex w-full items-center justify-between gap-2">
                         <span className="flex items-center gap-2 truncate">
                           {m.status === "new" ? (
-                            <span className="h-2 w-2 shrink-0 rounded-full bg-[#b08d57]" aria-label="Unread" />
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--b-gold)]" aria-label="Unread" />
                           ) : null}
-                          <span className="truncate text-[13.5px] font-medium text-[#2b3a67]">{m.name}</span>
+                          <span className="truncate text-[13.5px] font-medium text-[var(--b-ink)]">{m.name}</span>
                         </span>
-                        <span className="shrink-0 text-[11px] text-[rgba(43,58,103,0.5)]">
+                        <span className="shrink-0 text-[11px] text-[rgba(43,27,18,0.5)]">
                           {new Date(m.createdAt).toLocaleDateString()}
                         </span>
                       </span>
                       {m.subject ? (
-                        <span className="line-clamp-1 text-[12.5px] text-[rgba(43,58,103,0.65)]">{m.subject}</span>
+                        <span className="line-clamp-1 text-[12.5px] text-[rgba(43,27,18,0.65)]">{m.subject}</span>
                       ) : null}
-                      <span className="line-clamp-2 text-[12px] text-[rgba(43,58,103,0.5)]">{m.message}</span>
+                      <span className="line-clamp-2 text-[12px] text-[rgba(43,27,18,0.5)]">{m.message}</span>
                     </button>
                   </li>
                 );
@@ -171,7 +171,7 @@ export default function AdminContactMessagesPage() {
         </div>
 
         {/* Detail */}
-        <div className="min-h-[300px] rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+        <div className="min-h-[300px] rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
           {selected ? (
             <MessageDetail
               m={selected}
@@ -188,7 +188,7 @@ export default function AdminContactMessagesPage() {
               }}
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 py-12 text-center text-[13.5px] text-[rgba(43,58,103,0.5)]">
+            <div className="flex h-full items-center justify-center px-6 py-12 text-center text-[13.5px] text-[rgba(43,27,18,0.5)]">
               Select a message on the left to read it.
             </div>
           )}
@@ -226,22 +226,22 @@ function MessageDetail({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[rgba(43,58,103,0.08)] px-6 py-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[rgba(43,27,18,0.08)] px-6 py-5">
         <div className="min-w-0">
           <h2
-            className="text-2xl font-medium italic text-[#2b3a67]"
+            className="text-2xl font-medium italic text-[var(--b-ink)]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             {m.name}
           </h2>
-          <p className="mt-0.5 text-[13px] text-[rgba(43,58,103,0.7)]">
-            <a href={`mailto:${m.email}`} className="hover:text-[#2b3a67] hover:underline">{m.email}</a>
+          <p className="mt-0.5 text-[13px] text-[rgba(43,27,18,0.7)]">
+            <a href={`mailto:${m.email}`} className="hover:text-[var(--b-ink)] hover:underline">{m.email}</a>
             {m.phone ? ` · ${m.phone}` : ""}
           </p>
           {m.subject ? (
-            <p className="mt-1 text-[13px] font-medium text-[#2b3a67]">{m.subject}</p>
+            <p className="mt-1 text-[13px] font-medium text-[var(--b-ink)]">{m.subject}</p>
           ) : null}
-          <p className="mt-2 text-[11.5px] text-[rgba(43,58,103,0.5)]">
+          <p className="mt-2 text-[11.5px] text-[rgba(43,27,18,0.5)]">
             {created.toLocaleString()} · via {m.source}
           </p>
         </div>
@@ -249,7 +249,7 @@ function MessageDetail({
           <StatusChip status={m.status} />
           <a
             href={mailto()}
-            className="rounded-full bg-[#2b3a67] px-4 py-2 text-[12.5px] font-medium text-white shadow-[0_8px_20px_rgba(43,58,103,0.25)] transition-colors hover:bg-[#22305a]"
+            className="rounded-full bg-[var(--b-primary)] px-4 py-2 text-[12.5px] font-medium text-white shadow-[0_8px_20px_rgba(43,27,18,0.25)] transition-colors hover:bg-[var(--b-primary-deep)]"
           >
             Reply by email
           </a>
@@ -269,7 +269,7 @@ function MessageDetail({
           </button>
         </div>
       </div>
-      <div className="flex-1 whitespace-pre-wrap px-6 py-6 text-[14px] leading-[1.65] text-[rgba(43,58,103,0.85)]">
+      <div className="flex-1 whitespace-pre-wrap px-6 py-6 text-[14px] leading-[1.65] text-[rgba(43,27,18,0.85)]">
         {m.message}
       </div>
     </div>
@@ -279,7 +279,7 @@ function MessageDetail({
 function StatusChip({ status }: { status: ContactMessage["status"] }) {
   const map: Record<string, { bg: string; fg: string; label: string }> = {
     new: { bg: "#e8edf5", fg: "#b08d57", label: "NEW" },
-    read: { bg: "#eef2f8", fg: "#8a5f6c", label: "READ" },
+    read: { bg: "var(--b-tint)", fg: "#8a5f6c", label: "READ" },
     replied: { bg: "#eaf6ea", fg: "#2f6b50", label: "REPLIED" },
   };
   const c = map[status] || map.new;

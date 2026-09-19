@@ -14,11 +14,11 @@ const PRESETS: { label: string; host: string; port: string }[] = [
 ];
 
 function Lbl({ children }: { children: React.ReactNode }) {
-  return <label className="mb-1 block text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">{children}</label>;
+  return <label className="mb-1 block text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--b-muted)]">{children}</label>;
 }
 
 const inputCls =
-  "w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400";
+  "w-full rounded-lg border border-[var(--b-border)] px-3 py-2.5 text-sm outline-none focus:border-[var(--b-muted)]";
 
 export default function MailSettingsPage() {
   const { user, loading } = useAuth();
@@ -67,7 +67,7 @@ export default function MailSettingsPage() {
   }, [loading, user, router]);
 
   if (loading || !user || user.role !== "admin") {
-    return <div className="flex h-dvh items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex h-dvh items-center justify-center text-[var(--b-muted)]">Loading…</div>;
   }
 
   const set = (k: keyof typeof form, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
@@ -113,10 +113,10 @@ export default function MailSettingsPage() {
 
   return (
     <div className="min-h-dvh bg-[#f4f1ea]">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+      <header className="flex items-center justify-between border-b border-[var(--b-border)] bg-white px-6 py-3">
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="text-sm text-slate-500 hover:text-slate-800">← Admin</Link>
-          <span className="font-display text-lg uppercase tracking-[0.12em] text-[#2b3a67]">Email settings</span>
+          <Link href="/admin" className="text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Admin</Link>
+          <span className="font-display text-lg uppercase tracking-[0.12em] text-[var(--b-ink)]">Email settings</span>
         </div>
         <span
           className={`rounded-full px-2.5 py-0.5 text-[11px] ${live ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}
@@ -126,14 +126,14 @@ export default function MailSettingsPage() {
       </header>
 
       <main className="mx-auto max-w-2xl px-6 py-8">
-        <p className="mb-6 text-sm text-slate-500">
+        <p className="mb-6 text-sm text-[var(--b-muted)]">
           Set the address couples and you receive notifications from (RSVP exports, alerts).
           Notifications are sent <strong>from</strong> the address you configure here.
         </p>
 
         {/* From identity */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[#2b3a67]">Sender ("from")</h2>
+        <section className="rounded-xl border border-[var(--b-border)] bg-white p-5">
+          <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[var(--b-ink)]">Sender ("from")</h2>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Lbl>From name</Lbl>
@@ -144,14 +144,14 @@ export default function MailSettingsPage() {
               <input className={inputCls} type="email" value={form.fromEmail} onChange={(e) => set("fromEmail", e.target.value)} placeholder="e.g. weddings@yourdomain.com" />
             </div>
           </div>
-          {from ? <p className="mt-2 text-xs text-slate-400">Recipients will see: <span className="font-medium text-slate-600">{from}</span></p> : null}
+          {from ? <p className="mt-2 text-xs text-[var(--b-muted)]">Recipients will see: <span className="font-medium text-[var(--b-body)]">{from}</span></p> : null}
         </section>
 
         {/* SMTP */}
-        <section className="mt-5 rounded-xl border border-slate-200 bg-white p-5">
+        <section className="mt-5 rounded-xl border border-[var(--b-border)] bg-white p-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[#2b3a67]">Sending server (SMTP)</h2>
-            <label className="flex items-center gap-2 text-xs text-slate-600">
+            <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[var(--b-ink)]">Sending server (SMTP)</h2>
+            <label className="flex items-center gap-2 text-xs text-[var(--b-body)]">
               <input type="checkbox" checked={form.enabled} onChange={(e) => set("enabled", e.target.checked)} />
               Enable sending
             </label>
@@ -163,7 +163,7 @@ export default function MailSettingsPage() {
                 key={p.label}
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, smtpHost: p.host, smtpPort: p.port }))}
-                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:border-[#2b3a67] hover:text-[#2b3a67]"
+                className="rounded-full border border-[var(--b-border)] px-3 py-1 text-xs text-[var(--b-body)] hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
               >
                 {p.label}
               </button>
@@ -186,29 +186,29 @@ export default function MailSettingsPage() {
             <div className="sm:col-span-2">
               <Lbl>Password / app password</Lbl>
               <input className={inputCls} type="password" value={form.smtpPass} onChange={(e) => set("smtpPass", e.target.value)} placeholder={passSet ? "•••••••• (saved — leave blank to keep)" : "app password"} autoComplete="new-password" />
-              <p className="mt-1 text-[11px] text-slate-400">Gmail/Outlook need an <strong>app password</strong>, not your login password.</p>
+              <p className="mt-1 text-[11px] text-[var(--b-muted)]">Gmail/Outlook need an <strong>app password</strong>, not your login password.</p>
             </div>
           </div>
 
           <div className="mt-5 flex items-center gap-3">
-            <button onClick={save} disabled={busy} className="rounded-lg bg-[#2b3a67] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#23315a] disabled:opacity-60">
+            <button onClick={save} disabled={busy} className="rounded-lg bg-[var(--b-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#23315a] disabled:opacity-60">
               {busy ? "Saving…" : "Save settings"}
             </button>
-            {msg ? <span className="text-sm text-slate-500">{msg}</span> : null}
+            {msg ? <span className="text-sm text-[var(--b-muted)]">{msg}</span> : null}
           </div>
         </section>
 
         {/* Test */}
-        <section className="mt-5 rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[#2b3a67]">Send a test</h2>
-          <p className="mt-1 text-xs text-slate-500">Save first, then send a test to confirm delivery.</p>
+        <section className="mt-5 rounded-xl border border-[var(--b-border)] bg-white p-5">
+          <h2 className="font-display text-sm uppercase tracking-[0.12em] text-[var(--b-ink)]">Send a test</h2>
+          <p className="mt-1 text-xs text-[var(--b-muted)]">Save first, then send a test to confirm delivery.</p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input className={inputCls} type="email" value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="you@example.com" />
-            <button onClick={sendTest} disabled={testBusy} className="shrink-0 rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60">
+            <button onClick={sendTest} disabled={testBusy} className="shrink-0 rounded-lg border border-[var(--b-border-soft)] px-5 py-2.5 text-sm font-medium text-[var(--b-ink)] hover:bg-[var(--b-bg)] disabled:opacity-60">
               {testBusy ? "Sending…" : "Send test email"}
             </button>
           </div>
-          {testMsg ? <p className="mt-2 text-sm text-slate-600">{testMsg}</p> : null}
+          {testMsg ? <p className="mt-2 text-sm text-[var(--b-body)]">{testMsg}</p> : null}
         </section>
       </main>
     </div>

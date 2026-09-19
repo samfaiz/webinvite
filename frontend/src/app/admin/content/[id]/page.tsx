@@ -169,7 +169,7 @@ export default function ContentEditorPage() {
   };
 
   if (loading || !user || user.role !== "admin" || !form) {
-    return <div className="flex h-screen items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex h-screen items-center justify-center text-[var(--b-muted)]">Loading…</div>;
   }
 
   const publicPath = form.type === "post" ? `/blog/${form.slug}` : `/p/${form.slug}`;
@@ -177,34 +177,34 @@ export default function ContentEditorPage() {
   return (
     <div className="min-h-screen bg-[#f4f1ea]">
       {/* top bar */}
-      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-5 py-2.5">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--b-border)] bg-white px-5 py-2.5">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/admin/content" className="shrink-0 text-sm text-slate-500 hover:text-slate-800">← Content</Link>
+          <Link href="/admin/content" className="shrink-0 text-sm text-[var(--b-muted)] hover:text-[var(--b-ink)]">← Content</Link>
           <input
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             placeholder="Untitled"
-            className="min-w-0 flex-1 border-0 text-lg font-semibold text-slate-800 outline-none placeholder:text-slate-300"
+            className="min-w-0 flex-1 border-0 text-lg font-semibold text-[var(--b-ink)] outline-none placeholder:text-[var(--b-border-soft)]"
           />
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${status === "published" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${status === "published" ? "bg-emerald-50 text-emerald-700" : "bg-[var(--b-tint)] text-[var(--b-muted)]"}`}>
             {status}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {msg ? <span className="max-w-[32ch] truncate text-[11px] text-slate-500">{msg}</span> : null}
+          {msg ? <span className="max-w-[32ch] truncate text-[11px] text-[var(--b-muted)]">{msg}</span> : null}
           <button onClick={writeWithAi} disabled={aiBusy === "blog"} className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 disabled:opacity-60">
             {aiBusy === "blog" ? "Writing…" : "✨ Write with AI"}
           </button>
-          <button onClick={() => setShowDetails((v) => !v)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+          <button onClick={() => setShowDetails((v) => !v)} className="rounded-lg border border-[var(--b-border)] px-3 py-1.5 text-xs text-[var(--b-body)] hover:bg-[var(--b-bg)]">
             Details &amp; SEO
           </button>
-          <button onClick={save} disabled={saving} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60">
+          <button onClick={save} disabled={saving} className="rounded-lg border border-[var(--b-border-soft)] px-3 py-1.5 text-xs font-medium text-[var(--b-ink)] hover:bg-[var(--b-bg)] disabled:opacity-60">
             {saving ? "…" : "Save"}
           </button>
           {status === "published" ? (
-            <button onClick={unpublish} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">Unpublish</button>
+            <button onClick={unpublish} className="rounded-lg border border-[var(--b-border)] px-3 py-1.5 text-xs text-[var(--b-body)] hover:bg-[var(--b-bg)]">Unpublish</button>
           ) : null}
-          <button onClick={publish} disabled={saving} className="rounded-lg bg-[#2b3a67] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#23315a] disabled:opacity-60">
+          <button onClick={publish} disabled={saving} className="rounded-lg bg-[var(--b-primary)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#23315a] disabled:opacity-60">
             {status === "published" ? "Update" : "Publish"}
           </button>
         </div>
@@ -212,28 +212,28 @@ export default function ContentEditorPage() {
 
       {/* details & SEO */}
       {showDetails ? (
-        <div className="border-b border-slate-200 bg-white px-5 py-4">
+        <div className="border-b border-[var(--b-border)] bg-white px-5 py-4">
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Details</p>
-              <label className="mb-2 block text-xs text-slate-500">URL slug
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--b-muted)]">Details</p>
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">URL slug
                 <div className="mt-1 flex items-center gap-1">
-                  <span className="text-xs text-slate-400">/{form.type === "post" ? "blog" : "p"}/</span>
+                  <span className="text-xs text-[var(--b-muted)]">/{form.type === "post" ? "blog" : "p"}/</span>
                   <TextInput value={form.slug} onChange={(e) => set("slug", e.target.value)} />
                 </div>
               </label>
-              <label className="mb-2 block text-xs text-slate-500">Excerpt / summary
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">Excerpt / summary
                 <TextArea value={form.excerpt} onChange={(e) => set("excerpt", e.target.value)} rows={2} />
               </label>
-              <label className="mb-2 block text-xs text-slate-500">Cover image URL
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">Cover image URL
                 <TextInput value={form.coverImage} onChange={(e) => set("coverImage", e.target.value)} />
               </label>
               {form.type === "post" ? (
                 <div className="grid grid-cols-2 gap-2">
-                  <label className="block text-xs text-slate-500">Author
+                  <label className="block text-xs text-[var(--b-muted)]">Author
                     <TextInput value={form.authorName} onChange={(e) => set("authorName", e.target.value)} />
                   </label>
-                  <label className="block text-xs text-slate-500">Tags (comma-sep)
+                  <label className="block text-xs text-[var(--b-muted)]">Tags (comma-sep)
                     <TextInput value={form.tags} onChange={(e) => set("tags", e.target.value)} />
                   </label>
                 </div>
@@ -241,31 +241,31 @@ export default function ContentEditorPage() {
             </div>
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">SEO</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--b-muted)]">SEO</p>
                 <button onClick={suggestSeo} disabled={aiBusy === "seo"} className="rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700 hover:bg-violet-100 disabled:opacity-60">
                   {aiBusy === "seo" ? "Thinking…" : "✨ Suggest with AI"}
                 </button>
               </div>
               {aiNote ? <p className="mb-2 rounded-md bg-violet-50/70 px-2 py-1 text-[11px] text-violet-700">{aiNote}</p> : null}
-              <label className="mb-2 block text-xs text-slate-500">Meta title <span className="text-slate-300">(defaults to the page title)</span>
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">Meta title <span className="text-[var(--b-border-soft)]">(defaults to the page title)</span>
                 <TextInput value={form.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} />
               </label>
-              <label className="mb-2 block text-xs text-slate-500">Meta description
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">Meta description
                 <TextArea value={form.seoDescription} onChange={(e) => set("seoDescription", e.target.value)} rows={2} />
               </label>
-              <label className="mb-2 block text-xs text-slate-500">Social (OG) image
+              <label className="mb-2 block text-xs text-[var(--b-muted)]">Social (OG) image
                 <div className="mt-1 flex items-center gap-2">
                   <TextInput value={form.ogImage} onChange={(e) => set("ogImage", e.target.value)} />
                   <input ref={ogInput} type="file" accept="image/*" className="hidden" onChange={(e) => { uploadOg(e.target.files?.[0]); e.target.value = ""; }} />
-                  <button onClick={() => ogInput.current?.click()} className="shrink-0 rounded-lg bg-[#2b3a67] px-3 py-2 text-xs font-medium text-white hover:bg-[#23315a]">Upload</button>
+                  <button onClick={() => ogInput.current?.click()} className="shrink-0 rounded-lg bg-[var(--b-primary)] px-3 py-2 text-xs font-medium text-white hover:bg-[#23315a]">Upload</button>
                 </div>
               </label>
-              <label className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+              <label className="mt-1 flex items-center gap-2 text-sm text-[var(--b-body)]">
                 <input type="checkbox" checked={form.noindex} onChange={(e) => set("noindex", e.target.checked)} />
                 Hide from search engines (noindex)
               </label>
               {status === "published" ? (
-                <p className="mt-3 text-[11px] text-slate-400">Live at <a href={publicPath} target="_blank" rel="noreferrer" className="underline">{publicPath}</a></p>
+                <p className="mt-3 text-[11px] text-[var(--b-muted)]">Live at <a href={publicPath} target="_blank" rel="noreferrer" className="underline">{publicPath}</a></p>
               ) : null}
             </div>
           </div>

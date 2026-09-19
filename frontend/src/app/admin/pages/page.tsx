@@ -217,7 +217,7 @@ export default function AdminPagesPage() {
   if (loading || !user || user.role !== "admin") {
     return (
       <div
-        className="flex h-[80vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
+        className="flex h-[80vh] items-center justify-center text-[rgba(43,27,18,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         Loading…
@@ -230,15 +230,15 @@ export default function AdminPagesPage() {
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
-            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.75)]">Pages</span>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.55)]">List</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,27,18,0.55)]">
+            <Link href="/admin" className="hover:text-[var(--b-ink)]">Admin</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.75)]">Pages</span>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.55)]">List</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[var(--b-ink)] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Pages
@@ -249,14 +249,14 @@ export default function AdminPagesPage() {
             onClick={() => seedNow(false)}
             disabled={busy}
             title="Recreate any missing default pages (Home, About, Pricing, Contact, FAQ, Help, Privacy, Terms)."
-            className="rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2.5 text-[12.5px] font-medium text-[#2b3a67] transition-colors hover:border-[#5c7bb0] hover:text-[#5c7bb0] disabled:opacity-60"
+            className="rounded-full border border-[rgba(43,27,18,0.2)] px-4 py-2.5 text-[12.5px] font-medium text-[var(--b-ink)] transition-colors hover:border-[var(--b-gold)] hover:text-[var(--b-gold)] disabled:opacity-60"
           >
             Seed defaults
           </button>
           <button
             onClick={createNew}
             disabled={busy}
-            className="rounded-full bg-[#2b3a67] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
+            className="rounded-full bg-[var(--b-primary)] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,27,18,0.3)] transition-colors hover:bg-[var(--b-primary-deep)] disabled:opacity-60"
           >
             {busy ? "Working…" : "+ New page"}
           </button>
@@ -271,11 +271,11 @@ export default function AdminPagesPage() {
       ) : null}
 
       {/* Toolbar */}
-      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
         <button
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
           title={`Sort by title (${sortDir === "asc" ? "A→Z" : "Z→A"})`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,58,103,0.12)] text-[rgba(43,58,103,0.6)] transition-colors hover:border-[#2b3a67] hover:text-[#2b3a67]"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,27,18,0.12)] text-[rgba(43,27,18,0.6)] transition-colors hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             {sortDir === "asc" ? <path d="M7 4v16M7 4l-3 3M7 4l3 3M14 6h6M14 12h4M14 18h2" /> : <path d="M7 20V4M7 20l-3-3M7 20l3-3M14 6h6M14 12h4M14 18h2" />}
@@ -284,7 +284,7 @@ export default function AdminPagesPage() {
 
         {selected.size > 0 ? (
           <div className="flex items-center gap-2 text-[12px]">
-            <span className="text-[rgba(43,58,103,0.65)]">{selected.size} selected</span>
+            <span className="text-[rgba(43,27,18,0.65)]">{selected.size} selected</span>
             <button onClick={() => bulkPublish(true)} className="rounded-full border border-emerald-200 px-3 py-1 text-emerald-700 hover:bg-emerald-50">Publish</button>
             <button onClick={() => bulkPublish(false)} className="rounded-full border border-amber-200 px-3 py-1 text-amber-700 hover:bg-amber-50">Unpublish</button>
             <button onClick={bulkDelete} className="rounded-full border border-[rgba(190,60,50,0.4)] px-3 py-1 text-[#b3423a] hover:bg-[#f9e8e6]">Delete</button>
@@ -292,15 +292,15 @@ export default function AdminPagesPage() {
         ) : null}
 
         <div className="ml-auto flex items-center gap-2">
-          <label className="flex items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-[#eef2f8] px-3 py-1.5">
-            <svg className="h-3.5 w-3.5 text-[rgba(43,58,103,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <label className="flex items-center gap-2 rounded-full border border-[rgba(43,27,18,0.12)] bg-[var(--b-tint)] px-3 py-1.5">
+            <svg className="h-3.5 w-3.5 text-[rgba(43,27,18,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
             </svg>
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search"
-              className="w-40 border-none bg-transparent text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
+              className="w-40 border-none bg-transparent text-[13px] text-[var(--b-ink)] outline-none placeholder:text-[rgba(43,27,18,0.4)]"
             />
           </label>
 
@@ -308,7 +308,7 @@ export default function AdminPagesPage() {
             <button
               onClick={() => setShowCols((v) => !v)}
               title="Show / hide columns"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,58,103,0.12)] text-[rgba(43,58,103,0.6)] transition-colors hover:border-[#5c7bb0] hover:text-[#5c7bb0]"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,27,18,0.12)] text-[rgba(43,27,18,0.6)] transition-colors hover:border-[var(--b-gold)] hover:text-[var(--b-gold)]"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="4" height="16" rx="1" />
@@ -317,9 +317,9 @@ export default function AdminPagesPage() {
               </svg>
             </button>
             {showCols ? (
-              <div className="absolute right-0 top-10 z-10 w-52 rounded-xl border border-[rgba(111,138,184,0.2)] bg-white p-2 shadow-[0_20px_40px_rgba(43,58,103,0.15)]">
+              <div className="absolute right-0 top-10 z-10 w-52 rounded-xl border border-[rgba(43,27,18,0.2)] bg-white p-2 shadow-[0_20px_40px_rgba(43,27,18,0.15)]">
                 {COL_KEYS.map((k) => (
-                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] text-[#2b3a67] hover:bg-[#eef2f8]">
+                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] text-[var(--b-ink)] hover:bg-[var(--b-tint)]">
                     <input
                       type="checkbox"
                       checked={visible.has(k)}
@@ -331,7 +331,7 @@ export default function AdminPagesPage() {
                           return next;
                         })
                       }
-                      className="accent-[#2b3a67]"
+                      className="accent-[var(--b-ink)]"
                     />
                     <span>{COL_LABELS[k]}</span>
                   </label>
@@ -343,16 +343,16 @@ export default function AdminPagesPage() {
       </div>
 
       {/* Table */}
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
         <table className="w-full text-left text-[13.5px]">
-          <thead className="bg-[#eef2f8] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.55)]">
+          <thead className="bg-[var(--b-tint)] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,27,18,0.55)]">
             <tr>
               <th className="w-8 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={allOnPageSelected}
                   onChange={toggleAllOnPage}
-                  className="accent-[#2b3a67]"
+                  className="accent-[var(--b-ink)]"
                 />
               </th>
               {visible.has("key") ? <th className="px-4 py-3">Key</th> : null}
@@ -365,7 +365,7 @@ export default function AdminPagesPage() {
                 <th className="px-4 py-3">
                   <button
                     onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-                    className="inline-flex items-center gap-1 uppercase tracking-[0.14em] hover:text-[#5c7bb0]"
+                    className="inline-flex items-center gap-1 uppercase tracking-[0.14em] hover:text-[var(--b-gold)]"
                   >
                     Sort
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -380,13 +380,13 @@ export default function AdminPagesPage() {
           <tbody>
             {paged === null ? (
               <tr>
-                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.45)]">
+                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,27,18,0.45)]">
                   Loading pages…
                 </td>
               </tr>
             ) : paged.length === 0 ? (
               <tr>
-                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.5)]">
+                <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,27,18,0.5)]">
                   {rows && rows.length > 0
                     ? "No pages match your search."
                     : "No pages yet. Click “+ New page” to create your first."}
@@ -400,8 +400,8 @@ export default function AdminPagesPage() {
                   <tr
                     key={r.doc.id}
                     className={
-                      "border-t border-[rgba(43,58,103,0.06)] transition-colors " +
-                      (isSelected ? "bg-[#e3eaf5]/40" : "hover:bg-[#eef2f8]/60")
+                      "border-t border-[rgba(43,27,18,0.06)] transition-colors " +
+                      (isSelected ? "bg-[var(--b-tint)]/40" : "hover:bg-[var(--b-tint)]/60")
                     }
                   >
                     <td className="px-4 py-3 align-middle">
@@ -416,42 +416,42 @@ export default function AdminPagesPage() {
                             return next;
                           })
                         }
-                        className="accent-[#2b3a67]"
+                        className="accent-[var(--b-ink)]"
                       />
                     </td>
                     {visible.has("key") ? (
                       <td className="px-4 py-3 align-middle">
-                        <span className="rounded-md border border-[rgba(43,58,103,0.15)] bg-[#eef2f8] px-2 py-0.5 font-mono text-[11.5px] text-[rgba(43,58,103,0.75)]">
+                        <span className="rounded-md border border-[rgba(43,27,18,0.15)] bg-[var(--b-tint)] px-2 py-0.5 font-mono text-[11.5px] text-[rgba(43,27,18,0.75)]">
                           {r.doc.slug}
                         </span>
                       </td>
                     ) : null}
                     {visible.has("title") ? (
-                      <td className="px-4 py-3 align-middle font-medium text-[#2b3a67]">
-                        <Link href={`/admin/pages/${r.doc.id}`} className="hover:text-[#2b3a67] hover:underline">
+                      <td className="px-4 py-3 align-middle font-medium text-[var(--b-ink)]">
+                        <Link href={`/admin/pages/${r.doc.id}`} className="hover:text-[var(--b-ink)] hover:underline">
                           {r.doc.title || "Untitled"}
                         </Link>
                       </td>
                     ) : null}
                     {visible.has("eyebrow") ? (
-                      <td className="px-4 py-3 align-middle text-[rgba(43,58,103,0.72)]">
+                      <td className="px-4 py-3 align-middle text-[rgba(43,27,18,0.72)]">
                         <Truncate value={r.heroEyebrow} />
                       </td>
                     ) : null}
                     {visible.has("heading") ? (
-                      <td className="px-4 py-3 align-middle text-[#2b3a67]">
+                      <td className="px-4 py-3 align-middle text-[var(--b-ink)]">
                         <Truncate value={r.heroHeading} />
                       </td>
                     ) : null}
                     {visible.has("hero") ? (
                       <td className="px-4 py-3 align-middle">
                         {r.heroImage ? (
-                          <span className="inline-flex h-8 w-12 items-center justify-center overflow-hidden rounded-md border border-[rgba(43,58,103,0.1)] bg-[#eef2f8]">
+                          <span className="inline-flex h-8 w-12 items-center justify-center overflow-hidden rounded-md border border-[rgba(43,27,18,0.1)] bg-[var(--b-tint)]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={r.heroImage} alt="" className="h-full w-full object-cover" />
                           </span>
                         ) : (
-                          <span className="text-[rgba(43,58,103,0.35)]">—</span>
+                          <span className="text-[rgba(43,27,18,0.35)]">—</span>
                         )}
                       </td>
                     ) : null}
@@ -471,7 +471,7 @@ export default function AdminPagesPage() {
                               </svg>
                             </span>
                           ) : (
-                            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(43,58,103,0.15)] text-[rgba(43,58,103,0.35)] transition-colors group-hover:border-[#b08d57] group-hover:text-[#b08d57]">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(43,27,18,0.15)] text-[rgba(43,27,18,0.35)] transition-colors group-hover:border-[var(--b-gold)] group-hover:text-[var(--b-gold)]">
                               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="8" />
                               </svg>
@@ -481,7 +481,7 @@ export default function AdminPagesPage() {
                       </td>
                     ) : null}
                     {visible.has("sort") ? (
-                      <td className="px-4 py-3 align-middle text-[rgba(43,58,103,0.7)]">{r.doc.sortOrder ?? 0}</td>
+                      <td className="px-4 py-3 align-middle text-[rgba(43,27,18,0.7)]">{r.doc.sortOrder ?? 0}</td>
                     ) : null}
                     <td className="whitespace-nowrap px-4 py-3 align-middle text-right">
                       <div className="inline-flex items-center gap-4 text-[12.5px]">
@@ -489,7 +489,7 @@ export default function AdminPagesPage() {
                           href={`/p/${r.doc.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[#5c7bb0] hover:underline"
+                          className="inline-flex items-center gap-1 text-[var(--b-gold)] hover:underline"
                         >
                           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 20h9M4 20h4l10-10-4-4L4 16z" />
@@ -498,7 +498,7 @@ export default function AdminPagesPage() {
                         </a>
                         <Link
                           href={`/admin/pages/${r.doc.id}`}
-                          className="inline-flex items-center gap-1 text-[#2b3a67] hover:underline"
+                          className="inline-flex items-center gap-1 text-[var(--b-ink)] hover:underline"
                         >
                           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 20h9M4 20h4l10-10-4-4L4 16z" />
@@ -516,7 +516,7 @@ export default function AdminPagesPage() {
 
         {/* Paginator */}
         {filtered && filtered.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(43,58,103,0.08)] bg-[#eef2f8]/50 px-5 py-3 text-[12.5px] text-[rgba(43,58,103,0.7)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(43,27,18,0.08)] bg-[var(--b-tint)]/50 px-5 py-3 text-[12.5px] text-[rgba(43,27,18,0.7)]">
             <span>
               Showing {rangeStart} to {rangeEnd} of {total} results
             </span>
@@ -526,7 +526,7 @@ export default function AdminPagesPage() {
                 <select
                   value={perPage}
                   onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-                  className="rounded-full border border-[rgba(43,58,103,0.15)] bg-white px-2.5 py-1 text-[12.5px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
+                  className="rounded-full border border-[rgba(43,27,18,0.15)] bg-white px-2.5 py-1 text-[12.5px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]"
                 >
                   {[10, 25, 50, 100].map((n) => (
                     <option key={n} value={n}>{n}</option>
@@ -537,14 +537,14 @@ export default function AdminPagesPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
+                  className="rounded-full border border-[rgba(43,27,18,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
                 >
                   ← Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => (p * perPage < total ? p + 1 : p))}
                   disabled={page * perPage >= total}
-                  className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
+                  className="rounded-full border border-[rgba(43,27,18,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
                 >
                   Next →
                 </button>
@@ -558,7 +558,7 @@ export default function AdminPagesPage() {
 }
 
 function Truncate({ value, max = 60 }: { value?: string; max?: number }) {
-  if (!value) return <span className="text-[rgba(43,58,103,0.35)]">—</span>;
+  if (!value) return <span className="text-[rgba(43,27,18,0.35)]">—</span>;
   const s = value.length > max ? value.slice(0, max - 1) + "…" : value;
   return <span title={value.length > max ? value : undefined}>{s}</span>;
 }

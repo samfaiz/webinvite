@@ -287,7 +287,7 @@ export default function PageEditor() {
   if (loading || !doc) {
     return (
       <div
-        className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
+        className="flex h-[70vh] items-center justify-center text-[rgba(43,27,18,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         {loading ? "Loading…" : error || "Loading page…"}
@@ -300,17 +300,17 @@ export default function PageEditor() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
-            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <Link href="/admin/pages" className="hover:text-[#2b3a67]">Pages</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.75)]">{doc.title || "Untitled"}</span>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.55)]">Edit</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,27,18,0.55)]">
+            <Link href="/admin" className="hover:text-[var(--b-ink)]">Admin</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <Link href="/admin/pages" className="hover:text-[var(--b-ink)]">Pages</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.75)]">{doc.title || "Untitled"}</span>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.55)]">Edit</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[var(--b-ink)] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Edit {doc.title || "page"}
@@ -321,7 +321,7 @@ export default function PageEditor() {
             href={publicHref}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-[#5c7bb0] px-4 py-2.5 text-[13px] font-medium text-white shadow-[0_8px_22px_rgba(111,138,184,0.3)] transition-colors hover:bg-[#a53a66]"
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--b-gold)] px-4 py-2.5 text-[13px] font-medium text-white shadow-[0_8px_22px_rgba(43,27,18,0.3)] transition-colors hover:bg-[#a53a66]"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20h9M4 20h4l10-10-4-4L4 16z" />
@@ -337,7 +337,7 @@ export default function PageEditor() {
         </div>
       </div>
 
-      {error ? <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.4)] bg-[#e3eaf5] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
+      {error ? <div className="mt-4 rounded-lg border border-[rgba(43,27,18,0.4)] bg-[var(--b-tint)] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
       {success ? <div className="mt-4 rounded-lg border border-[rgba(92,138,94,0.3)] bg-[#eaf6ea] px-4 py-2 text-sm text-[#2f6b50]">{success}</div> : null}
       {aiInfo ? <div className="mt-4 rounded-lg border border-[rgba(122,91,166,0.3)] bg-[#efe8f7] px-4 py-2 text-sm text-[#5a3d8a]">{aiInfo}</div> : null}
 
@@ -452,7 +452,7 @@ export default function PageEditor() {
             <button
               onClick={optimiseAll}
               disabled={aiBusy !== null}
-              className="inline-flex items-center gap-2 rounded-full bg-[#7a5ba6] px-4 py-2 text-[13px] font-medium text-white shadow-[0_8px_20px_rgba(122,91,166,0.25)] transition-colors hover:bg-[#5f4685] disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--b-gold-deep)] px-4 py-2 text-[13px] font-medium text-white shadow-[0_8px_20px_rgba(122,91,166,0.25)] transition-colors hover:bg-[#5f4685] disabled:opacity-60"
             >
               <SparkleIcon />
               {aiBusy === "all" ? "Optimising…" : "Optimise all with AI"}
@@ -522,18 +522,18 @@ export default function PageEditor() {
             </div>
 
             {/* FAQs */}
-            <div className="mt-2 rounded-xl border border-[rgba(43,58,103,0.1)] bg-[#eef2f8] p-4">
+            <div className="mt-2 rounded-xl border border-[rgba(43,27,18,0.1)] bg-[var(--b-tint)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-[13px] font-medium text-[#2b3a67]">FAQs — answer-engine optimisation (AEO)</p>
-                  <p className="text-[12px] text-[rgba(43,58,103,0.6)]">
+                  <p className="text-[13px] font-medium text-[var(--b-ink)]">FAQs — answer-engine optimisation (AEO)</p>
+                  <p className="text-[12px] text-[rgba(43,27,18,0.6)]">
                     Rendered as an FAQ on the page and as FAQPage structured data for AI answer engines.
                   </p>
                 </div>
                 <button
                   onClick={generateFaqs}
                   disabled={aiBusy !== null}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(122,91,166,0.4)] px-3 py-1.5 text-[12px] font-medium text-[#7a5ba6] transition-colors hover:bg-[#efe8f7] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(122,91,166,0.4)] px-3 py-1.5 text-[12px] font-medium text-[var(--b-gold-deep)] transition-colors hover:bg-[#efe8f7] disabled:opacity-60"
                 >
                   <SparkleIcon />
                   {aiBusy === "faqs" ? "Generating…" : "Generate with AI"}
@@ -549,7 +549,7 @@ export default function PageEditor() {
                   />
                 ))}
                 {faqs.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-[rgba(43,58,103,0.2)] px-4 py-6 text-center text-[13px] text-[rgba(43,58,103,0.55)]">
+                  <p className="rounded-lg border border-dashed border-[rgba(43,27,18,0.2)] px-4 py-6 text-center text-[13px] text-[rgba(43,27,18,0.55)]">
                     No FAQs yet. Add one or click <em>Generate with AI</em>.
                   </p>
                 ) : null}
@@ -560,7 +560,7 @@ export default function PageEditor() {
                       { id: `faq-${Date.now().toString(36)}`, question: "", answer: "" },
                     ])
                   }
-                  className="w-full rounded-lg border border-dashed border-[rgba(43,58,103,0.25)] py-2 text-[13px] text-[rgba(43,58,103,0.65)] transition-colors hover:border-[#5c7bb0] hover:bg-white hover:text-[#5c7bb0]"
+                  className="w-full rounded-lg border border-dashed border-[rgba(43,27,18,0.25)] py-2 text-[13px] text-[rgba(43,27,18,0.65)] transition-colors hover:border-[var(--b-gold)] hover:bg-white hover:text-[var(--b-gold)]"
                 >
                   + Add FAQ
                 </button>
@@ -571,21 +571,21 @@ export default function PageEditor() {
       </div>
 
       {/* Save bar */}
-      <div className="sticky bottom-4 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(111,138,184,0.2)] bg-white/95 px-5 py-3 shadow-[0_12px_30px_rgba(43,58,103,0.12)] backdrop-blur">
-        <span className="text-[13px] text-[rgba(43,58,103,0.65)]">
+      <div className="sticky bottom-4 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(43,27,18,0.2)] bg-white/95 px-5 py-3 shadow-[0_12px_30px_rgba(43,27,18,0.12)] backdrop-blur">
+        <span className="text-[13px] text-[rgba(43,27,18,0.65)]">
           {doc.updatedAt ? `Last saved ${new Date(doc.updatedAt).toLocaleString()}` : "Ready to save"}
         </span>
         <div className="flex items-center gap-2">
           <Link
             href="/admin/pages"
-            className="rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2 text-[13px] font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
+            className="rounded-full border border-[rgba(43,27,18,0.2)] px-4 py-2 text-[13px] font-medium text-[var(--b-ink)] hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
           >
             Back
           </Link>
           <button
             onClick={save}
             disabled={saving}
-            className="rounded-full bg-[#2b3a67] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
+            className="rounded-full bg-[var(--b-primary)] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,27,18,0.3)] transition-colors hover:bg-[var(--b-primary-deep)] disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -598,18 +598,18 @@ export default function PageEditor() {
 /* ---------------- shared bits ---------------- */
 
 const inputCls =
-  "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-3 py-2 text-[14px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]";
+  "w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-3 py-2 text-[14px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]";
 
 function Card({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white p-6 shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+    <div className="rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white p-6 shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
       <h2
-        className="text-[18px] font-medium italic text-[#2b3a67]"
+        className="text-[18px] font-medium italic text-[var(--b-ink)]"
         style={{ fontFamily: "var(--f-serif)" }}
       >
         {title}
       </h2>
-      {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">{description}</p> : null}
+      {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,27,18,0.6)]">{description}</p> : null}
       <div className="mt-4 space-y-4">{children}</div>
     </div>
   );
@@ -629,22 +629,22 @@ function Collapsible({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+    <div className="rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
       <button
         onClick={onToggle}
         className="flex w-full items-start justify-between gap-3 p-6 text-left"
       >
         <div>
           <h2
-            className="text-[18px] font-medium italic text-[#2b3a67]"
+            className="text-[18px] font-medium italic text-[var(--b-ink)]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             {title}
           </h2>
-          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">{description}</p> : null}
+          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,27,18,0.6)]">{description}</p> : null}
         </div>
         <svg
-          className={"mt-2 h-4 w-4 text-[rgba(43,58,103,0.5)] transition-transform " + (open ? "rotate-180" : "")}
+          className={"mt-2 h-4 w-4 text-[rgba(43,27,18,0.5)] transition-transform " + (open ? "rotate-180" : "")}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -655,7 +655,7 @@ function Collapsible({
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
-      {open ? <div className="border-t border-[rgba(43,58,103,0.08)] p-6">{children}</div> : null}
+      {open ? <div className="border-t border-[rgba(43,27,18,0.08)] p-6">{children}</div> : null}
     </div>
   );
 }
@@ -676,15 +676,15 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 flex items-center justify-between gap-2 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">
+      <span className="mb-1 flex items-center justify-between gap-2 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">
         <span className="flex items-center gap-1">
           {label}
-          {required ? <span className="text-[#2b3a67]">*</span> : null}
+          {required ? <span className="text-[var(--b-ink)]">*</span> : null}
         </span>
         {action}
       </span>
       {children}
-      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(43,58,103,0.55)]">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(43,27,18,0.55)]">{hint}</span> : null}
     </label>
   );
 }
@@ -709,11 +709,11 @@ function AiChip({
       type="button"
       onClick={onClick}
       disabled={busy || disabled}
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-medium text-[#7a5ba6] transition-colors hover:bg-[#efe8f7] disabled:opacity-50"
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-medium text-[var(--b-gold-deep)] transition-colors hover:bg-[#efe8f7] disabled:opacity-50"
       title={`Regenerate ${label} with AI`}
     >
       {busy ? (
-        <span className="inline-block h-3 w-3 animate-spin rounded-full border border-[#7a5ba6] border-t-transparent" />
+        <span className="inline-block h-3 w-3 animate-spin rounded-full border border-[var(--b-gold-deep)] border-t-transparent" />
       ) : (
         <SparkleIcon />
       )}
@@ -730,7 +730,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       aria-pressed={on}
       className={
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors " +
-        (on ? "bg-[#2b3a67]" : "bg-[rgba(43,58,103,0.2)]")
+        (on ? "bg-[var(--b-primary)]" : "bg-[rgba(43,27,18,0.2)]")
       }
     >
       <span
@@ -762,7 +762,7 @@ function KeywordChips({
     onDraft("");
   };
   return (
-    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-2 py-1.5">
+    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-2 py-1.5">
       {value.map((k, i) => (
         <span
           key={k + i}
@@ -772,7 +772,7 @@ function KeywordChips({
           <button
             type="button"
             onClick={() => onChange(value.filter((_, j) => j !== i))}
-            className="hover:text-[#2b3a67]"
+            className="hover:text-[var(--b-ink)]"
             aria-label={`Remove ${k}`}
           >
             ×
@@ -792,7 +792,7 @@ function KeywordChips({
         }}
         onBlur={commit}
         placeholder={value.length ? "" : "Add a keyword"}
-        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
+        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[var(--b-ink)] outline-none placeholder:text-[rgba(43,27,18,0.4)]"
       />
     </div>
   );
@@ -809,11 +809,11 @@ function FaqRow({
 }) {
   const [open, setOpen] = useState(!faq.question || !faq.answer);
   return (
-    <div className="rounded-lg border border-[rgba(43,58,103,0.12)] bg-white">
+    <div className="rounded-lg border border-[rgba(43,27,18,0.12)] bg-white">
       <div className="flex items-start gap-2 px-3 py-2">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[rgba(43,58,103,0.5)] hover:bg-[#eef2f8] hover:text-[#5c7bb0]"
+          className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[rgba(43,27,18,0.5)] hover:bg-[var(--b-tint)] hover:text-[var(--b-gold)]"
           aria-label={open ? "Collapse" : "Expand"}
         >
           <svg
@@ -832,12 +832,12 @@ function FaqRow({
           value={faq.question}
           onChange={(e) => onChange({ question: e.target.value })}
           placeholder="Question…"
-          className="flex-1 border-none bg-transparent py-1 text-[13.5px] font-medium text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
+          className="flex-1 border-none bg-transparent py-1 text-[13.5px] font-medium text-[var(--b-ink)] outline-none placeholder:text-[rgba(43,27,18,0.4)]"
         />
         <button
           onClick={onRemove}
           aria-label="Delete FAQ"
-          className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[rgba(217,47,47,0.7)] hover:bg-[#e3eaf5] hover:text-[#d92f2f]"
+          className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[rgba(217,47,47,0.7)] hover:bg-[var(--b-tint)] hover:text-[#d92f2f]"
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
@@ -845,12 +845,12 @@ function FaqRow({
         </button>
       </div>
       {open ? (
-        <div className="border-t border-[rgba(43,58,103,0.08)] px-3 py-2">
+        <div className="border-t border-[rgba(43,27,18,0.08)] px-3 py-2">
           <textarea
             value={faq.answer}
             onChange={(e) => onChange({ answer: e.target.value })}
             placeholder="Short factual answer (1–2 sentences)…"
-            className="w-full resize-y border-none bg-transparent text-[13px] text-[rgba(43,58,103,0.85)] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
+            className="w-full resize-y border-none bg-transparent text-[13px] text-[rgba(43,27,18,0.85)] outline-none placeholder:text-[rgba(43,27,18,0.4)]"
             rows={2}
           />
         </div>
@@ -896,7 +896,7 @@ function ImageDrop({
           if (f) upload(f);
         }}
         onClick={() => inputRef.current?.click()}
-        className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,58,103,0.25)] bg-[#eef2f8] px-4 py-3 text-center text-[13px] text-[rgba(43,58,103,0.65)] transition-colors hover:border-[#2b3a67] hover:bg-[#e3eaf5]/50 hover:text-[#2b3a67]"
+        className="flex flex-1 cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,27,18,0.25)] bg-[var(--b-tint)] px-4 py-3 text-center text-[13px] text-[rgba(43,27,18,0.65)] transition-colors hover:border-[var(--b-primary)] hover:bg-[var(--b-tint)]/50 hover:text-[var(--b-ink)]"
       >
         {uploading
           ? "Uploading…"
@@ -916,14 +916,14 @@ function ImageDrop({
       </div>
       {value ? (
         <div className="flex items-center gap-1">
-          <span className="inline-flex h-12 w-16 items-center justify-center overflow-hidden rounded-lg border border-[rgba(43,58,103,0.1)] bg-white">
+          <span className="inline-flex h-12 w-16 items-center justify-center overflow-hidden rounded-lg border border-[rgba(43,27,18,0.1)] bg-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt="" className="h-full w-full object-cover" />
           </span>
           <button
             onClick={() => onChange("")}
             aria-label="Remove image"
-            className="flex h-6 w-6 items-center justify-center rounded text-[rgba(217,47,47,0.7)] hover:bg-[#e3eaf5] hover:text-[#d92f2f]"
+            className="flex h-6 w-6 items-center justify-center rounded text-[rgba(217,47,47,0.7)] hover:bg-[var(--b-tint)] hover:text-[#d92f2f]"
           >
             ×
           </button>

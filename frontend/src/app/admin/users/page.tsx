@@ -45,7 +45,7 @@ export default function AdminUsersPage() {
   if (loading || !user || user.role !== "admin") {
     return (
       <div
-        className="flex h-[80vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
+        className="flex h-[80vh] items-center justify-center text-[rgba(43,27,18,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         Loading…
@@ -65,11 +65,11 @@ export default function AdminUsersPage() {
     <div className="mx-auto max-w-7xl px-6 py-8 sm:px-10 sm:py-10" style={{ fontFamily: "var(--f-body)" }}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#5c7bb0]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--b-gold)]">
             Couples
           </span>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[var(--b-ink)] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Users
@@ -79,7 +79,7 @@ export default function AdminUsersPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search email or name…"
-          className="w-full max-w-xs rounded-full border border-[rgba(111,138,184,0.25)] px-4 py-2 text-[13px] text-[#2b3a67] outline-none focus:border-[#5c7bb0] sm:w-64"
+          className="w-full max-w-xs rounded-full border border-[rgba(43,27,18,0.25)] px-4 py-2 text-[13px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)] sm:w-64"
         />
       </div>
 
@@ -87,16 +87,16 @@ export default function AdminUsersPage() {
 
       <section className="mt-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-[20px] font-medium italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
+          <h2 className="text-[20px] font-medium italic text-[var(--b-ink)]" style={{ fontFamily: "var(--f-serif)" }}>
             All users
           </h2>
-          <span className="text-[12px] text-[rgba(43,58,103,0.55)]">
+          <span className="text-[12px] text-[rgba(43,27,18,0.55)]">
             {q ? `${shown.length} of ${users.length}` : `${users.length} total`}
           </span>
         </div>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
           <table className="w-full text-left text-[13.5px]">
-            <thead className="bg-[#eef2f8] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.55)]">
+            <thead className="bg-[var(--b-tint)] text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,27,18,0.55)]">
               <tr>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Name</th>
@@ -108,13 +108,13 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {shown.map((u) => (
-                <tr key={u.id} className="border-t border-[rgba(43,58,103,0.06)] transition-colors hover:bg-[#eef2f8]/60">
-                  <td className="px-5 py-3 text-[#2b3a67]">{u.email}</td>
-                  <td className="px-5 py-3 text-[rgba(43,58,103,0.75)]">{u.name ?? "—"}</td>
+                <tr key={u.id} className="border-t border-[rgba(43,27,18,0.06)] transition-colors hover:bg-[var(--b-tint)]/60">
+                  <td className="px-5 py-3 text-[var(--b-ink)]">{u.email}</td>
+                  <td className="px-5 py-3 text-[rgba(43,27,18,0.75)]">{u.name ?? "—"}</td>
                   <td className="px-5 py-3">
                     <RolePill role={u.role} />
                   </td>
-                  <td className="px-5 py-3 text-[#2b3a67]">{u.invitations}</td>
+                  <td className="px-5 py-3 text-[var(--b-ink)]">{u.invitations}</td>
                   <td className="px-5 py-3">
                     {/* per-user permission: duplicate own invitations (off by default) */}
                     <button
@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
                       className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
                         u.canDuplicate
                           ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          : "bg-[var(--b-tint)] text-[var(--b-muted)] hover:bg-[var(--b-border)]"
                       }`}
                     >
                       {u.canDuplicate ? "Allowed ✓" : "Off"}
@@ -139,7 +139,7 @@ export default function AdminUsersPage() {
                   <td className="px-5 py-3 text-right">
                     <button
                       onClick={() => setResetUser({ id: u.id, email: u.email })}
-                      className="rounded-lg border border-[rgba(111,138,184,0.3)] px-3 py-1.5 text-[12px] font-medium text-[#5c7bb0] transition-colors hover:bg-[#eef2f8]"
+                      className="rounded-lg border border-[rgba(43,27,18,0.3)] px-3 py-1.5 text-[12px] font-medium text-[var(--b-gold)] transition-colors hover:bg-[var(--b-tint)]"
                     >
                       Reset password
                     </button>
@@ -148,7 +148,7 @@ export default function AdminUsersPage() {
               ))}
               {shown.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[rgba(43,58,103,0.45)]">
+                  <td colSpan={6} className="px-5 py-8 text-center text-[rgba(43,27,18,0.45)]">
                     {busy ? "Loading…" : q ? "No users match that search." : "No users yet."}
                   </td>
                 </tr>
@@ -205,11 +205,11 @@ function ResetPasswordModal({ user, onClose }: { user: { id: string; email: stri
         style={{ fontFamily: "var(--f-body)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-[18px] font-medium italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
+        <h3 className="text-[18px] font-medium italic text-[var(--b-ink)]" style={{ fontFamily: "var(--f-serif)" }}>
           Reset password
         </h3>
-        <p className="mt-1 text-[13px] text-[rgba(43,58,103,0.7)]">
-          for <strong className="text-[#2b3a67]">{user.email}</strong>
+        <p className="mt-1 text-[13px] text-[rgba(43,27,18,0.7)]">
+          for <strong className="text-[var(--b-ink)]">{user.email}</strong>
         </p>
 
         {done ? (
@@ -217,30 +217,30 @@ function ResetPasswordModal({ user, onClose }: { user: { id: string; email: stri
             <p className="text-[13px] font-medium text-emerald-700">Password updated ✓</p>
             {done.generated ? (
               <div className="mt-3">
-                <p className="text-[12px] text-[rgba(43,58,103,0.7)]">
+                <p className="text-[12px] text-[rgba(43,27,18,0.7)]">
                   Temporary password — share it securely; it won&apos;t be shown again:
                 </p>
                 <div className="mt-2 flex items-center gap-2">
-                  <code className="flex-1 rounded-lg bg-[#eef2f8] px-3 py-2 text-[14px] tracking-wide text-[#2b3a67]">
+                  <code className="flex-1 rounded-lg bg-[var(--b-tint)] px-3 py-2 text-[14px] tracking-wide text-[var(--b-ink)]">
                     {done.generated}
                   </code>
-                  <button onClick={copy} className="rounded-lg border border-[rgba(111,138,184,0.3)] px-3 py-2 text-[12px] font-medium text-[#5c7bb0] hover:bg-[#eef2f8]">
+                  <button onClick={copy} className="rounded-lg border border-[rgba(43,27,18,0.3)] px-3 py-2 text-[12px] font-medium text-[var(--b-gold)] hover:bg-[var(--b-tint)]">
                     {copied ? "Copied ✓" : "Copy"}
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="mt-2 text-[12px] text-[rgba(43,58,103,0.7)]">The password you set is now active.</p>
+              <p className="mt-2 text-[12px] text-[rgba(43,27,18,0.7)]">The password you set is now active.</p>
             )}
             <div className="mt-5 flex justify-end">
-              <button onClick={onClose} className="rounded-lg bg-[#5c7bb0] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90">
+              <button onClick={onClose} className="rounded-lg bg-[var(--b-gold)] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90">
                 Done
               </button>
             </div>
           </div>
         ) : (
           <div className="mt-4">
-            <label className="block text-[12px] text-[rgba(43,58,103,0.7)]">
+            <label className="block text-[12px] text-[rgba(43,27,18,0.7)]">
               New password
               <input
                 type="text"
@@ -248,21 +248,21 @@ function ResetPasswordModal({ user, onClose }: { user: { id: string; email: stri
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
                 placeholder="Leave blank to auto-generate"
-                className="mt-1 w-full rounded-lg border border-[rgba(111,138,184,0.25)] px-3 py-2 text-[14px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]"
+                className="mt-1 w-full rounded-lg border border-[rgba(43,27,18,0.25)] px-3 py-2 text-[14px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]"
               />
             </label>
-            <p className="mt-1 text-[11px] text-[rgba(43,58,103,0.5)]">
+            <p className="mt-1 text-[11px] text-[rgba(43,27,18,0.5)]">
               Minimum 8 characters. Leave blank to generate a secure temporary password.
             </p>
             {err ? <p className="mt-2 text-[12px] text-rose-600">{err}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
-              <button onClick={onClose} className="rounded-lg border border-[rgba(43,58,103,0.2)] px-4 py-2 text-[13px] text-[rgba(43,58,103,0.75)] hover:bg-[#eef2f8]">
+              <button onClick={onClose} className="rounded-lg border border-[rgba(43,27,18,0.2)] px-4 py-2 text-[13px] text-[rgba(43,27,18,0.75)] hover:bg-[var(--b-tint)]">
                 Cancel
               </button>
               <button
                 onClick={submit}
                 disabled={busy}
-                className="rounded-lg bg-[#5c7bb0] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-60"
+                className="rounded-lg bg-[var(--b-gold)] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-60"
               >
                 {busy ? "Resetting…" : "Reset password"}
               </button>
@@ -280,7 +280,7 @@ function RolePill({ role }: { role: string }) {
     <span
       className="rounded-full px-2.5 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em]"
       style={{
-        background: admin ? "#f9dce9" : "#eef2f8",
+        background: admin ? "#f9dce9" : "var(--b-tint)",
         color: admin ? "#a53a66" : "#8a5f6c",
       }}
     >

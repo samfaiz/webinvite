@@ -194,7 +194,7 @@ export default function EditSiteSettingsPage() {
   if (loading || !data) {
     return (
       <div
-        className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
+        className="flex h-[70vh] items-center justify-center text-[rgba(43,27,18,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
         {loading ? "Loading…" : error || "Loading site settings…"}
@@ -207,15 +207,15 @@ export default function EditSiteSettingsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
-            <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <Link href="/admin/site-settings" className="hover:text-[#2b3a67]">Site Settings</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">›</span>
-            <span className="text-[rgba(43,58,103,0.55)]">Edit</span>
+          <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,27,18,0.55)]">
+            <Link href="/admin" className="hover:text-[var(--b-ink)]">Admin</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <Link href="/admin/site-settings" className="hover:text-[var(--b-ink)]">Site Settings</Link>
+            <span className="text-[rgba(43,27,18,0.3)]">›</span>
+            <span className="text-[rgba(43,27,18,0.55)]">Edit</span>
           </nav>
           <h1
-            className="mt-1 text-4xl font-medium italic text-[#2b3a67] sm:text-[42px]"
+            className="mt-1 text-4xl font-medium italic text-[var(--b-ink)] sm:text-[42px]"
             style={{ fontFamily: "var(--f-serif)" }}
           >
             Edit Site Setting
@@ -230,12 +230,12 @@ export default function EditSiteSettingsPage() {
         </button>
       </div>
 
-      {error ? <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.4)] bg-[#e3eaf5] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
+      {error ? <div className="mt-4 rounded-lg border border-[rgba(43,27,18,0.4)] bg-[var(--b-tint)] px-4 py-2 text-sm text-[#7a2418]">{error}</div> : null}
       {success ? <div className="mt-4 rounded-lg border border-[rgba(92,138,94,0.3)] bg-[#eaf6ea] px-4 py-2 text-sm text-[#2f6b50]">{success}</div> : null}
 
       {/* Tab strip */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
-        <div className="flex overflow-x-auto border-b border-[rgba(43,58,103,0.08)] bg-[#eef2f8]/60">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-[rgba(43,27,18,0.15)] bg-white shadow-[0_10px_30px_rgba(43,27,18,0.05)]">
+        <div className="flex overflow-x-auto border-b border-[rgba(43,27,18,0.08)] bg-[var(--b-tint)]/60">
           {TABS.map((t) => {
             const on = tab === t.id;
             return (
@@ -245,8 +245,8 @@ export default function EditSiteSettingsPage() {
                 className={
                   "flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[13px] font-medium transition-colors " +
                   (on
-                    ? "border-[#2b3a67] bg-white text-[#2b3a67]"
-                    : "border-transparent text-[rgba(43,58,103,0.6)] hover:bg-white/60 hover:text-[#2b3a67]")
+                    ? "border-[var(--b-primary)] bg-white text-[var(--b-ink)]"
+                    : "border-transparent text-[rgba(43,27,18,0.6)] hover:bg-white/60 hover:text-[var(--b-ink)]")
                 }
               >
                 <TabIcon name={t.icon} active={on} />
@@ -296,13 +296,13 @@ export default function EditSiteSettingsPage() {
         <button
           onClick={save}
           disabled={saving}
-          className="rounded-full bg-[#2b3a67] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
+          className="rounded-full bg-[var(--b-primary)] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,27,18,0.3)] transition-colors hover:bg-[var(--b-primary-deep)] disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
         <Link
           href="/admin/site-settings"
-          className="rounded-full border border-[rgba(43,58,103,0.2)] px-4 py-2.5 text-[13px] font-medium text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
+          className="rounded-full border border-[rgba(43,27,18,0.2)] px-4 py-2.5 text-[13px] font-medium text-[var(--b-ink)] hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
         >
           Cancel
         </Link>
@@ -553,46 +553,46 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
     <div className="space-y-6">
       {/* Social links table */}
       <div>
-        <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Social links</p>
+        <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">Social links</p>
         <datalist id="wi-platform-suggestions">
           {PLATFORM_SUGGESTIONS.map((p) => (
             <option key={p} value={p} />
           ))}
         </datalist>
-        <div className="overflow-hidden rounded-lg border border-[rgba(43,58,103,0.15)]">
-          <div className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,58,103,0.1)] bg-[#eef2f8] px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.55)]">
+        <div className="overflow-hidden rounded-lg border border-[rgba(43,27,18,0.15)]">
+          <div className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,27,18,0.1)] bg-[var(--b-tint)] px-3 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(43,27,18,0.55)]">
             <span>Platform</span>
             <span>URL</span>
             <span aria-hidden />
           </div>
           {value.links.length === 0 ? (
-            <div className="px-3 py-6 text-center text-[13px] text-[rgba(43,58,103,0.5)]">
+            <div className="px-3 py-6 text-center text-[13px] text-[rgba(43,27,18,0.5)]">
               No social links yet. Click <em>Add social link</em> below.
             </div>
           ) : (
             value.links.map((l, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,58,103,0.08)] px-3 py-2 last:border-b-0"
+                className="grid grid-cols-[1fr_1.6fr_36px] items-center gap-3 border-b border-[rgba(43,27,18,0.08)] px-3 py-2 last:border-b-0"
               >
                 <input
                   list="wi-platform-suggestions"
                   value={l.platform}
                   onChange={(e) => patchLink(i, { platform: e.target.value })}
-                  className="w-full rounded-md border-none bg-transparent px-2 py-1 font-mono text-[13px] text-[#2b3a67] outline-none focus:bg-[#eef2f8]"
+                  className="w-full rounded-md border-none bg-transparent px-2 py-1 font-mono text-[13px] text-[var(--b-ink)] outline-none focus:bg-[var(--b-tint)]"
                   placeholder="instagram"
                 />
                 <input
                   value={l.url}
                   onChange={(e) => patchLink(i, { url: e.target.value })}
-                  className="w-full rounded-md border-none bg-transparent px-2 py-1 text-[13px] text-[#2b3a67] outline-none focus:bg-[#eef2f8]"
+                  className="w-full rounded-md border-none bg-transparent px-2 py-1 text-[13px] text-[var(--b-ink)] outline-none focus:bg-[var(--b-tint)]"
                   placeholder="https://instagram.com/…"
                 />
                 <button
                   type="button"
                   onClick={() => removeLink(i)}
                   aria-label={`Remove ${l.platform || "link"}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-[rgba(217,47,47,0.8)] transition-colors hover:bg-[#e3eaf5] hover:text-[#d92f2f]"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-[rgba(217,47,47,0.8)] transition-colors hover:bg-[var(--b-tint)] hover:text-[#d92f2f]"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
@@ -604,12 +604,12 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           <button
             type="button"
             onClick={addLink}
-            className="flex w-full items-center justify-center border-t border-[rgba(43,58,103,0.1)] bg-[#eef2f8]/40 px-3 py-2 text-[13px] font-medium text-[#5c7bb0] transition-colors hover:bg-[#e3eaf5]/60"
+            className="flex w-full items-center justify-center border-t border-[rgba(43,27,18,0.1)] bg-[var(--b-tint)]/40 px-3 py-2 text-[13px] font-medium text-[var(--b-gold)] transition-colors hover:bg-[var(--b-tint)]/60"
           >
             + Add social link
           </button>
         </div>
-        <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+        <p className="mt-1.5 text-[11.5px] text-[rgba(43,27,18,0.55)]">
           e.g. <code className="font-mono">instagram</code> → <code className="font-mono">https://instagram.com/…</code>
         </p>
       </div>
@@ -644,42 +644,42 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
   return (
     <div className="space-y-6">
       {/* Accent colors — light */}
-      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,27,18,0.1)] p-5">
         <div className="mb-1">
-          <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors</p>
-          <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
+          <p className="text-[15px] font-medium text-[var(--b-ink)]">Accent colors</p>
+          <p className="text-[12.5px] text-[rgba(43,27,18,0.6)]">
             Brand accent used for buttons, links and highlights. Leave blank to keep the default coral.
           </p>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <ColorField label="Accent" value={value.accent} onChange={(v) => patch("accent", v)} placeholder="#2b3a67" />
-          <ColorField label="Accent (soft)" value={value.accentSoft} onChange={(v) => patch("accentSoft", v)} placeholder="#e3eaf5" />
+          <ColorField label="Accent (soft)" value={value.accentSoft} onChange={(v) => patch("accentSoft", v)} placeholder="var(--b-tint)" />
           <ColorField label="Text on accent" value={value.textOnAccent} onChange={(v) => patch("textOnAccent", v)} placeholder="#ffffff" />
         </div>
       </div>
 
       {/* Accent colors — dark mode (collapsible) */}
-      <div className="rounded-xl border border-[rgba(43,58,103,0.1)]">
+      <div className="rounded-xl border border-[rgba(43,27,18,0.1)]">
         <button
           type="button"
           onClick={() => setDarkOpen((v) => !v)}
           className="flex w-full items-start justify-between gap-3 p-5 text-left"
         >
           <div>
-            <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors — dark mode</p>
-            <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
+            <p className="text-[15px] font-medium text-[var(--b-ink)]">Accent colors — dark mode</p>
+            <p className="text-[12.5px] text-[rgba(43,27,18,0.6)]">
               Optional overrides applied only when the site is in dark mode.
             </p>
           </div>
           <svg
-            className={"mt-1 h-4 w-4 text-[rgba(43,58,103,0.5)] transition-transform " + (darkOpen ? "rotate-180" : "")}
+            className={"mt-1 h-4 w-4 text-[rgba(43,27,18,0.5)] transition-transform " + (darkOpen ? "rotate-180" : "")}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
           >
             <path d="M6 9l6 6 6-6" />
           </svg>
         </button>
         {darkOpen ? (
-          <div className="grid gap-4 border-t border-[rgba(43,58,103,0.08)] p-5 sm:grid-cols-3">
+          <div className="grid gap-4 border-t border-[rgba(43,27,18,0.08)] p-5 sm:grid-cols-3">
             <ColorField label="Accent" value={value.accentDark} onChange={(v) => patch("accentDark", v)} placeholder="#5c7bb0" />
             <ColorField label="Accent (soft)" value={value.accentSoftDark} onChange={(v) => patch("accentSoftDark", v)} placeholder="#3a1620" />
             <ColorField label="Text on accent" value={value.textOnAccentDark} onChange={(v) => patch("textOnAccentDark", v)} placeholder="#ffffff" />
@@ -688,10 +688,10 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
       </div>
 
       {/* Fonts */}
-      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,27,18,0.1)] p-5">
         <div className="mb-1">
-          <p className="text-[15px] font-medium text-[#2b3a67]">Fonts</p>
-          <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
+          <p className="text-[15px] font-medium text-[var(--b-ink)]">Fonts</p>
+          <p className="text-[12.5px] text-[rgba(43,27,18,0.6)]">
             Pick from a curated set. Leave blank to keep the defaults.
           </p>
         </div>
@@ -721,20 +721,20 @@ function ColorField({
 
   return (
     <label className="block">
-      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">{label}</span>
-      <div className="flex items-center gap-2 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white pr-1">
+      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">{label}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-[rgba(43,27,18,0.2)] bg-white pr-1">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 border-none bg-transparent px-3 py-2 font-mono text-[13.5px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.35)]"
+          className="flex-1 border-none bg-transparent px-3 py-2 font-mono text-[13.5px] text-[var(--b-ink)] outline-none placeholder:text-[rgba(43,27,18,0.35)]"
         />
         {/* Native colour picker; its output overwrites the text field. */}
         <input
           type="color"
           value={isValidHex ? value.trim().slice(0, 7) : "#ffffff"}
           onChange={(e) => onChange(e.target.value)}
-          className="h-7 w-7 shrink-0 cursor-pointer rounded-full border border-[rgba(43,58,103,0.15)]"
+          className="h-7 w-7 shrink-0 cursor-pointer rounded-full border border-[rgba(43,27,18,0.15)]"
           style={{ background: swatch, padding: 0 }}
           aria-label={`${label} colour picker`}
         />
@@ -758,7 +758,7 @@ function FontField({
   const def = FONT_DEFAULT[role];
   return (
     <label className="block">
-      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">{label}</span>
+      <span className="mb-1 flex text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -903,7 +903,7 @@ function SeoTab({
                 onClick={() => {
                   onIntPatch({ clearAiApiKey: true, aiApiKey: undefined });
                 }}
-                className="mt-1 text-[11.5px] text-[#22305a] hover:underline"
+                className="mt-1 text-[11.5px] text-[var(--b-primary-deep)] hover:underline"
               >
                 Clear saved key
               </button>
@@ -1004,15 +1004,15 @@ function SeoTab({
             <button
               type="button"
               onClick={() => onIntPatch({ clearGaServiceAccount: true, gaServiceAccountJson: undefined })}
-              className="mt-1 text-[11.5px] text-[#22305a] hover:underline"
+              className="mt-1 text-[11.5px] text-[var(--b-primary-deep)] hover:underline"
             >
               Clear saved service account
             </button>
           ) : null}
         </Field>
 
-        <div className="mt-4 rounded-lg border border-[rgba(43,58,103,0.1)] bg-[#eef2f8] p-4 text-[13px] text-[rgba(43,58,103,0.75)]">
-          <p className="mb-2 font-medium text-[#2b3a67]">How to connect</p>
+        <div className="mt-4 rounded-lg border border-[rgba(43,27,18,0.1)] bg-[var(--b-tint)] p-4 text-[13px] text-[rgba(43,27,18,0.75)]">
+          <p className="mb-2 font-medium text-[var(--b-ink)]">How to connect</p>
           <ol className="list-decimal space-y-1 pl-5">
             <li>In <strong>Google Cloud Console</strong>, create (or pick) a project and enable the <strong>Google Analytics Data API</strong>.</li>
             <li>Create a <strong>Service Account</strong> → add a <strong>JSON key</strong> → download it.</li>
@@ -1047,7 +1047,7 @@ function KeywordChips({
     onDraft("");
   };
   return (
-    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-2 py-1.5">
+    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-2 py-1.5">
       {value.map((k, i) => (
         <span
           key={k + i}
@@ -1057,7 +1057,7 @@ function KeywordChips({
           <button
             type="button"
             onClick={() => onChange(value.filter((_, j) => j !== i))}
-            className="hover:text-[#2b3a67]"
+            className="hover:text-[var(--b-ink)]"
             aria-label={`Remove ${k}`}
           >
             Ã—
@@ -1077,7 +1077,7 @@ function KeywordChips({
         }}
         onBlur={commit}
         placeholder={value.length ? "" : "Add a keyword"}
-        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
+        className="flex-1 border-none bg-transparent px-1 py-1 text-[13px] text-[var(--b-ink)] outline-none placeholder:text-[rgba(43,27,18,0.4)]"
       />
     </div>
   );
@@ -1099,24 +1099,24 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-[rgba(43,58,103,0.1)]">
+    <div className="rounded-xl border border-[rgba(43,27,18,0.1)]">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full items-start justify-between gap-3 p-5 text-left"
       >
         <div>
-          <p className="text-[15px] font-medium text-[#2b3a67]">{title}</p>
-          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">{description}</p> : null}
+          <p className="text-[15px] font-medium text-[var(--b-ink)]">{title}</p>
+          {description ? <p className="mt-0.5 text-[12.5px] text-[rgba(43,27,18,0.6)]">{description}</p> : null}
         </div>
         <svg
-          className={"mt-1 h-4 w-4 shrink-0 text-[rgba(43,58,103,0.5)] transition-transform " + (open ? "rotate-180" : "")}
+          className={"mt-1 h-4 w-4 shrink-0 text-[rgba(43,27,18,0.5)] transition-transform " + (open ? "rotate-180" : "")}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
-      {open ? <div className="space-y-4 border-t border-[rgba(43,58,103,0.08)] p-5">{children}</div> : null}
+      {open ? <div className="space-y-4 border-t border-[rgba(43,27,18,0.08)] p-5">{children}</div> : null}
     </div>
   );
 }
@@ -1151,7 +1151,7 @@ function AlgoTab({
 
   if (!value) {
     return (
-      <div className="flex h-40 items-center justify-center text-[13px] text-[rgba(43,58,103,0.55)]">
+      <div className="flex h-40 items-center justify-center text-[13px] text-[rgba(43,27,18,0.55)]">
         Loading SEO algorithm…
       </div>
     );
@@ -1248,16 +1248,16 @@ function AlgoTab({
   return (
     <div className="space-y-6">
       {/* Automatic weekly improvement */}
-      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,27,18,0.1)] p-5">
         <div className="mb-4 flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--b-tint)] text-[var(--b-gold)]">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-3.5-7.1" /><path d="M21 4v5h-5" />
             </svg>
           </span>
           <div>
-            <p className="text-[15px] font-medium text-[#2b3a67]">Automatic weekly improvement</p>
-            <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">
+            <p className="text-[15px] font-medium text-[var(--b-ink)]">Automatic weekly improvement</p>
+            <p className="mt-0.5 text-[12.5px] text-[rgba(43,27,18,0.6)]">
               Let AI research and refresh the algorithm on a schedule, archiving every previous version so you can
               compare and revert. Each run also updates the AI&rsquo;s learning memory, so results compound over time.
             </p>
@@ -1265,13 +1265,13 @@ function AlgoTab({
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Auto-improve with AI</p>
+            <p className="mb-2 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">Auto-improve with AI</p>
             <Toggle
               checked={eff.autoImprove}
               onChange={(v) => onPatch({ autoImprove: v })}
               label={eff.autoImprove ? "On" : "Off"}
             />
-            <p className="mt-2 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+            <p className="mt-2 text-[11.5px] text-[rgba(43,27,18,0.55)]">
               When on, the algorithm is researched and replaced automatically at the cadence below.
             </p>
           </div>
@@ -1306,11 +1306,11 @@ function AlgoTab({
             />
           </Field>
           <div>
-            <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Last AI run</p>
-            <p className="text-[14px] text-[#2b3a67]">
+            <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">Last AI run</p>
+            <p className="text-[14px] text-[var(--b-ink)]">
               {value.lastRunAt ? formatDateTime(value.lastRunAt) : "Never run yet"}
               {value.lastRunNote ? (
-                <span className="ml-1 text-[12.5px] text-[rgba(43,58,103,0.55)]">— {value.lastRunNote}</span>
+                <span className="ml-1 text-[12.5px] text-[rgba(43,27,18,0.55)]">— {value.lastRunNote}</span>
               ) : null}
             </p>
           </div>
@@ -1332,16 +1332,16 @@ function AlgoTab({
       </div>
 
       {/* AI audit & optimisation algorithm */}
-      <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
+      <div className="rounded-xl border border-[rgba(43,27,18,0.1)] p-5">
         <div className="mb-4 flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--b-tint)] text-[var(--b-gold)]">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" />
             </svg>
           </span>
           <div>
-            <p className="text-[15px] font-medium text-[#2b3a67]">AI audit &amp; optimisation algorithm</p>
-            <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">
+            <p className="text-[15px] font-medium text-[var(--b-ink)]">AI audit &amp; optimisation algorithm</p>
+            <p className="mt-0.5 text-[12.5px] text-[rgba(43,27,18,0.6)]">
               The strategy and 0–100 scoring rubric Claude follows when auditing and optimising every page. A strong
               default is provided — tune it, or let AI improve it. Save to apply across all content editors; every
               save is archived as a version.
@@ -1364,7 +1364,7 @@ function AlgoTab({
             type="button"
             onClick={resetToDefault}
             disabled={busy !== null}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(43,58,103,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#2b3a67] transition-colors hover:border-[#2b3a67] hover:text-[#2b3a67] disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(43,27,18,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[var(--b-ink)] transition-colors hover:border-[var(--b-primary)] hover:text-[var(--b-ink)] disabled:opacity-60"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v6h6" />
@@ -1376,7 +1376,7 @@ function AlgoTab({
           value={eff.algorithm}
           onChange={(e) => onPatch({ algorithm: e.target.value })}
           className={
-            "mt-4 w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#5c7bb0]"
+            "mt-4 w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[var(--b-gold)]"
           }
           rows={18}
           spellCheck={false}
@@ -1391,7 +1391,7 @@ function AlgoTab({
         description="Every version is archived with its source and SEO performance (average audit score). Restore any earlier version, or load it into the editor to compare."
       >
         <div>
-          <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">Saved versions (newest first)</p>
+          <p className="mb-1 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">Saved versions (newest first)</p>
           <select
             value={selectedVersion}
             onChange={(e) => setSelectedVersion(e.target.value)}
@@ -1408,7 +1408,7 @@ function AlgoTab({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+          <p className="mt-1.5 text-[11.5px] text-[rgba(43,27,18,0.55)]">
             &ldquo;•&rdquo; marks the version currently in use.
           </p>
         </div>
@@ -1418,7 +1418,7 @@ function AlgoTab({
               type="button"
               onClick={() => loadVersionIntoEditor(selectedVersion)}
               disabled={busy !== null}
-              className="rounded-full border border-[rgba(43,58,103,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[#2b3a67] hover:border-[#5c7bb0] hover:text-[#5c7bb0] disabled:opacity-60"
+              className="rounded-full border border-[rgba(43,27,18,0.2)] bg-white px-3.5 py-1.5 text-[12.5px] font-medium text-[var(--b-ink)] hover:border-[var(--b-gold)] hover:text-[var(--b-gold)] disabled:opacity-60"
             >
               Load into editor
             </button>
@@ -1426,7 +1426,7 @@ function AlgoTab({
               type="button"
               onClick={() => restoreVersion(selectedVersion)}
               disabled={busy !== null || value.versions.find((v) => v.id === selectedVersion)?.isCurrent}
-              className="rounded-full bg-[#2b3a67] px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-[#22305a] disabled:opacity-60"
+              className="rounded-full bg-[var(--b-primary)] px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-[var(--b-primary-deep)] disabled:opacity-60"
             >
               Restore as current
             </button>
@@ -1445,12 +1445,12 @@ function AlgoTab({
           value={eff.learningMemory}
           onChange={(e) => onPatch({ learningMemory: e.target.value })}
           className={
-            "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[#5c7bb0]"
+            "w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-white p-3 font-mono text-[12.5px] leading-[1.6] text-[#3d2540] outline-none focus:border-[var(--b-gold)]"
           }
           rows={14}
           spellCheck={false}
         />
-        <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
+        <p className="mt-1.5 text-[11.5px] text-[rgba(43,27,18,0.55)]">
           Passed to the AI before each run so improvements build on prior learnings.
         </p>
       </Section>
@@ -1504,7 +1504,7 @@ function Toggle({
         aria-checked={checked}
         className={
           "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors " +
-          (checked ? "bg-[#2b3a67]" : "bg-[rgba(43,58,103,0.25)]")
+          (checked ? "bg-[var(--b-primary)]" : "bg-[rgba(43,27,18,0.25)]")
         }
       >
         <span
@@ -1514,26 +1514,26 @@ function Toggle({
           }
         />
       </button>
-      {label ? <span className="text-[13px] text-[#2b3a67]">{label}</span> : null}
+      {label ? <span className="text-[13px] text-[var(--b-ink)]">{label}</span> : null}
     </label>
   );
 }
 
 function ComingSoon({ tab }: { tab: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[rgba(43,58,103,0.2)] px-6 py-14 text-center">
-      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e8edf5] text-[#b08d57]">
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[rgba(43,27,18,0.2)] px-6 py-14 text-center">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--b-tint)] text-[var(--b-gold)]">
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 8v4l3 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" />
         </svg>
       </span>
       <p
-        className="text-lg font-medium italic text-[#2b3a67]"
+        className="text-lg font-medium italic text-[var(--b-ink)]"
         style={{ fontFamily: "var(--f-serif)" }}
       >
         {tab} — coming next
       </p>
-      <p className="max-w-md text-[13.5px] text-[rgba(43,58,103,0.65)]">
+      <p className="max-w-md text-[13.5px] text-[rgba(43,27,18,0.65)]">
         Share the fields you want in this tab and I'll wire them to the same site-settings record.
       </p>
     </div>
@@ -1543,7 +1543,7 @@ function ComingSoon({ tab }: { tab: string }) {
 /* --------------------------- shared bits --------------------------------- */
 
 const inputCls =
-  "w-full rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-3 py-2 text-[14px] text-[#2b3a67] outline-none focus:border-[#5c7bb0]";
+  "w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-3 py-2 text-[14px] text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]";
 
 function Field({
   label,
@@ -1558,12 +1558,12 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(43,58,103,0.75)]">
+      <span className="mb-1 flex items-center gap-1 text-[12.5px] font-medium text-[rgba(43,27,18,0.75)]">
         {label}
-        {required ? <span className="text-[#2b3a67]">*</span> : null}
+        {required ? <span className="text-[var(--b-ink)]">*</span> : null}
       </span>
       {children}
-      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(43,58,103,0.55)]">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-[11.5px] text-[rgba(43,27,18,0.55)]">{hint}</span> : null}
     </label>
   );
 }
@@ -1638,7 +1638,7 @@ function FileDrop({
           if (f) upload(f);
         }}
         onClick={() => inputRef.current?.click()}
-        className="flex min-h-[92px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,58,103,0.25)] bg-[#eef2f8] px-4 py-4 text-center text-[13px] text-[rgba(43,58,103,0.7)] transition-colors hover:border-[#2b3a67] hover:bg-[#e3eaf5]/40 hover:text-[#2b3a67]"
+        className="flex min-h-[92px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,27,18,0.25)] bg-[var(--b-tint)] px-4 py-4 text-center text-[13px] text-[rgba(43,27,18,0.7)] transition-colors hover:border-[var(--b-primary)] hover:bg-[var(--b-tint)]/40 hover:text-[var(--b-ink)]"
       >
         {uploading ? (
           <span>Uploading…</span>
@@ -1648,16 +1648,16 @@ function FileDrop({
             <img
               src={value}
               alt=""
-              className="h-14 w-14 rounded-md border border-[rgba(43,58,103,0.1)] bg-white object-contain p-1"
+              className="h-14 w-14 rounded-md border border-[rgba(43,27,18,0.1)] bg-white object-contain p-1"
             />
             <span className="text-left">
-              <span className="block text-[13px] font-medium text-[#2b3a67]">Replace</span>
-              <span className="block text-[11.5px] text-[rgba(43,58,103,0.55)]">Drag &amp; drop or click to change</span>
+              <span className="block text-[13px] font-medium text-[var(--b-ink)]">Replace</span>
+              <span className="block text-[11.5px] text-[rgba(43,27,18,0.55)]">Drag &amp; drop or click to change</span>
             </span>
           </div>
         ) : (
           <span>
-            Drag &amp; Drop your files or <span className="text-[#5c7bb0] underline">Browse</span>
+            Drag &amp; Drop your files or <span className="text-[var(--b-gold)] underline">Browse</span>
           </span>
         )}
         <input
@@ -1672,14 +1672,14 @@ function FileDrop({
         />
       </div>
       {value ? (
-        <div className="mt-2 flex items-center justify-between text-[11.5px] text-[rgba(43,58,103,0.55)]">
+        <div className="mt-2 flex items-center justify-between text-[11.5px] text-[rgba(43,27,18,0.55)]">
           <span className="truncate">{value}</span>
           <span className="ml-2 flex shrink-0 gap-1.5">
             {editable ? (
               <button
                 type="button"
                 onClick={editCurrent}
-                className="rounded-full border border-[rgba(43,58,103,0.2)] px-2 py-0.5 text-[11px] text-[#2b3a67] hover:border-[#2b3a67] hover:text-[#2b3a67]"
+                className="rounded-full border border-[rgba(43,27,18,0.2)] px-2 py-0.5 text-[11px] text-[var(--b-ink)] hover:border-[var(--b-primary)] hover:text-[var(--b-ink)]"
               >
                 Edit
               </button>

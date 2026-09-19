@@ -43,7 +43,7 @@ export default function AdminInvitationsPage() {
   }, [rows, q]);
 
   if (loading || !user || user.role !== "admin") {
-    return <div className="flex h-dvh items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex h-dvh items-center justify-center text-[var(--b-muted)]">Loading…</div>;
   }
 
   const statusPill = (status: string) =>
@@ -51,20 +51,20 @@ export default function AdminInvitationsPage() {
       ? "bg-emerald-50 text-emerald-700"
       : status === "expired"
         ? "bg-amber-50 text-amber-700"
-        : "bg-slate-100 text-slate-500";
+        : "bg-[var(--b-tint)] text-[var(--b-muted)]";
 
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#5c7bb0]">Couples</p>
-          <h1 className="font-display text-2xl text-[#2b3a67]">All invitations</h1>
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--b-gold)]">Couples</p>
+          <h1 className="font-display text-2xl text-[var(--b-ink)]">All invitations</h1>
         </div>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search couple, email or slug…"
-          className="w-64 rounded-lg border border-[rgba(43,58,103,0.2)] bg-white px-3 py-2 text-sm outline-none focus:border-[#2b3a67]"
+          className="w-64 rounded-lg border border-[rgba(43,27,18,0.2)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--b-primary)]"
         />
       </div>
 
@@ -72,11 +72,11 @@ export default function AdminInvitationsPage() {
 
       <div className="space-y-3">
         {filtered.map((r) => (
-          <div key={r.id} className="rounded-xl border border-[rgba(43,58,103,0.08)] bg-white p-4 shadow-sm">
+          <div key={r.id} className="rounded-xl border border-[rgba(43,27,18,0.08)] bg-white p-4 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-display text-lg text-[#2b3a67]">{r.names}</p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[rgba(43,58,103,0.6)]">
+                <p className="font-display text-lg text-[var(--b-ink)]">{r.names}</p>
+                <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[rgba(43,27,18,0.6)]">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${statusPill(r.status)}`}>
                     {r.status}
                   </span>
@@ -84,13 +84,13 @@ export default function AdminInvitationsPage() {
                   <span className="truncate">owner: {r.ownerName ? `${r.ownerName} — ` : ""}{r.ownerEmail}</span>
                 </p>
                 {r.slug ? (
-                  <p className="mt-1 truncate text-xs text-[rgba(43,58,103,0.45)]">/i/{r.slug}</p>
+                  <p className="mt-1 truncate text-xs text-[rgba(43,27,18,0.45)]">/i/{r.slug}</p>
                 ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <Link
                   href={`/studio?id=${r.id}`}
-                  className="rounded-full bg-[#2b3a67] px-3 py-1.5 font-medium text-white hover:bg-[#23315a]"
+                  className="rounded-full bg-[var(--b-primary)] px-3 py-1.5 font-medium text-white hover:bg-[#23315a]"
                 >
                   Edit in Studio
                 </Link>
@@ -99,7 +99,7 @@ export default function AdminInvitationsPage() {
                     href={`/i/${r.slug}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]"
+                    className="rounded-full border border-[rgba(43,27,18,0.2)] px-3 py-1.5 text-[var(--b-ink)] hover:bg-[var(--b-tint)]"
                   >
                     View live ↗
                   </a>
@@ -120,7 +120,7 @@ export default function AdminInvitationsPage() {
                       setMsg((err as Error).message);
                     }
                   }}
-                  className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]"
+                  className="rounded-full border border-[rgba(43,27,18,0.2)] px-3 py-1.5 text-[var(--b-ink)] hover:bg-[var(--b-tint)]"
                 >
                   Excel ↓
                 </a>
@@ -129,7 +129,7 @@ export default function AdminInvitationsPage() {
           </div>
         ))}
         {filtered.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-[rgba(43,58,103,0.15)] p-8 text-center text-sm text-[rgba(43,58,103,0.5)]">
+          <p className="rounded-xl border border-dashed border-[rgba(43,27,18,0.15)] p-8 text-center text-sm text-[rgba(43,27,18,0.5)]">
             {rows.length === 0 ? "No invitations yet." : "Nothing matches your search."}
           </p>
         ) : null}
