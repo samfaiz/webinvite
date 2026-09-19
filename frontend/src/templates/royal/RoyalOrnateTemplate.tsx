@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { ParticleField } from "@/components/ParticleField";
 import { MusicToggle } from "@/components/MusicToggle";
+import { ScrollGuide } from "@/components/ScrollGuide";
 import { MonogramCrest, Divider } from "@/components/Ornaments";
 import { EnvelopeIntro } from "@/blocks/EnvelopeIntro";
 import { VideoIntro } from "@/blocks/VideoIntro";
@@ -123,6 +124,7 @@ export function RoyalOrnateTemplate({
       </main>
 
       <MusicToggle trackUrl={content.music.trackUrl} />
+      <ScrollGuide active={opened} hasMusic={!!content.music.trackUrl} />
     </ThemeProvider>
     </PreviewContext.Provider>
   );

@@ -5,6 +5,7 @@ import type { CustomSection, RenderProps } from "@/engine/types";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PreviewContext } from "@/components/PreviewContext";
 import { MusicToggle } from "@/components/MusicToggle";
+import { ScrollGuide } from "@/components/ScrollGuide";
 import { StyleOverrides } from "@/components/StyleOverrides";
 import { TextOffsets } from "@/templates/TextOffsets";
 import { SectionBody, cardBox } from "./sections";
@@ -126,6 +127,8 @@ export function CustomTemplate({
           ))}
         </main>
         <MusicToggle trackUrl={content.music?.trackUrl} />
+        {/* no envelope on this template, so the nudge timer starts at mount */}
+        <ScrollGuide active hasMusic={!!content.music?.trackUrl} />
       </ThemeProvider>
     </PreviewContext.Provider>
   );

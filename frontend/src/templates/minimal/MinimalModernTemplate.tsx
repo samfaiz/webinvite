@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { ParticleField } from "@/components/ParticleField";
 import { MusicToggle } from "@/components/MusicToggle";
+import { ScrollGuide } from "@/components/ScrollGuide";
 import { Divider } from "@/components/Ornaments";
 import { StyleOverrides } from "@/components/StyleOverrides";
 import { TextOffsets } from "@/templates/TextOffsets";
@@ -99,6 +100,8 @@ export function MinimalModernTemplate({
         </main>
 
         <MusicToggle trackUrl={content.music.trackUrl} />
+        {/* no envelope on this template, so the nudge timer starts at mount */}
+        <ScrollGuide active hasMusic={!!content.music.trackUrl} />
       </div>
     </ThemeProvider>
     </PreviewContext.Provider>
