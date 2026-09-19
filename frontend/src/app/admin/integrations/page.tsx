@@ -123,7 +123,10 @@ export default function AdminIntegrationsPage() {
 
           <label className="mb-3 block text-xs text-[var(--b-muted)]">
             Anthropic API key {st.ai.hasKey ? <span className="text-[var(--b-muted)]">· current: <code>{st.ai.keyPreview}</code></span> : null}
-            <input type="password" autoComplete="off" value={aiKeyInput} onChange={(e) => setAiKeyInput(e.target.value)}
+            {/* autoComplete="new-password", not "off": Chrome deliberately ignores
+                "off" on password fields, and was filling the admin's saved account
+                password into this box. "new-password" stops that. */}
+            <input type="password" autoComplete="new-password" value={aiKeyInput} onChange={(e) => setAiKeyInput(e.target.value)}
               placeholder={st.ai.hasKey ? "Enter a new key to replace it" : "sk-ant-…"} className={`${input} mt-1`} />
           </label>
 

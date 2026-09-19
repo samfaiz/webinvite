@@ -72,6 +72,7 @@ export default function LoginPage() {
           <input
             type="email"
             required
+            autoComplete="username"
             className="w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-[var(--b-tint)] px-3 py-2.5 text-sm text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]"
             placeholder="Email"
             value={email}
@@ -82,6 +83,10 @@ export default function LoginPage() {
             type="password"
             required
             minLength={6}
+            /* The one field that *should* autofill. Naming it explicitly keeps
+               the password manager anchored here rather than guessing at the
+               admin's secret-key fields. */
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
             className="w-full rounded-lg border border-[rgba(43,27,18,0.2)] bg-[var(--b-tint)] px-3 py-2.5 text-sm text-[var(--b-ink)] outline-none focus:border-[var(--b-gold)]"
             placeholder="Password (min 6 chars)"
             value={password}

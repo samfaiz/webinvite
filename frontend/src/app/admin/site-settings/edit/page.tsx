@@ -880,6 +880,8 @@ function SeoTab({
           <Field label="Anthropic API key" hint="Stored encrypted and never shown again. Get one from the Anthropic Console.">
             <input
               type="password"
+              // not a login field — keep the browser's password manager out of it
+              autoComplete="new-password"
               value={aiKeyDraft}
               onChange={(e) => {
                 setAiKeyDraft(e.target.value);
