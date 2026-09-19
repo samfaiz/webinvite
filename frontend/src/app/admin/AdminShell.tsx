@@ -210,26 +210,34 @@ export function AdminShell({ children }: { children: ReactNode }) {
     .join("");
 
   return (
-    <div className="flex min-h-svh bg-[#f7f9fc] text-[#2b3a67]" style={{ fontFamily: "var(--f-body)" }}>
+    <div className="brand-page flex min-h-svh">
       {/* ─────────────────────── Sidebar ─────────────────────── */}
-      <aside className="hidden w-[240px] shrink-0 flex-col border-r border-[rgba(43,58,103,0.1)] bg-white lg:flex">
-        <div className="flex items-center gap-2 border-b border-[rgba(43,58,103,0.08)] px-5 py-[18px]">
+      <aside
+        className="hidden w-[236px] shrink-0 flex-col lg:flex"
+        style={{ background: "var(--b-ink)" }}
+      >
+        <div className="flex items-center gap-2 px-[22px] pb-5 pt-[22px]">
           <Link
             href="/dashboard"
             aria-label="Back to my invitations"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-[rgba(43,58,103,0.55)] transition-colors hover:bg-[#e8edf5] hover:text-[#2b3a67]"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-[#8a6f52] transition-colors hover:text-[var(--b-sand)]"
           >
             {icon.back()}
           </Link>
           <Link href="/admin" className="flex items-baseline gap-1.5">
-            <span className="text-[18px] font-semibold italic text-[#2b3a67]" style={{ fontFamily: "var(--f-serif)" }}>
+            <span
+              className="text-[20px] font-bold"
+              style={{ fontFamily: "var(--f-display)", color: "var(--b-tint)" }}
+            >
               Web Invite
             </span>
-            <span className="h-[4px] w-[4px] rotate-45 bg-[#5c7bb0]" />
+            <span className="text-[20px] font-bold" style={{ fontFamily: "var(--f-display)", color: "var(--b-gold)" }}>
+              .
+            </span>
           </Link>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 pb-4">
           {NAV.map((group, gi) => {
             const key = group.title || `g${gi}`;
             const isClosed = !!closed[key];
@@ -239,7 +247,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <button
                     type="button"
                     onClick={() => setClosed((c) => ({ ...c, [key]: !isClosed }))}
-                    className="mb-1 flex w-full items-center justify-between px-2 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[rgba(43,58,103,0.45)] transition-colors hover:text-[#5c7bb0]"
+                    className="mb-1 flex w-full items-center justify-between px-[14px] pb-1.5 pt-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8a6f52] transition-colors hover:text-[var(--b-gold)]"
                   >
                     <span>{group.title}</span>
                     <span className={"transition-transform " + (isClosed ? "-rotate-90" : "")}>
@@ -256,27 +264,28 @@ export function AdminShell({ children }: { children: ReactNode }) {
                           key={item.href}
                           href={item.href}
                           className={
-                            "group mt-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] transition " +
+                            "group mt-0.5 flex items-center gap-[10px] rounded-[9px] px-[14px] py-[11px] text-[13.5px] transition " +
                             (on
-                              ? "font-medium shadow-[0_6px_16px_rgba(43,58,103,0.28)] hover:brightness-95"
-                              : "text-[rgba(43,58,103,0.78)] hover:bg-[#e8edf5] hover:text-[#2b3a67]")
+                              ? "font-semibold"
+                              : "font-medium text-[#d8c6ac] hover:bg-white/[0.06] hover:text-[var(--b-tint)]")
                           }
-                          style={on ? { background: "var(--c-primary)", color: "var(--c-on-primary)" } : undefined}
+                          style={on ? { background: "var(--b-sand)", color: "var(--b-ink)" } : undefined}
                         >
                           <span
-                            className={on ? "" : "text-[rgba(43,58,103,0.55)] group-hover:text-[#5c7bb0]"}
-                            style={on ? { color: "var(--c-on-primary)" } : undefined}
+                            className={on ? "" : "text-[#8a6f52] group-hover:text-[var(--b-gold)]"}
+                            style={on ? { color: "var(--b-ink)" } : undefined}
                           >
                             {item.icon("h-4 w-4")}
                           </span>
                           <span className="flex-1">{item.label}</span>
                           {badge > 0 ? (
                             <span
-                              className={
-                                "min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10.5px] font-semibold " +
-                                (on ? "" : "bg-[#b08d57] text-white")
+                              className="min-w-[20px] rounded-full px-2 py-0.5 text-center text-[11px] font-bold"
+                              style={
+                                on
+                                  ? { background: "var(--b-ink)", color: "var(--b-sand)" }
+                                  : { background: "var(--b-gold)", color: "var(--b-ink)" }
                               }
-                              style={on ? { background: "var(--c-on-primary)", color: "var(--c-primary)" } : undefined}
                             >
                               {badge > 99 ? "99+" : badge}
                             </span>
@@ -289,56 +298,76 @@ export function AdminShell({ children }: { children: ReactNode }) {
             );
           })}
 
-          <div className="mt-6 border-t border-[rgba(43,58,103,0.08)] pt-4">
+          <div className="mt-6 border-t border-[rgba(240,220,187,0.15)] pt-4">
             {OUTBOUND.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] text-[rgba(43,58,103,0.78)] transition-colors hover:bg-[#e8edf5] hover:text-[#5c7bb0]"
+                className="flex items-center gap-[10px] rounded-[9px] px-[14px] py-[11px] text-[13.5px] font-medium text-[#d8c6ac] transition-colors hover:bg-white/[0.06] hover:text-[var(--b-tint)]"
               >
-                <span className="text-[rgba(43,58,103,0.55)]">{item.icon("h-4 w-4")}</span>
+                <span className="text-[#8a6f52]">{item.icon("h-4 w-4")}</span>
                 <span>{item.label}</span>
               </Link>
             ))}
           </div>
         </nav>
+
+        {/* Who is signed in — moved out of the top bar, per the design */}
+        <div
+          className="mx-3 mt-auto flex items-center gap-[10px] border-t px-[14px] pb-[18px] pt-3.5"
+          style={{ borderColor: "rgba(240,220,187,0.15)" }}
+        >
+          <span
+            className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full text-[14px] font-bold"
+            style={{ background: "var(--b-gold)", color: "var(--b-ink)" }}
+          >
+            {initials || "?"}
+          </span>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-[13px] font-semibold" style={{ color: "var(--b-tint)" }}>
+              {user?.name || user?.email?.split("@")[0]}
+            </span>
+            <span className="text-[11px]" style={{ color: "#8a6f52" }}>
+              {user?.role === "admin" ? "Super admin" : "Admin"}
+            </span>
+          </div>
+        </div>
       </aside>
 
       {/* ─────────────────────── Main column ─────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="flex items-center gap-3 border-b border-[rgba(43,58,103,0.08)] bg-white px-4 py-3 sm:px-6">
+        <header
+          className="flex items-center gap-3 bg-white px-4 py-4 sm:px-8"
+          style={{ borderBottom: "1px solid rgba(43,27,18,.08)" }}
+        >
           {/* Breadcrumb (mobile only shows current) */}
-          <nav className="flex items-center gap-1.5 text-[13px] text-[rgba(43,58,103,0.55)]">
-            <Link href="/admin" className="hidden hover:text-[#2b3a67] sm:inline">Admin</Link>
-            <span className="hidden text-[rgba(43,58,103,0.3)] sm:inline">›</span>
-            <span className="font-medium text-[#2b3a67]">{active.crumb || active.label}</span>
+          <nav className="flex items-center gap-1.5 text-[13px]" style={{ color: "var(--b-muted)" }}>
+            <Link href="/admin" className="hidden hover:opacity-70 sm:inline">Admin</Link>
+            <span className="hidden sm:inline" style={{ color: "var(--b-gold)" }}>›</span>
+            <span className="font-semibold" style={{ color: "var(--b-ink)" }}>
+              {active.crumb || active.label}
+            </span>
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <label className="hidden items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-[#eef2f8] px-3 py-1.5 md:flex">
-              <span className="text-[rgba(43,58,103,0.5)]">{icon.search("h-3.5 w-3.5")}</span>
+            <label
+              className="hidden items-center gap-2 rounded-full px-4 py-[9px] md:flex"
+              style={{ background: "var(--b-bg)", border: "1px solid rgba(43,27,18,.1)" }}
+            >
+              <span style={{ color: "#a08a75" }}>{icon.search("h-3.5 w-3.5")}</span>
               <input
-                className="w-40 border-none bg-transparent text-[13px] text-[#2b3a67] outline-none placeholder:text-[rgba(43,58,103,0.4)]"
-                placeholder="Search"
+                className="w-40 border-none bg-transparent text-[13px] outline-none"
+                style={{ color: "var(--b-ink)" }}
+                placeholder="Search anything…"
               />
             </label>
 
-            <div className="flex items-center gap-2 rounded-full border border-[rgba(43,58,103,0.12)] bg-white px-2 py-1">
-              <span
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                style={{ background: "linear-gradient(135deg,#2b3a67,#5c7bb0)" }}
-              >
-                {initials || "?"}
-              </span>
-              <span className="hidden pr-1 text-[13px] text-[rgba(43,58,103,0.75)] sm:inline">
-                {user?.name || user?.email?.split("@")[0]}
-              </span>
-            </div>
-
+            {/* The identity chip now lives in the sidebar footer, as designed. */}
             <button
               onClick={logout}
-              className="rounded-full border border-[rgba(43,58,103,0.35)] px-3 py-1.5 text-[12px] font-medium text-[#22305a] transition-colors hover:bg-[#e3eaf5]"
+              className="rounded-full px-[18px] py-2 text-[13px] font-semibold transition-colors hover:bg-[var(--b-tint)]"
+              style={{ color: "var(--b-primary)", border: "1.5px solid rgba(122,46,42,.3)" }}
             >
               Log out
             </button>

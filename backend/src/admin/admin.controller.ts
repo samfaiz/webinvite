@@ -15,6 +15,12 @@ export class AdminController {
     return this.svc.stats();
   }
 
+  /** Everything the dashboard renders, measured in one round trip. */
+  @Get('dashboard')
+  dashboard() {
+    return this.svc.dashboard();
+  }
+
   @Get('invitations')
   invitations() {
     return this.svc.listInvitations();

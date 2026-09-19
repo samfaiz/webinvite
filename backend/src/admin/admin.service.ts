@@ -32,6 +32,93 @@ export class AdminService {
     };
   }
 
+  /**
+   * Everything the admin dashboard needs, in one round trip.
+   *
+   * Every figure here is measured, not estimated. Note the RSVP split is
+   * two-way: the schema stores "accept" | "decline" only, so there is no
+   * "maybe" bucket to report.
+   */
+  async dashboard() {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 864e5);
+    /** Monday 00:00 of the week containing `d`. */
+    const weekStart = (d: Date) => {
+      const s = new Date(d);
+      s.setHours(0, 0, 0, 0);
+      s.setDate(s.getDate() - ((s.getDay() + 6) % 7));
+      return s;
+    };
+    const firstWeek = weekStart(new Date(now.getTime() - 11 * 7 * 864e5));
+
+    const [
+      base,
+      newUsers,
+      newInvitations,
+      newRsvps,
+      accepted,
+      declined,
+      byTemplate,
+      views,
+      rsvpRows,
+      unreadEnquiries,
+    ] = await Promise.all([
+      this.stats(),
+      this.prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.invitation.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.rsvp.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.rsvp.count({ where: { attending: 'accept' } }),
+      this.prisma.rsvp.count({ where: { attending: 'decline' } }),
+      this.prisma.invitation.groupBy({
+        by: ['templateId'],
+        _count: { templateId: true },
+        orderBy: { _count: { templateId: 'desc' } },
+        take: 5,
+      }),
+      this.prisma.pageView.findMany({
+        where: { createdAt: { gte: firstWeek } },
+        select: { createdAt: true },
+      }),
+      this.prisma.rsvp.findMany({
+        where: { createdAt: { gte: firstWeek } },
+        select: { createdAt: true },
+      }),
+      this.prisma.contactMessage.count({ where: { status: 'new' } }),
+    ]);
+
+    // 12 weekly buckets, oldest first.
+    const buckets = Array.from({ length: 12 }, (_, i) => {
+      const start = new Date(firstWeek.getTime() + i * 7 * 864e5);
+      return {
+        label: start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+        start: start.getTime(),
+        views: 0,
+        rsvps: 0,
+      };
+    });
+    const bucketFor = (d: Date) =>
+      Math.min(11, Math.max(0, Math.floor((d.getTime() - firstWeek.getTime()) / (7 * 864e5))));
+    for (const v of views) buckets[bucketFor(v.createdAt)].views++;
+    for (const r of rsvpRows) buckets[bucketFor(r.createdAt)].rsvps++;
+
+    const staleDrafts = await this.prisma.invitation.count({
+      where: { status: 'draft', updatedAt: { lt: new Date(now.getTime() - 30 * 864e5) } },
+    });
+
+    return {
+      ...base,
+      deltas: { users: newUsers, invitations: newInvitations, rsvps: newRsvps },
+      staleDrafts,
+      unreadEnquiries,
+      rsvpSplit: { accepted, declined },
+      topTemplates: byTemplate.map((t) => ({
+        templateId: t.templateId,
+        count: t._count.templateId,
+      })),
+      weeks: buckets.map(({ label, views: v, rsvps: r }) => ({ label, views: v, rsvps: r })),
+    };
+  }
+
   /** Couple names out of an invitation's content JSON. */
   private coupleNames(contentJson: string): string {
     try {

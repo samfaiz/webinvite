@@ -243,6 +243,7 @@ export const api = {
     request<{ ok: boolean }>(`/tracks/${id}`, { method: "DELETE" }, true),
 
   // admin
+  adminDashboard: () => request<any>("/admin/dashboard", {}, true),
   adminStats: () => request<any>("/admin/stats", {}, true),
   adminInvitations: () => request<any[]>("/admin/invitations", {}, true),
   adminUsers: () => request<any[]>("/admin/users", {}, true),
