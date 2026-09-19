@@ -28,6 +28,17 @@ type Post = {
   blocks?: unknown[];
 };
 
+/**
+ * Rough reading time from the post's blocks. Derived rather than stored so it
+ * stays true when the post is edited in the admin, and so authors never have
+ * to maintain it. 200 wpm is the usual figure for online prose.
+ */
+function readingTime(blocks: unknown[] | undefined): string {
+  const text = JSON.stringify(blocks ?? []).replace(/<[^>]*>/g, " ");
+  const words = (text.match(/[A-Za-zÀ-ɏ]+/g) ?? []).length;
+  return `${Math.max(1, Math.round(words / 200))} min read`;
+}
+
 async function getPost(slug: string): Promise<Post | null> {
   try {
     const r = await fetch(`${API}/blog/${encodeURIComponent(slug)}`, { cache: "no-store" });
@@ -85,34 +96,127 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <PublicShell>
       <JsonLd data={articleLd} />
-      <article className="mx-auto max-w-3xl px-6 py-12">
-        <Link href="/blog" className="text-sm text-[rgba(43,58,103,0.6)] hover:text-[#2b3a67]" style={{ fontFamily: "var(--f-body)" }}>← All posts</Link>
-        <h1
-          className="mt-4 text-4xl font-medium italic leading-tight text-[#2b3a67] sm:text-5xl"
-          style={{ fontFamily: "var(--f-serif)" }}
+      <article className="mx-auto max-w-[720px] px-6 pb-20 pt-10">
+        <Link
+          href="/blog"
+          className="text-[13px] font-medium transition-opacity hover:opacity-70"
+          style={{ color: "var(--b-primary)" }}
         >
-          {post.title}
-        </h1>
-        <p
-          className="mt-3 text-[11px] uppercase tracking-wide text-[rgba(43,58,103,0.5)]"
-          style={{ fontFamily: "var(--f-body)" }}
-        >
-          {[post.authorName, post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : null].filter(Boolean).join(" · ")}
-        </p>
+          ← All posts
+        </Link>
+
+        {/* Title block. The eyebrow carries the reading time, which is derived
+            from the blocks rather than stored, so it stays true as posts are
+            edited in the admin. */}
+        <header className="mt-6">
+          <p
+            className="text-[11px] font-semibold uppercase"
+            style={{ letterSpacing: "0.18em", color: "var(--b-gold)" }}
+          >
+            {[post.tags?.[0] ?? "Journal", readingTime(post.blocks)].join(" · ")}
+          </p>
+          <h1
+            className="mt-3 text-[34px] font-semibold leading-[1.12] sm:text-[46px]"
+            style={{ fontFamily: "var(--f-display)", color: "var(--b-ink)", textWrap: "pretty" }}
+          >
+            {post.title}
+          </h1>
+          {post.excerpt ? (
+            <p
+              className="mt-4 text-[18px] leading-[1.6]"
+              style={{ color: "var(--b-muted)", textWrap: "pretty" }}
+            >
+              {post.excerpt}
+            </p>
+          ) : null}
+
+          <div
+            className="mt-6 flex items-center gap-3 border-t pt-5"
+            style={{ borderColor: "var(--b-border)" }}
+          >
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold"
+              style={{ background: "var(--b-sand)", color: "var(--b-primary)" }}
+              aria-hidden
+            >
+              {(post.authorName || "W").trim().charAt(0).toUpperCase()}
+            </span>
+            <div className="flex flex-col">
+              <span className="text-[13px] font-semibold" style={{ color: "var(--b-ink)" }}>
+                {post.authorName || "Web Invite"}
+              </span>
+              {post.publishedAt ? (
+                <time
+                  dateTime={post.publishedAt}
+                  className="text-[12px]"
+                  style={{ color: "var(--b-muted)" }}
+                >
+                  {new Date(post.publishedAt).toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </time>
+              ) : null}
+            </div>
+          </div>
+        </header>
+
         {post.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.coverImage} alt="" className="mt-6 w-full rounded-2xl border border-[rgba(43,58,103,0.1)] object-cover" />
+          <img
+            src={post.coverImage}
+            alt=""
+            className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover"
+            style={{ border: "1px solid var(--b-border)" }}
+          />
         ) : null}
-        <div className="mt-8">
+
+        {/* Body. The generous rhythm lives here rather than in BlockRenderer so
+            the same blocks can be reused at other measures (CMS pages, previews). */}
+        <div className="mt-10 flex flex-col gap-6 text-[17px] leading-[1.75]">
           <BlockRenderer blocks={normalizeBlocks(post.blocks)} />
         </div>
+
         {post.tags && post.tags.length ? (
-          <div className="mt-10 flex flex-wrap gap-2">
+          <div
+            className="mt-12 flex flex-wrap gap-2 border-t pt-6"
+            style={{ borderColor: "var(--b-border)" }}
+          >
             {post.tags.map((t) => (
-              <span key={t} className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200">#{t}</span>
+              <span
+                key={t}
+                className="rounded-full px-3 py-1 text-[12px] font-medium"
+                style={{ background: "var(--b-tint)", color: "var(--b-body)" }}
+              >
+                #{t}
+              </span>
             ))}
           </div>
         ) : null}
+
+        {/* Close on the thing the post exists to sell. */}
+        <aside
+          className="mt-12 flex flex-col items-start gap-3 rounded-2xl px-7 py-8"
+          style={{ background: "var(--b-ink)" }}
+        >
+          <p
+            className="text-[22px] font-semibold leading-[1.2]"
+            style={{ fontFamily: "var(--f-display)", color: "var(--b-tint)" }}
+          >
+            Ready to send yours?
+          </p>
+          <p className="text-[14px] leading-[1.6]" style={{ color: "var(--b-border-soft)" }}>
+            Pick a design, add your details, share one link. Guests RSVP in a tap.
+          </p>
+          <Link
+            href="/gallery"
+            className="mt-1 rounded-full px-6 py-3 text-[14px] font-semibold"
+            style={{ background: "var(--b-sand)", color: "var(--b-ink)" }}
+          >
+            Browse designs
+          </Link>
+        </aside>
       </article>
     </PublicShell>
   );
