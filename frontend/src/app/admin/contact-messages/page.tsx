@@ -9,7 +9,7 @@ import { api, type ContactMessage } from "@/lib/api";
 type Filter = "all" | "new" | "read" | "replied";
 
 /**
- * `/admin/contact-messages` â€” inbox for public /contact submissions.
+ * `/admin/contact-messages` — inbox for public /contact submissions.
  * Left column: filter tabs + list of messages. Right column: the selected
  * message with reply / mark-read / delete actions.
  */
@@ -71,7 +71,7 @@ export default function AdminContactMessagesPage() {
         className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        Loading messagesâ€¦
+        Loading messages…
       </div>
     );
   }
@@ -90,9 +90,9 @@ export default function AdminContactMessagesPage() {
         <div>
           <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
             <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <span className="text-[rgba(43,58,103,0.55)]">Inbox</span>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <span className="text-[rgba(43,58,103,0.75)]">Contact Messages</span>
           </nav>
           <h1
@@ -211,7 +211,7 @@ function MessageDetail({
   const mailto = () => {
     const subj = m.subject ? `Re: ${m.subject}` : "Re: your message";
     const body =
-      `Hi ${m.name.split(" ")[0]},\n\nThanks for reaching out.\n\nâ€” \nQuoting your message:\n> ${m.message.replace(/\n/g, "\n> ")}`;
+      `Hi ${m.name.split(" ")[0]},\n\nThanks for reaching out.\n\n— \nQuoting your message:\n> ${m.message.replace(/\n/g, "\n> ")}`;
     return `mailto:${m.email}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -236,13 +236,13 @@ function MessageDetail({
           </h2>
           <p className="mt-0.5 text-[13px] text-[rgba(43,58,103,0.7)]">
             <a href={`mailto:${m.email}`} className="hover:text-[#2b3a67] hover:underline">{m.email}</a>
-            {m.phone ? ` Â· ${m.phone}` : ""}
+            {m.phone ? ` · ${m.phone}` : ""}
           </p>
           {m.subject ? (
             <p className="mt-1 text-[13px] font-medium text-[#2b3a67]">{m.subject}</p>
           ) : null}
           <p className="mt-2 text-[11.5px] text-[rgba(43,58,103,0.5)]">
-            {created.toLocaleString()} Â· via {m.source}
+            {created.toLocaleString()} · via {m.source}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

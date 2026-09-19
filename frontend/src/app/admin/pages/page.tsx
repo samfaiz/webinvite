@@ -8,7 +8,7 @@ import { api, type CmsDoc } from "@/lib/api";
 import { normalizeBlocks, type Block } from "@/cms/blocks";
 
 /**
- * `/admin/pages` â€” inventory of every marketing page (ContentDoc where
+ * `/admin/pages` — inventory of every marketing page (ContentDoc where
  * type === "page"). Hero eyebrow / heading / image are pulled out of the
  * first "hero" block if present; otherwise we fall back to excerpt/title/
  * coverImage. Row-order acts as "sort" for now (real ordering is a follow-up).
@@ -99,7 +99,7 @@ export default function AdminPagesPage() {
           `${auto ? "Auto-seeded" : "Seeded"} ${res.created.length} default page${res.created.length === 1 ? "" : "s"} (${res.created.join(", ")}).`,
         );
       } else if (!auto) {
-        setSeedInfo("All default pages already exist â€” nothing to add.");
+        setSeedInfo("All default pages already exist — nothing to add.");
       }
     } catch (e) {
       setErr((e as Error).message);
@@ -220,7 +220,7 @@ export default function AdminPagesPage() {
         className="flex h-[80vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        Loadingâ€¦
+        Loading…
       </div>
     );
   }
@@ -232,9 +232,9 @@ export default function AdminPagesPage() {
         <div>
           <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
             <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <span className="text-[rgba(43,58,103,0.75)]">Pages</span>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <span className="text-[rgba(43,58,103,0.55)]">List</span>
           </nav>
           <h1
@@ -258,7 +258,7 @@ export default function AdminPagesPage() {
             disabled={busy}
             className="rounded-full bg-[#2b3a67] px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
           >
-            {busy ? "Workingâ€¦" : "+ New page"}
+            {busy ? "Working…" : "+ New page"}
           </button>
         </div>
       </div>
@@ -274,7 +274,7 @@ export default function AdminPagesPage() {
       <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(111,138,184,0.15)] bg-white px-4 py-3 shadow-[0_10px_30px_rgba(43,58,103,0.05)]">
         <button
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          title={`Sort by title (${sortDir === "asc" ? "Aâ†’Z" : "Zâ†’A"})`}
+          title={`Sort by title (${sortDir === "asc" ? "A→Z" : "Z→A"})`}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(43,58,103,0.12)] text-[rgba(43,58,103,0.6)] transition-colors hover:border-[#2b3a67] hover:text-[#2b3a67]"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -381,7 +381,7 @@ export default function AdminPagesPage() {
             {paged === null ? (
               <tr>
                 <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.45)]">
-                  Loading pagesâ€¦
+                  Loading pages…
                 </td>
               </tr>
             ) : paged.length === 0 ? (
@@ -389,7 +389,7 @@ export default function AdminPagesPage() {
                 <td colSpan={12} className="px-4 py-10 text-center text-[rgba(43,58,103,0.5)]">
                   {rows && rows.length > 0
                     ? "No pages match your search."
-                    : "No pages yet. Click â€œ+ New pageâ€ to create your first."}
+                    : "No pages yet. Click “+ New page” to create your first."}
                 </td>
               </tr>
             ) : (
@@ -451,7 +451,7 @@ export default function AdminPagesPage() {
                             <img src={r.heroImage} alt="" className="h-full w-full object-cover" />
                           </span>
                         ) : (
-                          <span className="text-[rgba(43,58,103,0.35)]">â€”</span>
+                          <span className="text-[rgba(43,58,103,0.35)]">—</span>
                         )}
                       </td>
                     ) : null}
@@ -459,7 +459,7 @@ export default function AdminPagesPage() {
                       <td className="px-4 py-3 align-middle">
                         <button
                           onClick={() => togglePublish(r)}
-                          title={r.doc.status === "published" ? `Published${publishedDate ? " on " + publishedDate : ""}` : "Draft â€” click to publish"}
+                          title={r.doc.status === "published" ? `Published${publishedDate ? " on " + publishedDate : ""}` : "Draft — click to publish"}
                           className="group inline-flex items-center gap-1"
                         >
                           {r.doc.status === "published" ? (
@@ -539,14 +539,14 @@ export default function AdminPagesPage() {
                   disabled={page <= 1}
                   className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
                 >
-                  â† Prev
+                  ← Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => (p * perPage < total ? p + 1 : p))}
                   disabled={page * perPage >= total}
                   className="rounded-full border border-[rgba(43,58,103,0.15)] px-2.5 py-1 disabled:opacity-40 hover:border-[#2b3a67] hover:text-[#2b3a67]"
                 >
-                  Next â†’
+                  Next →
                 </button>
               </div>
             </div>
@@ -558,7 +558,7 @@ export default function AdminPagesPage() {
 }
 
 function Truncate({ value, max = 60 }: { value?: string; max?: number }) {
-  if (!value) return <span className="text-[rgba(43,58,103,0.35)]">â€”</span>;
-  const s = value.length > max ? value.slice(0, max - 1) + "â€¦" : value;
+  if (!value) return <span className="text-[rgba(43,58,103,0.35)]">—</span>;
+  const s = value.length > max ? value.slice(0, max - 1) + "…" : value;
   return <span title={value.length > max ? value : undefined}>{s}</span>;
 }

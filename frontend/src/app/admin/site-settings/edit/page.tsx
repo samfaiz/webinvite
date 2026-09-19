@@ -26,7 +26,7 @@ import { ImageEditorModal, urlToDataUrl, dataUrlToFile } from "@/components/Imag
 import { fileToScaledDataUrl } from "@/lib/image";
 
 /**
- * `/admin/site-settings/edit` â€” tabbed form for the singleton site settings.
+ * `/admin/site-settings/edit` — tabbed form for the singleton site settings.
  * Only the Branding tab is wired for now; the other tabs render an "in
  * progress" hint and are safe to click without side effects.
  */
@@ -99,7 +99,7 @@ export default function EditSiteSettingsPage() {
   // siteSettings on Save so the SEO tab can be a single click.
   const [intPatch, setIntPatch] = useState<IntegrationsUpdate>({});
 
-  // SEO Algorithm â€” loaded lazily the first time the Algo tab opens so the
+  // SEO Algorithm — loaded lazily the first time the Algo tab opens so the
   // main site-settings load isn't slowed by two extra queries + a possible
   // AI-improve draft download.
   const [algo, setAlgo] = useState<SeoAlgorithm | null>(null);
@@ -197,7 +197,7 @@ export default function EditSiteSettingsPage() {
         className="flex h-[70vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        {loading ? "Loadingâ€¦" : error || "Loading site settingsâ€¦"}
+        {loading ? "Loading…" : error || "Loading site settings…"}
       </div>
     );
   }
@@ -209,9 +209,9 @@ export default function EditSiteSettingsPage() {
         <div>
           <nav className="flex items-center gap-1.5 text-[12px] text-[rgba(43,58,103,0.55)]">
             <Link href="/admin" className="hover:text-[#2b3a67]">Admin</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <Link href="/admin/site-settings" className="hover:text-[#2b3a67]">Site Settings</Link>
-            <span className="text-[rgba(43,58,103,0.3)]">â€º</span>
+            <span className="text-[rgba(43,58,103,0.3)]">›</span>
             <span className="text-[rgba(43,58,103,0.55)]">Edit</span>
           </nav>
           <h1
@@ -298,7 +298,7 @@ export default function EditSiteSettingsPage() {
           disabled={saving}
           className="rounded-full bg-[#2b3a67] px-6 py-2.5 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition-colors hover:bg-[#22305a] disabled:opacity-60"
         >
-          {saving ? "Savingâ€¦" : "Save changes"}
+          {saving ? "Saving…" : "Save changes"}
         </button>
         <Link
           href="/admin/site-settings"
@@ -393,7 +393,7 @@ function HeroTab({ value, onChange }: { value: SiteHero; onChange: (v: SiteHero)
         />
       </Field>
 
-      <Field label="Hero subheadline" hint="Prose shown below the headline (1â€“2 sentences).">
+      <Field label="Hero subheadline" hint="Prose shown below the headline (1–2 sentences).">
         <textarea
           value={value.heroSubheadline}
           onChange={(e) => patch("heroSubheadline", e.target.value)}
@@ -416,7 +416,7 @@ function HeroTab({ value, onChange }: { value: SiteHero; onChange: (v: SiteHero)
           value={value.mission}
           onChange={(e) => patch("mission", e.target.value)}
           className={inputCls + " min-h-[110px] resize-y"}
-          placeholder="Why you exist and what you stand for â€” the story that guides every design decision."
+          placeholder="Why you exist and what you stand for — the story that guides every design decision."
         />
       </Field>
 
@@ -503,7 +503,7 @@ function ContactTab({ value, onChange }: { value: SiteContact; onChange: (v: Sit
           value={value.officeHours}
           onChange={(e) => patch("officeHours", e.target.value)}
           className={inputCls}
-          placeholder="Mondayâ€“Friday, 9 AM â€“ 5 PM (GCC)"
+          placeholder="Monday–Friday, 9 AM – 5 PM (GCC)"
         />
       </Field>
 
@@ -512,7 +512,7 @@ function ContactTab({ value, onChange }: { value: SiteContact; onChange: (v: Sit
           value={value.calendarUrl}
           onChange={(e) => patch("calendarUrl", e.target.value)}
           className={inputCls}
-          placeholder="https://cal.com/â€¦"
+          placeholder="https://cal.com/…"
         />
       </Field>
     </div>
@@ -586,7 +586,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
                   value={l.url}
                   onChange={(e) => patchLink(i, { url: e.target.value })}
                   className="w-full rounded-md border-none bg-transparent px-2 py-1 text-[13px] text-[#2b3a67] outline-none focus:bg-[#eef2f8]"
-                  placeholder="https://instagram.com/â€¦"
+                  placeholder="https://instagram.com/…"
                 />
                 <button
                   type="button"
@@ -610,7 +610,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           </button>
         </div>
         <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
-          e.g. <code className="font-mono">instagram</code> â†’ <code className="font-mono">https://instagram.com/â€¦</code>
+          e.g. <code className="font-mono">instagram</code> → <code className="font-mono">https://instagram.com/…</code>
         </p>
       </div>
 
@@ -619,7 +619,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           value={value.footerMessage}
           onChange={(e) => onChange({ ...value, footerMessage: e.target.value })}
           className={inputCls + " min-h-[90px] resize-y"}
-          placeholder="A short line that sums up what your brand does â€” shown at the bottom of every marketing page."
+          placeholder="A short line that sums up what your brand does — shown at the bottom of every marketing page."
         />
       </Field>
 
@@ -628,7 +628,7 @@ function SocialTab({ value, onChange }: { value: SiteSocial; onChange: (v: SiteS
           value={value.copyrightText}
           onChange={(e) => onChange({ ...value, copyrightText: e.target.value })}
           className={inputCls}
-          placeholder={`Â© ${new Date().getFullYear()} Your Brand Name`}
+          placeholder={`© ${new Date().getFullYear()} Your Brand Name`}
         />
       </Field>
     </div>
@@ -643,7 +643,7 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
 
   return (
     <div className="space-y-6">
-      {/* Accent colors â€” light */}
+      {/* Accent colors — light */}
       <div className="rounded-xl border border-[rgba(43,58,103,0.1)] p-5">
         <div className="mb-1">
           <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors</p>
@@ -658,7 +658,7 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
         </div>
       </div>
 
-      {/* Accent colors â€” dark mode (collapsible) */}
+      {/* Accent colors — dark mode (collapsible) */}
       <div className="rounded-xl border border-[rgba(43,58,103,0.1)]">
         <button
           type="button"
@@ -666,7 +666,7 @@ function ThemeTab({ value, onChange }: { value: SiteTheme; onChange: (v: SiteThe
           className="flex w-full items-start justify-between gap-3 p-5 text-left"
         >
           <div>
-            <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors â€” dark mode</p>
+            <p className="text-[15px] font-medium text-[#2b3a67]">Accent colors — dark mode</p>
             <p className="text-[12.5px] text-[rgba(43,58,103,0.6)]">
               Optional overrides applied only when the site is in dark mode.
             </p>
@@ -823,7 +823,7 @@ function SeoTab({
           value={value.metaTitle}
           onChange={(e) => patchField("metaTitle", e.target.value)}
           className={inputCls}
-          placeholder="Your brand â€” tagline"
+          placeholder="Your brand — tagline"
         />
       </Field>
       <Field label="Meta description">
@@ -893,8 +893,8 @@ function SeoTab({
               className={inputCls}
               placeholder={
                 integrations?.ai.hasKey
-                  ? `${integrations.ai.keyPreview || "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"} saved â€” type a new key to replace it`
-                  : "sk-ant-â€¦"
+                  ? `${integrations.ai.keyPreview || "•••••••••••"} saved — type a new key to replace it`
+                  : "sk-ant-…"
               }
             />
             {integrations?.ai.hasKey && !aiKeyDraft ? (
@@ -970,7 +970,7 @@ function SeoTab({
       >
         <Field
           label="GA4 Property ID"
-          hint="The numeric Property ID from GA4 Admin â†’ Property settings (not the G-XXXX tag)."
+          hint="The numeric Property ID from GA4 Admin → Property settings (not the G-XXXX tag)."
         >
           <input
             value={gaPropertyId}
@@ -996,8 +996,8 @@ function SeoTab({
             className={inputCls + " min-h-[140px] resize-y font-mono text-[12px]"}
             placeholder={
               integrations?.ga.hasServiceAccount
-                ? "A key is saved â€” paste new JSON to replace it"
-                : '{ "type": "service_account", "private_key": "â€¦", "client_email": "â€¦@â€¦iam.gserviceaccount.com" }'
+                ? "A key is saved — paste new JSON to replace it"
+                : '{ "type": "service_account", "private_key": "…", "client_email": "…@…iam.gserviceaccount.com" }'
             }
           />
           {integrations?.ga.hasServiceAccount && !gaJsonDraft ? (
@@ -1015,9 +1015,9 @@ function SeoTab({
           <p className="mb-2 font-medium text-[#2b3a67]">How to connect</p>
           <ol className="list-decimal space-y-1 pl-5">
             <li>In <strong>Google Cloud Console</strong>, create (or pick) a project and enable the <strong>Google Analytics Data API</strong>.</li>
-            <li>Create a <strong>Service Account</strong> â†’ add a <strong>JSON key</strong> â†’ download it.</li>
+            <li>Create a <strong>Service Account</strong> → add a <strong>JSON key</strong> → download it.</li>
             <li>Paste the JSON above and enter your numeric GA4 Property ID.</li>
-            <li>In GA4 â†’ Admin â†’ <strong>Property access management</strong>, add the service account&rsquo;s email as a <strong>Viewer</strong>.</li>
+            <li>In GA4 → Admin → <strong>Property access management</strong>, add the service account&rsquo;s email as a <strong>Viewer</strong>.</li>
             <li>Save. The dashboard charts populate within a few minutes (cached ~15 min).</li>
           </ol>
         </div>
@@ -1152,7 +1152,7 @@ function AlgoTab({
   if (!value) {
     return (
       <div className="flex h-40 items-center justify-center text-[13px] text-[rgba(43,58,103,0.55)]">
-        Loading SEO algorithmâ€¦
+        Loading SEO algorithm…
       </div>
     );
   }
@@ -1172,7 +1172,7 @@ function AlgoTab({
     try {
       const r = await api.improveSeoAlgorithmDraft();
       onPatch({ algorithm: r.algorithm, learningMemory: r.learningMemory });
-      onSuccess(`AI drafted an improved rubric. ${r.rationale ? `â€” ${r.rationale}` : ""} Review, then Save.`);
+      onSuccess(`AI drafted an improved rubric. ${r.rationale ? `— ${r.rationale}` : ""} Review, then Save.`);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1188,7 +1188,7 @@ function AlgoTab({
       const r = await api.runSeoAlgorithmNow();
       onChange(r.dto);
       onPatch({}); // clear stale drafts
-      onSuccess(`Improvement run complete. ${r.rationale ? `â€” ${r.rationale}` : ""}`);
+      onSuccess(`Improvement run complete. ${r.rationale ? `— ${r.rationale}` : ""}`);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1237,7 +1237,7 @@ function AlgoTab({
       const next = await api.restoreSeoAlgorithmVersion(id);
       onChange(next);
       onPatch({});
-      onSuccess("Restored â€” this version is now current.");
+      onSuccess("Restored — this version is now current.");
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1295,7 +1295,7 @@ function AlgoTab({
         </div>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          <Field label="Versions to keep in history" hint="Older versions beyond this are pruned (5â€“365). Default 90.">
+          <Field label="Versions to keep in history" hint="Older versions beyond this are pruned (5–365). Default 90.">
             <input
               type="number"
               min={5}
@@ -1310,7 +1310,7 @@ function AlgoTab({
             <p className="text-[14px] text-[#2b3a67]">
               {value.lastRunAt ? formatDateTime(value.lastRunAt) : "Never run yet"}
               {value.lastRunNote ? (
-                <span className="ml-1 text-[12.5px] text-[rgba(43,58,103,0.55)]">â€” {value.lastRunNote}</span>
+                <span className="ml-1 text-[12.5px] text-[rgba(43,58,103,0.55)]">— {value.lastRunNote}</span>
               ) : null}
             </p>
           </div>
@@ -1326,7 +1326,7 @@ function AlgoTab({
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 2 3 14h9l-1 8 10-12h-9z" />
             </svg>
-            {busy === "run" ? "Runningâ€¦" : "Run improvement now"}
+            {busy === "run" ? "Running…" : "Run improvement now"}
           </button>
         </div>
       </div>
@@ -1342,8 +1342,8 @@ function AlgoTab({
           <div>
             <p className="text-[15px] font-medium text-[#2b3a67]">AI audit &amp; optimisation algorithm</p>
             <p className="mt-0.5 text-[12.5px] text-[rgba(43,58,103,0.6)]">
-              The strategy and 0â€“100 scoring rubric Claude follows when auditing and optimising every page. A strong
-              default is provided â€” tune it, or let AI improve it. Save to apply across all content editors; every
+              The strategy and 0–100 scoring rubric Claude follows when auditing and optimising every page. A strong
+              default is provided — tune it, or let AI improve it. Save to apply across all content editors; every
               save is archived as a version.
             </p>
           </div>
@@ -1358,7 +1358,7 @@ function AlgoTab({
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z" />
             </svg>
-            {busy === "improve" ? "Thinkingâ€¦" : "Improve editor text with AI"}
+            {busy === "improve" ? "Thinking…" : "Improve editor text with AI"}
           </button>
           <button
             type="button"
@@ -1369,7 +1369,7 @@ function AlgoTab({
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v6h6" />
             </svg>
-            {busy === "reset" ? "Resettingâ€¦" : "Reset to default"}
+            {busy === "reset" ? "Resetting…" : "Reset to default"}
           </button>
         </div>
         <textarea
@@ -1401,7 +1401,7 @@ function AlgoTab({
                 "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23855f6c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>\")",
             }}
           >
-            <option value="">Select a versionâ€¦</option>
+            <option value="">Select a version…</option>
             {value.versions.map((v, i) => (
               <option key={v.id} value={v.id}>
                 {formatVersionLabel(value.versions.length - i, v)}
@@ -1409,7 +1409,7 @@ function AlgoTab({
             ))}
           </select>
           <p className="mt-1.5 text-[11.5px] text-[rgba(43,58,103,0.55)]">
-            &ldquo;â€¢&rdquo; marks the version currently in use.
+            &ldquo;•&rdquo; marks the version currently in use.
           </p>
         </div>
         {selectedVersion ? (
@@ -1439,7 +1439,7 @@ function AlgoTab({
         open={memoryOpen}
         onToggle={() => setMemoryOpen((v) => !v)}
         title="AI learning memory"
-        description="Notes the AI keeps and rewrites after each improvement run â€” durable principles, what correlates with higher audit scores, and pitfalls to avoid. This is how the system improves itself over time. You can read and lightly edit it."
+        description="Notes the AI keeps and rewrites after each improvement run — durable principles, what correlates with higher audit scores, and pitfalls to avoid. This is how the system improves itself over time. You can read and lightly edit it."
       >
         <textarea
           value={eff.learningMemory}
@@ -1459,10 +1459,10 @@ function AlgoTab({
 }
 
 function formatVersionLabel(index: number, v: SeoAlgorithmVersion): string {
-  const dot = v.isCurrent ? "â€¢ " : "";
-  const score = v.avgAuditScore != null ? ` â€” avg ${Math.round(v.avgAuditScore)}` : "";
+  const dot = v.isCurrent ? "• " : "";
+  const score = v.avgAuditScore != null ? ` — avg ${Math.round(v.avgAuditScore)}` : "";
   const src = v.source === "manual" ? "" : ` [${v.source}]`;
-  return `${dot}v${index} â€” ${formatDateTime(v.createdAt)}${src}${score}`;
+  return `${dot}v${index} — ${formatDateTime(v.createdAt)}${src}${score}`;
 }
 
 function versionLabel(versions: SeoAlgorithmVersion[], id: string): string {
@@ -1531,7 +1531,7 @@ function ComingSoon({ tab }: { tab: string }) {
         className="text-lg font-medium italic text-[#2b3a67]"
         style={{ fontFamily: "var(--f-serif)" }}
       >
-        {tab} â€” coming next
+        {tab} — coming next
       </p>
       <p className="max-w-md text-[13.5px] text-[rgba(43,58,103,0.65)]">
         Share the fields you want in this tab and I'll wire them to the same site-settings record.
@@ -1608,7 +1608,7 @@ function FileDrop({
     try {
       setEditorSrc(await urlToDataUrl(value));
     } catch {
-      onError("Couldn't load the saved image for editing â€” upload it again instead.");
+      onError("Couldn't load the saved image for editing — upload it again instead.");
     }
   };
 
@@ -1641,7 +1641,7 @@ function FileDrop({
         className="flex min-h-[92px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-[rgba(43,58,103,0.25)] bg-[#eef2f8] px-4 py-4 text-center text-[13px] text-[rgba(43,58,103,0.7)] transition-colors hover:border-[#2b3a67] hover:bg-[#e3eaf5]/40 hover:text-[#2b3a67]"
       >
         {uploading ? (
-          <span>Uploadingâ€¦</span>
+          <span>Uploading…</span>
         ) : value ? (
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}

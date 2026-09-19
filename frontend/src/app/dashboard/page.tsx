@@ -39,7 +39,7 @@ export default function DashboardPage() {
         className="flex h-screen items-center justify-center bg-[#f7f9fc] text-[rgba(43,58,103,0.55)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        Loadingâ€¦
+        Loading…
       </div>
     );
   }
@@ -138,14 +138,14 @@ export default function DashboardPage() {
         {error ? <p className="mt-4 text-sm text-[#b3423a]" style={{ fontFamily: "var(--f-body)" }}>{error}</p> : null}
 
         {items === null ? (
-          <p className="mt-8 text-[rgba(43,58,103,0.5)]" style={{ fontFamily: "var(--f-body)" }}>Loadingâ€¦</p>
+          <p className="mt-8 text-[rgba(43,58,103,0.5)]" style={{ fontFamily: "var(--f-body)" }}>Loading…</p>
         ) : items.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-[rgba(111,138,184,0.3)] bg-white/60 p-10 text-center">
             <p className="text-lg italic text-[rgba(43,58,103,0.65)]" style={{ fontFamily: "var(--f-serif)" }}>
               No invitations yet.
             </p>
             <Link href="/gallery" className="mt-3 inline-block text-sm font-medium text-[#5c7bb0] hover:underline" style={{ fontFamily: "var(--f-body)" }}>
-              Pick a design to get started â†’
+              Pick a design to get started →
             </Link>
           </div>
         ) : (
@@ -177,7 +177,7 @@ export default function DashboardPage() {
                       >
                         {inv.status}
                       </span>
-                      {inv.views} views Â· {inv.rsvpCount} RSVPs
+                      {inv.views} views · {inv.rsvpCount} RSVPs
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                       </button>
                     ) : null}
                     {inv.status === "published" && inv.slug ? (
-                      <a href={`/i/${inv.slug}`} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">View live â†—</a>
+                      <a href={`/i/${inv.slug}`} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">View live ↗</a>
                     ) : null}
                     {inv.status === "published" ? (
                       <button onClick={() => act(() => api.unpublishInvitation(inv.id))} className="rounded-full border border-amber-200 px-3 py-1.5 text-amber-700 hover:bg-amber-50">Unpublish</button>
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                       <button onClick={() => act(() => api.publishInvitation(inv.id))} className="rounded-full border border-emerald-200 px-3 py-1.5 text-emerald-700 hover:bg-emerald-50">Publish</button>
                     )}
                     <button onClick={() => viewRsvps(inv.id)} className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">RSVPs</button>
-                    <button onClick={() => downloadExcel(inv)} className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">Excel â†“</button>
+                    <button onClick={() => downloadExcel(inv)} className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">Excel ↓</button>
                     <button onClick={() => emailExport(inv)} className="rounded-full border border-[rgba(43,58,103,0.2)] px-3 py-1.5 text-[#2b3a67] hover:bg-[#eef2f8]">Email me</button>
                     <button
                       onClick={() => { if (confirm("Delete this invitation?")) act(() => api.deleteInvitation(inv.id)); }}
@@ -218,13 +218,13 @@ export default function DashboardPage() {
                 {rsvpFor === inv.id ? (
                   <div className="mt-3 rounded-lg bg-[#eef2f8] p-3 text-sm">
                     {!rsvpData ? (
-                      <p className="text-[rgba(43,58,103,0.5)]">Loading RSVPsâ€¦</p>
+                      <p className="text-[rgba(43,58,103,0.5)]">Loading RSVPs…</p>
                     ) : rsvpData.total === 0 ? (
                       <p className="text-[rgba(43,58,103,0.6)]">No RSVPs yet.</p>
                     ) : (
                       <>
                         <p className="mb-2 text-[rgba(43,58,103,0.75)]">
-                          {rsvpData.accepted} accepting ({rsvpData.headcount} guests) Â· {rsvpData.declined} declining
+                          {rsvpData.accepted} accepting ({rsvpData.headcount} guests) · {rsvpData.declined} declining
                         </p>
                         <ul className="space-y-1">
                           {rsvpData.rsvps.map((r: any) => (
@@ -234,7 +234,7 @@ export default function DashboardPage() {
                                 {r.email ? (
                                   <span className="block truncate text-[11px] text-[rgba(43,58,103,0.55)]">
                                     {r.email}
-                                    {r.subscribed ? " Â· updates âœ“" : ""}
+                                    {r.subscribed ? " · updates ✓" : ""}
                                   </span>
                                 ) : null}
                               </span>

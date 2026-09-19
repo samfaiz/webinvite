@@ -63,6 +63,9 @@ export function ScratchCard({
   const grid = useRef(new Uint8Array(COLS * ROWS));
   const clearedCells = useRef(0);
   const doneRef = useRef(editing);
+  /** queued client coords as a flat [x,y,x,y,...] buffer, drained once a frame */
+  const pending = useRef<number[]>([]);
+  const rafRef = useRef(0);
 
   const fireConfetti = useCallback(() => {
     if (reduce) return;
@@ -206,13 +209,45 @@ export function ScratchCard({
     [mark],
   );
 
-  const toLocal = (e: { clientX: number; clientY: number }) => {
+  /**
+   * Drain the queued points and draw them as one batch.
+   *
+   * This runs once per frame, and reads the canvas rect once for the whole
+   * batch. That matters: the card lives inside a scroll-driven parallax
+   * transform and Lenis keeps the layout tree dirty, so every
+   * getBoundingClientRect() forces a synchronous reflow. Measuring per point
+   * (with coalesced events, 5-15 of them a frame) thrashes layout badly on a
+   * phone.
+   */
+  const flush = useCallback(() => {
+    rafRef.current = 0;
     const canvas = canvasRef.current;
-    if (!canvas) return null;
+    const queue = pending.current;
+    if (!canvas || !queue.length || doneRef.current) {
+      queue.length = 0;
+      return;
+    }
     const rect = canvas.getBoundingClientRect();
-    // CSS px — the context transform already accounts for dpr
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
+    let hit = false;
+    for (let i = 0; i < queue.length; i += 2) {
+      // CSS px — the context transform already accounts for dpr
+      if (strokeTo(queue[i] - rect.left, queue[i + 1] - rect.top)) hit = true;
+    }
+    queue.length = 0;
+    if (hit) finish();
+  }, [strokeTo, finish]);
+
+  const enqueue = useCallback(
+    (x: number, y: number) => {
+      pending.current.push(x, y);
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(flush);
+    },
+    [flush],
+  );
+
+  useEffect(() => () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
 
   const onDown = (e: React.PointerEvent) => {
     if (doneRef.current) return;
@@ -225,8 +260,7 @@ export function ScratchCard({
     } catch {
       /* not capturable; scratching still works, it just ends at the edge */
     }
-    const p = toLocal(e);
-    if (p && strokeTo(p.x, p.y)) finish();
+    enqueue(e.clientX, e.clientY);
   };
 
   const onMove = (e: React.PointerEvent) => {
@@ -236,22 +270,21 @@ export function ScratchCard({
     const native = e.nativeEvent;
     const points =
       typeof native.getCoalescedEvents === "function" ? native.getCoalescedEvents() : [];
-    let hit = false;
     if (points.length) {
-      for (const pt of points) {
-        const p = toLocal(pt);
-        if (p && strokeTo(p.x, p.y)) hit = true;
-      }
+      for (const pt of points) enqueue(pt.clientX, pt.clientY);
     } else {
-      const p = toLocal(e);
-      if (p && strokeTo(p.x, p.y)) hit = true;
+      enqueue(e.clientX, e.clientY);
     }
-    if (hit) finish();
   };
 
   const onUp = (e: React.PointerEvent) => {
     if (!drawing.current) return;
     drawing.current = false;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      flush();
+    }
     last.current = null;
     try {
       canvasRef.current?.releasePointerCapture?.(e.pointerId);

@@ -53,7 +53,7 @@ export default function AdminPage() {
         className="flex h-[80vh] items-center justify-center text-[rgba(43,58,103,0.5)]"
         style={{ fontFamily: "var(--f-body)" }}
       >
-        Loadingâ€¦
+        Loading…
       </div>
     );
   }
@@ -85,12 +85,12 @@ export default function AdminPage() {
 
       {/* Stats */}
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Users" value={stats?.users ?? "â€”"} />
-        <StatCard label="Invitations" value={stats?.invitations ?? "â€”"} />
-        <StatCard label="Published" value={stats?.published ?? "â€”"} tone="#5c8a5e" />
-        <StatCard label="Drafts" value={stats?.drafts ?? "â€”"} tone="#b08d57" />
-        <StatCard label="RSVPs" value={stats?.rsvps ?? "â€”"} tone="#5c7bb0" />
-        <StatCard label="Total views" value={stats?.totalViews ?? "â€”"} tone="#7a5ba6" />
+        <StatCard label="Users" value={stats?.users ?? "—"} />
+        <StatCard label="Invitations" value={stats?.invitations ?? "—"} />
+        <StatCard label="Published" value={stats?.published ?? "—"} tone="#5c8a5e" />
+        <StatCard label="Drafts" value={stats?.drafts ?? "—"} tone="#b08d57" />
+        <StatCard label="RSVPs" value={stats?.rsvps ?? "—"} tone="#5c7bb0" />
+        <StatCard label="Total views" value={stats?.totalViews ?? "—"} tone="#7a5ba6" />
       </div>
 
       {/* Invitations table */}
@@ -125,7 +125,7 @@ export default function AdminPage() {
                   <td className="px-5 py-3 text-[rgba(43,58,103,0.65)]">{i.templateId}</td>
                   <td className="px-5 py-3 text-[#2b3a67]">{i.views}</td>
                   <td className="px-5 py-3 text-[#2b3a67]">{i.rsvpCount}</td>
-                  <td className="px-5 py-3 text-[rgba(43,58,103,0.55)]">{i.slug ?? "â€”"}</td>
+                  <td className="px-5 py-3 text-[rgba(43,58,103,0.55)]">{i.slug ?? "—"}</td>
                 </tr>
               ))}
               {invites.length === 0 ? (
@@ -166,7 +166,7 @@ export default function AdminPage() {
               {users.map((u) => (
                 <tr key={u.id} className="border-t border-[rgba(43,58,103,0.06)] transition-colors hover:bg-[#eef2f8]/60">
                   <td className="px-5 py-3 text-[#2b3a67]">{u.email}</td>
-                  <td className="px-5 py-3 text-[rgba(43,58,103,0.75)]">{u.name ?? "â€”"}</td>
+                  <td className="px-5 py-3 text-[rgba(43,58,103,0.75)]">{u.name ?? "—"}</td>
                   <td className="px-5 py-3">
                     <RolePill role={u.role} />
                   </td>
@@ -189,7 +189,7 @@ export default function AdminPage() {
                           : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                       }`}
                     >
-                      {u.canDuplicate ? "Allowed âœ“" : "Off"}
+                      {u.canDuplicate ? "Allowed ✓" : "Off"}
                     </button>
                   </td>
                   <td className="px-5 py-3 text-right">
@@ -270,18 +270,18 @@ function ResetPasswordModal({ user, onClose }: { user: { id: string; email: stri
 
         {done ? (
           <div className="mt-4">
-            <p className="text-[13px] font-medium text-emerald-700">Password updated âœ“</p>
+            <p className="text-[13px] font-medium text-emerald-700">Password updated ✓</p>
             {done.generated ? (
               <div className="mt-3">
                 <p className="text-[12px] text-[rgba(43,58,103,0.7)]">
-                  Temporary password â€” share it securely; it won&apos;t be shown again:
+                  Temporary password — share it securely; it won&apos;t be shown again:
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                   <code className="flex-1 rounded-lg bg-[#eef2f8] px-3 py-2 text-[14px] tracking-wide text-[#2b3a67]">
                     {done.generated}
                   </code>
                   <button onClick={copy} className="rounded-lg border border-[rgba(111,138,184,0.3)] px-3 py-2 text-[12px] font-medium text-[#5c7bb0] hover:bg-[#eef2f8]">
-                    {copied ? "Copied âœ“" : "Copy"}
+                    {copied ? "Copied ✓" : "Copy"}
                   </button>
                 </div>
               </div>
@@ -320,7 +320,7 @@ function ResetPasswordModal({ user, onClose }: { user: { id: string; email: stri
                 disabled={busy}
                 className="rounded-lg bg-[#5c7bb0] px-4 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-60"
               >
-                {busy ? "Resettingâ€¦" : "Reset password"}
+                {busy ? "Resetting…" : "Reset password"}
               </button>
             </div>
           </div>

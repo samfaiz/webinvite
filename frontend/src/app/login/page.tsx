@@ -45,7 +45,7 @@ export default function LoginPage() {
           className="text-xs text-[rgba(43,58,103,0.55)] hover:text-[#2b3a67]"
           style={{ fontFamily: "var(--f-body)" }}
         >
-          â† Browse designs
+          ← Browse designs
         </Link>
         <h1
           className="mt-4 text-3xl font-medium italic text-[#2b3a67]"
@@ -97,7 +97,7 @@ export default function LoginPage() {
             className="w-full rounded-full py-2.5 text-sm font-medium shadow-[0_10px_24px_rgba(43,58,103,0.3)] transition hover:brightness-95 disabled:opacity-60"
             style={{ background: "var(--c-primary)", color: "var(--c-on-primary)", fontFamily: "var(--f-body)" }}
           >
-            {busy ? "Please waitâ€¦" : mode === "login" ? "Log in" : "Sign up"}
+            {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
           </button>
         </form>
 
