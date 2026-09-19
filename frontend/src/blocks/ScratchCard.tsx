@@ -5,10 +5,26 @@ import { motion, useReducedMotion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { usePreview } from "@/components/PreviewContext";
 
+/** brush radius, CSS px */
+const BRUSH = 24;
+/** fraction of the coating that must go before it auto-completes */
+const THRESHOLD = 0.55;
+/** coarse coverage grid — how progress is measured, see `mark` */
+const COLS = 20;
+const ROWS = 6;
+/**
+ * Phones report devicePixelRatio 3+; a 3x backing store for a 104px coating is
+ * ~2.2x the pixels of a 2x one for no visible gain. Cap it.
+ */
+const MAX_DPR = 2;
+
 /**
  * Scratch-to-reveal card. A canvas coating sits over the revealed date; dragging
  * erases it, and once ~55% is cleared it auto-completes with a confetti burst.
  * Reduced-motion users get a simple "Tap to reveal" button instead.
+ *
+ * The 2D context is kept in CSS-pixel space (see `paint`), so every coordinate
+ * below is CSS px — never multiply by dpr here.
  */
 export function ScratchCard({
   teaser = "Scratch to reveal",
@@ -33,42 +49,60 @@ export function ScratchCard({
   const { editing } = usePreview();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  // in the WYSIWYG editor the date is shown directly (no scratch) so it's editable
-  const [revealed, setRevealed] = useState(editing);
-  const drawing = useRef(false);
+  const [revealed, setRevealed] = useState(false);
+  // in the WYSIWYG editor the date is shown directly (no scratch) so it's
+  // editable — derived, so toggling edit mode after mount is picked up
+  const shown = revealed || editing;
   const reduce = useReducedMotion();
+
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const sizeRef = useRef({ width: 0, height: 0 });
+  const drawing = useRef(false);
+  const last = useRef<{ x: number; y: number } | null>(null);
+  /** one flag per grid cell, plus a running count, so progress needs no readback */
+  const grid = useRef(new Uint8Array(COLS * ROWS));
+  const clearedCells = useRef(0);
+  const doneRef = useRef(editing);
 
   const fireConfetti = useCallback(() => {
     if (reduce) return;
+    const small = typeof window !== "undefined" && window.innerWidth < 480;
     confetti({
-      particleCount: 130,
+      particleCount: small ? 70 : 130,
       spread: 75,
       origin: { y: 0.5 },
       colors: ["#b08d57", "#2b3a67", "#ffffff", "#d9b366"],
       scalar: 0.9,
+      disableForReducedMotion: true,
     });
   }, [reduce]);
 
   const finish = useCallback(() => {
-    if (revealed) return;
+    if (doneRef.current) return;
+    doneRef.current = true;
+    drawing.current = false;
     setRevealed(true);
     fireConfetti();
     onRevealed?.();
-  }, [revealed, fireConfetti, onRevealed]);
+  }, [fireConfetti, onRevealed]);
 
-  // paint the scratch coating
-  useEffect(() => {
-    if (reduce) return;
+  /** (re)draw the coating and reset progress. Also runs on resize. */
+  const paint = useCallback(() => {
     const canvas = canvasRef.current;
-    const wrap = wrapRef.current;
-    if (!canvas || !wrap) return;
-    const dpr = window.devicePixelRatio || 1;
-    const { width, height } = wrap.getBoundingClientRect();
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    if (!canvas) return;
+    // measure the canvas, not the wrapper: the wrapper's border box is 2px
+    // larger, which would scale the coating against the pointer coordinates
+    const { width, height } = canvas.getBoundingClientRect();
+    if (!width || !height) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.scale(dpr, dpr);
+    // assign rather than scale() so repaints never compound the transform
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
 
     const grad = ctx.createLinearGradient(0, 0, width, height);
     grad.addColorStop(0, primary);
@@ -83,57 +117,147 @@ export function ScratchCard({
     ctx.fillStyle = accent;
     ctx.font = "italic 12px Georgia, serif";
     ctx.fillText(revealLabel, width / 2, height / 2 + 16);
-  }, [reduce, teaser, revealLabel, primary, secondary, accent]);
 
-  const scratch = useCallback((clientX: number, clientY: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const dpr = window.devicePixelRatio || 1;
-    const x = (clientX - rect.left) * dpr;
-    const y = (clientY - rect.top) * dpr;
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(x, y, 24 * dpr, 0, Math.PI * 2);
-    ctx.fill();
-  }, []);
+    ctxRef.current = ctx;
+    sizeRef.current = { width, height };
+    grid.current.fill(0);
+    clearedCells.current = 0;
+    last.current = null;
+  }, [teaser, revealLabel, primary, secondary, accent]);
 
-  const measure = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const { width, height } = canvas;
-    const step = 32;
-    let cleared = 0;
-    let total = 0;
-    const data = ctx.getImageData(0, 0, width, height).data;
-    for (let y = 0; y < height; y += step) {
-      for (let x = 0; x < width; x += step) {
-        total++;
-        const alpha = data[(y * width + x) * 4 + 3];
-        if (alpha < 40) cleared++;
+  useEffect(() => {
+    if (reduce || shown) return;
+    paint();
+    const wrap = wrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
+    // width is responsive, so rotating the phone changes it; without this the
+    // coating stretches and the scratch stops landing under the finger
+    let w = wrap.getBoundingClientRect().width;
+    const ro = new ResizeObserver(() => {
+      const next = wrap.getBoundingClientRect().width;
+      if (Math.abs(next - w) < 1) return;
+      w = next;
+      paint();
+    });
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [reduce, shown, paint]);
+
+  /** Flag every grid cell the brush covers at (x, y); true once past threshold. */
+  const mark = useCallback((x: number, y: number) => {
+    const { width, height } = sizeRef.current;
+    if (!width || !height) return false;
+    const cw = width / COLS;
+    const ch = height / ROWS;
+    const c0 = Math.max(0, Math.floor((x - BRUSH) / cw));
+    const c1 = Math.min(COLS - 1, Math.floor((x + BRUSH) / cw));
+    const r0 = Math.max(0, Math.floor((y - BRUSH) / ch));
+    const r1 = Math.min(ROWS - 1, Math.floor((y + BRUSH) / ch));
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        const i = r * COLS + c;
+        if (grid.current[i]) continue;
+        // circular brush: only count a cell whose centre is actually under it
+        const dx = (c + 0.5) * cw - x;
+        const dy = (r + 0.5) * ch - y;
+        if (dx * dx + dy * dy > BRUSH * BRUSH) continue;
+        grid.current[i] = 1;
+        clearedCells.current++;
       }
     }
-    if (total && cleared / total > 0.55) finish();
-  }, [finish]);
+    return clearedCells.current / (COLS * ROWS) > THRESHOLD;
+  }, []);
+
+  /** Erase from the previous point to (x, y) as one continuous stroke. */
+  const strokeTo = useCallback(
+    (x: number, y: number) => {
+      const ctx = ctxRef.current;
+      if (!ctx) return false;
+      ctx.globalCompositeOperation = "destination-out";
+      const prev = last.current;
+      if (prev) {
+        ctx.lineWidth = BRUSH * 2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(x, y, BRUSH, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // sample along the segment so a fast swipe still scores every cell it crossed
+      let hit = false;
+      if (prev) {
+        const dist = Math.hypot(x - prev.x, y - prev.y);
+        const steps = Math.min(24, Math.ceil(dist / (BRUSH * 0.5)));
+        for (let i = 1; i <= steps; i++) {
+          const t = i / steps;
+          if (mark(prev.x + (x - prev.x) * t, prev.y + (y - prev.y) * t)) hit = true;
+        }
+      }
+      if (mark(x, y)) hit = true;
+      last.current = { x, y };
+      return hit;
+    },
+    [mark],
+  );
+
+  const toLocal = (e: { clientX: number; clientY: number }) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    // CSS px — the context transform already accounts for dpr
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  };
 
   const onDown = (e: React.PointerEvent) => {
-    if (revealed) return;
+    if (doneRef.current) return;
     drawing.current = true;
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-    scratch(e.clientX, e.clientY);
+    last.current = null;
+    // capture keeps the stroke alive if the finger slides off the card, but it
+    // throws if the pointer is already gone — never let that kill the gesture
+    try {
+      canvasRef.current?.setPointerCapture?.(e.pointerId);
+    } catch {
+      /* not capturable; scratching still works, it just ends at the edge */
+    }
+    const p = toLocal(e);
+    if (p && strokeTo(p.x, p.y)) finish();
   };
+
   const onMove = (e: React.PointerEvent) => {
-    if (!drawing.current || revealed) return;
-    scratch(e.clientX, e.clientY);
+    if (!drawing.current || doneRef.current) return;
+    // phones batch several samples into one frame; replaying them keeps the
+    // stroke smooth instead of leaving gaps on a fast swipe
+    const native = e.nativeEvent;
+    const points =
+      typeof native.getCoalescedEvents === "function" ? native.getCoalescedEvents() : [];
+    let hit = false;
+    if (points.length) {
+      for (const pt of points) {
+        const p = toLocal(pt);
+        if (p && strokeTo(p.x, p.y)) hit = true;
+      }
+    } else {
+      const p = toLocal(e);
+      if (p && strokeTo(p.x, p.y)) hit = true;
+    }
+    if (hit) finish();
   };
-  const onUp = () => {
+
+  const onUp = (e: React.PointerEvent) => {
     if (!drawing.current) return;
     drawing.current = false;
-    measure();
+    last.current = null;
+    try {
+      canvasRef.current?.releasePointerCapture?.(e.pointerId);
+    } catch {
+      /* capture was never taken, or already released */
+    }
   };
 
   return (
@@ -159,7 +283,7 @@ export function ScratchCard({
           data-edit="dateReveal.eventDate"
           className="font-script text-2xl"
           style={{ color: "var(--c-primary)" }}
-          animate={revealed ? { scale: [0.8, 1.06, 1] } : {}}
+          animate={shown ? { scale: [0.8, 1.06, 1] } : {}}
           transition={{ duration: 0.6 }}
         >
           {eventDate}
@@ -170,19 +294,30 @@ export function ScratchCard({
       </div>
 
       {/* scratch coating */}
-      {!reduce && !revealed ? (
+      {!reduce && !shown ? (
         <canvas
           ref={canvasRef}
           className="absolute inset-0 h-full w-full cursor-pointer touch-none"
+          role="button"
+          tabIndex={0}
+          aria-label={teaser + " — " + revealLabel}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
-          onPointerLeave={onUp}
+          // fires when the browser takes the gesture over (scroll, call, app switch);
+          // without it `drawing` sticks on and the next tap resumes mid-stroke
+          onPointerCancel={onUp}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              finish();
+            }
+          }}
         />
       ) : null}
 
       {/* reduced-motion fallback */}
-      {reduce && !revealed ? (
+      {reduce && !shown ? (
         <button
           onClick={finish}
           className="absolute inset-0 flex items-center justify-center"

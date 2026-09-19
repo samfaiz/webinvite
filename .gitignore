@@ -37,3 +37,14 @@ backend/exports/
 Thumbs.db
 *.log
 npm-debug.log*
+
+# ---- design/reference working folders (local only, not part of the app) ----
+# Source references and generated template art. Kept out of the repo: the raw
+# model output is huge (1536x2752 PNGs run ~6MB each) and all of it is
+# regenerable working material rather than application code.
+references/
+template-generation/
+Template generateion/
+
+# ---- local editor/agent config ----
+.claude/
