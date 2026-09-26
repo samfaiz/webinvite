@@ -230,6 +230,13 @@ export interface InvitationContent {
     heading: string;
     subtext?: string;
     events: EventItem[];
+    /**
+     * How the events are laid out.
+     *   "slides"  — one full screen per event (default)
+     *   "stacked" — all of them on one screen, in a column
+     *   "row"     — all on one screen, side by side, swiped horizontally
+     */
+    layout?: "slides" | "stacked" | "row";
   };
   rsvp: {
     heading: string;

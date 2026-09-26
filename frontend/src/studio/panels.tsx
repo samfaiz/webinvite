@@ -786,6 +786,17 @@ export function ScheduleFields({ draft, update }: PanelProps) {
   return (
     <div>
       <Field label="Subtitle"><TextInput value={c.schedule.subtext ?? ""} onChange={(e) => update((d) => { d.content.schedule.subtext = e.target.value; })} /></Field>
+      <Field label="Layout">
+        <Select
+          value={c.schedule.layout ?? "slides"}
+          onChange={(v) => update((d) => { d.content.schedule.layout = v as "slides" | "stacked" | "row"; })}
+          options={[
+            { value: "slides", label: "One screen per event" },
+            { value: "stacked", label: "Vertical — all on one screen" },
+            { value: "row", label: "Horizontal — swipe sideways" },
+          ]}
+        />
+      </Field>
       {c.schedule.events.map((ev, i) => (
         <div
           key={ev.id}

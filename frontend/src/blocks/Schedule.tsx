@@ -80,8 +80,51 @@ function EventCard({ event, motif, basePath }: { event: EventItem; motif: MotifP
   );
 }
 
-/** Each event is its own full-screen (phone) slide; the section background covers
- *  the screen and the event card sits centered over it. */
+/** The heading, on the same frosted vellum the cards use — it is bare text in
+ *  the theme's ink otherwise, and vanishes wherever the background art turns
+ *  dark (a navy ribbon, a photo). */
+function Heading({ content }: { content: InvitationContent }) {
+  return (
+    <Movable moveKey="schedule.heading" offset={content.offsets?.["schedule.heading"]}>
+      <Reveal>
+        <div
+          className="mx-auto max-w-md rounded-[1.5rem] px-6 py-5"
+          style={{
+            background: "color-mix(in srgb, var(--c-surface) 58%, transparent)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.4)",
+          }}
+        >
+          <h2
+            data-edit="schedule.heading"
+            className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
+            style={{ color: "var(--c-primary)" }}
+          >
+            {content.schedule.heading}
+          </h2>
+          {content.schedule.subtext ? (
+            <p
+              data-edit="schedule.subtext"
+              className="font-display mt-3 text-[11px] uppercase tracking-[0.22em]"
+              style={{ color: "var(--c-accent)" }}
+            >
+              {content.schedule.subtext}
+            </p>
+          ) : null}
+        </div>
+        <Divider className="my-7" width={100} />
+      </Reveal>
+    </Movable>
+  );
+}
+
+/**
+ * The day's events, laid out the way the couple asked for:
+ *   "slides"  — one full screen each, the background art carrying every one
+ *   "stacked" — all of them down a single screen
+ *   "row"     — all on one screen, swiped sideways
+ */
 export function Schedule({
   content,
   motif,
@@ -93,41 +136,54 @@ export function Schedule({
 }) {
   const events = content.schedule.events;
   if (!events.length) return null;
+  const layout = content.schedule.layout ?? "slides";
+
+  const card = (event: EventItem, i: number) => (
+    <Movable
+      key={event.id}
+      moveKey={`schedule.events.${i}.card`}
+      offset={content.offsets?.[`schedule.events.${i}.card`]}
+    >
+      <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
+    </Movable>
+  );
+
+  if (layout === "slides") {
+    return (
+      <>
+        {events.map((event, i) => (
+          <FrameBg key={event.id} id={i === 0 ? "frame-schedule" : undefined} src={bg} fullScreen>
+            <section className="px-6 py-14 text-center">
+              {i === 0 ? <Heading content={content} /> : null}
+              {card(event, i)}
+            </section>
+          </FrameBg>
+        ))}
+      </>
+    );
+  }
 
   return (
-    <>
-      {events.map((event, i) => (
-        <FrameBg key={event.id} id={i === 0 ? "frame-schedule" : undefined} src={bg} fullScreen>
-          <section className="px-6 py-14 text-center">
-            {i === 0 ? (
-              <Movable moveKey="schedule.heading" offset={content.offsets?.["schedule.heading"]}>
-                <Reveal>
-                  <h2
-                    data-edit="schedule.heading"
-                    className="font-display text-2xl uppercase tracking-[0.12em] sm:text-3xl"
-                    style={{ color: "var(--c-primary)" }}
-                  >
-                    {content.schedule.heading}
-                  </h2>
-                  {content.schedule.subtext ? (
-                    <p
-                      data-edit="schedule.subtext"
-                      className="font-display mt-3 text-[11px] uppercase tracking-[0.22em]"
-                      style={{ color: "var(--c-accent)" }}
-                    >
-                      {content.schedule.subtext}
-                    </p>
-                  ) : null}
-                  <Divider className="my-7" width={100} />
-                </Reveal>
-              </Movable>
-            ) : null}
-            <Movable moveKey={`schedule.events.${i}.card`} offset={content.offsets?.[`schedule.events.${i}.card`]}>
-              <EventCard event={event} motif={motif} basePath={`schedule.events.${i}`} />
-            </Movable>
-          </section>
-        </FrameBg>
-      ))}
-    </>
+    <FrameBg id="frame-schedule" src={bg} fullScreen>
+      <section className="px-6 py-14 text-center">
+        <Heading content={content} />
+        {layout === "row" ? (
+          // a swipeable strip: full-width cards on a phone, several in view on
+          // a desktop, each one snapping into place
+          <div
+            className="-mx-6 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-3"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {events.map((event, i) => (
+              <div key={event.id} className="w-[min(84vw,24rem)] shrink-0 snap-center">
+                {card(event, i)}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-6">{events.map((event, i) => card(event, i))}</div>
+        )}
+      </section>
+    </FrameBg>
   );
 }
