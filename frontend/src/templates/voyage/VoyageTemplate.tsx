@@ -429,14 +429,7 @@ export function VoyageTemplate({
             {/* ------------------------- 7 · the dress code -------------------- */}
             {hidden.includes("dresscode") ? null : (
             <PlainSlide compact={compact}>
-              <DressCode
-                heading={dress?.heading ?? "Dress code"}
-                note={
-                  dress?.note ??
-                  "We'd love to see you in something elegant and timeless — our palette for the day:"
-                }
-                swatches={dress?.swatches}
-              />
+              <DressCode dress={dress} />
             </PlainSlide>
             )}
 

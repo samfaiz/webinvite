@@ -507,36 +507,58 @@ export const DEFAULT_DRESS = [
   { hex: "#141414", label: "Black" },
 ];
 
-export function DressCode({
-  heading,
-  note,
-  swatches = DEFAULT_DRESS,
-}: {
-  heading: string;
-  note?: string;
-  swatches?: { hex: string; label: string }[];
-}) {
+export function DressCode({ dress }: { dress?: InvitationContent["dressCode"] }) {
+  const swatches = dress?.swatches?.length ? dress.swatches : DEFAULT_DRESS;
+  const round = dress?.swatchShape !== "square";
+  const her = dress?.her?.trim();
+  const him = dress?.him?.trim();
+
   return (
     <div className="mx-auto w-full max-w-[420px] px-6 text-center">
-      <h2 style={{ ...serifHead, color: "var(--v-cream)" }}>{heading}</h2>
+      <h2 style={{ ...serifHead, color: "var(--v-cream)" }}>
+        {dress?.heading?.trim() || "Dress code"}
+      </h2>
+      {dress?.attire?.trim() ? (
+        <span
+          className="mt-3 inline-block"
+          style={{
+            ...label,
+            color: "var(--v-gold)",
+            border: "1px solid color-mix(in srgb, var(--v-gold) 45%, transparent)",
+            borderRadius: 999,
+            padding: "6px 14px",
+          }}
+        >
+          {dress.attire}
+        </span>
+      ) : null}
       <span
         aria-hidden
         className="mx-auto mt-4 block"
         style={{ width: 54, height: 1, background: "var(--v-gold)" }}
       />
-      {note ? (
+      {dress?.note?.trim() ? (
         <p className="mx-auto mt-4 max-w-[34ch]" style={{ ...bodyText, color: "rgba(245,241,228,0.78)" }}>
-          {note}
+          {dress.note}
         </p>
       ) : null}
+
+      {her || him ? (
+        <div className={`mt-6 grid gap-5 text-left ${her && him ? "grid-cols-2" : "grid-cols-1 text-center"}`}>
+          {her ? <VoyageGuidance label="For her" text={her} /> : null}
+          {him ? <VoyageGuidance label="For him" text={him} /> : null}
+        </div>
+      ) : null}
+
       <div className="mt-8 flex items-start justify-center gap-3">
-        {swatches.map((s) => (
-          <div key={s.label} className="flex flex-1 flex-col items-center">
+        {swatches.map((s, i) => (
+          <div key={`${s.hex}-${i}`} className="flex flex-1 flex-col items-center">
             <span
               className="block w-full"
               style={{
                 aspectRatio: "1 / 1",
                 background: s.hex,
+                borderRadius: round ? "50%" : 4,
                 border: "1px solid color-mix(in srgb, var(--v-gold) 55%, transparent)",
               }}
             />
@@ -549,6 +571,26 @@ export function DressCode({
           </div>
         ))}
       </div>
+
+      {dress?.avoid?.trim() ? (
+        <p
+          className="mx-auto mt-7 max-w-[36ch] italic"
+          style={{ ...bodyText, color: "rgba(245,241,228,0.6)" }}
+        >
+          Kindly avoid {dress.avoid}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function VoyageGuidance({ label: text, text: body }: { label: string; text: string }) {
+  return (
+    <div>
+      <span style={{ ...label, color: "var(--v-gold)" }}>{text}</span>
+      <p className="mt-1" style={{ ...bodyText, color: "rgba(245,241,228,0.78)" }}>
+        {body}
+      </p>
     </div>
   );
 }

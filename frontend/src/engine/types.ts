@@ -241,8 +241,18 @@ export interface InvitationContent {
    *  palette when the couple hasn't set one. */
   dressCode?: {
     heading?: string;
+    /** short attire label shown as a chip, e.g. "Traditional", "Black tie" */
+    attire?: string;
+    /** the main line of guidance, e.g. "Modest and elegant" */
     note?: string;
+    /** optional per-guest guidance, shown side by side when both are set */
+    her?: string;
+    him?: string;
+    /** the colours to please stay away from, e.g. "white and black" */
+    avoid?: string;
     swatches?: { hex: string; label: string }[];
+    /** palette chip shape (default round) */
+    swatchShape?: "circle" | "square";
   };
   map: {
     points: MapPoint[];

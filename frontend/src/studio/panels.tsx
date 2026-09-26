@@ -863,6 +863,21 @@ const DRESS_PRESETS: { name: string; swatches: { hex: string; label: string }[] 
   { name: "Jewel tones", swatches: [
     { hex: "#7a1f3d", label: "Wine" }, { hex: "#1f4d3a", label: "Emerald" },
     { hex: "#1b2a4a", label: "Navy" }, { hex: "#8a6d1f", label: "Antique gold" } ] },
+  { name: "Earth & terracotta", swatches: [
+    { hex: "#b5643c", label: "Terracotta" }, { hex: "#d9a679", label: "Clay" },
+    { hex: "#7d6449", label: "Umber" }, { hex: "#efe2cf", label: "Oat" } ] },
+  { name: "Blush & burgundy", swatches: [
+    { hex: "#f2d3d1", label: "Blush" }, { hex: "#c98b8b", label: "Rose" },
+    { hex: "#7c2130", label: "Burgundy" }, { hex: "#e8d6b8", label: "Champagne" } ] },
+  { name: "Sage & champagne", swatches: [
+    { hex: "#c3cfbb", label: "Sage" }, { hex: "#8a9a7b", label: "Olive" },
+    { hex: "#ecdcc0", label: "Champagne" }, { hex: "#f6f2e8", label: "Chalk" } ] },
+  { name: "Kerala traditional", swatches: [
+    { hex: "#faf6ec", label: "Off-white" }, { hex: "#c9a227", label: "Kasavu gold" },
+    { hex: "#8e1c2b", label: "Deep red" }, { hex: "#1f4d3a", label: "Green" } ] },
+  { name: "Monochrome", swatches: [
+    { hex: "#ffffff", label: "White" }, { hex: "#bcbcbc", label: "Silver" },
+    { hex: "#5c5c5c", label: "Charcoal" }, { hex: "#141414", label: "Black" } ] },
 ];
 
 /**
@@ -889,6 +904,13 @@ export function DressCodeFields({ draft, update }: PanelProps) {
           onChange={(e) => edit((x) => { x.heading = e.target.value; })}
         />
       </Field>
+      <Field label="Attire">
+        <TextInput
+          value={dc.attire ?? ""}
+          placeholder="Traditional · Indo-western · Black tie"
+          onChange={(e) => edit((x) => { x.attire = e.target.value; })}
+        />
+      </Field>
       <Field label="What to wear">
         <TextArea
           value={dc.note ?? ""}
@@ -897,12 +919,51 @@ export function DressCodeFields({ draft, update }: PanelProps) {
         />
       </Field>
       <p className="-mt-1 mb-3 text-[11px] text-slate-400">
-        Leave this blank and the whole section stays off the invitation.
+        Leave every field here blank and the whole section stays off the invitation.
       </p>
 
-      <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
-        Colour palette <span className="normal-case tracking-normal text-slate-400">(optional)</span>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="For her">
+          <TextInput
+            value={dc.her ?? ""}
+            placeholder="A saree or lehenga"
+            onChange={(e) => edit((x) => { x.her = e.target.value; })}
+          />
+        </Field>
+        <Field label="For him">
+          <TextInput
+            value={dc.him ?? ""}
+            placeholder="Kurta or a suit"
+            onChange={(e) => edit((x) => { x.him = e.target.value; })}
+          />
+        </Field>
+      </div>
+      <Field label="Kindly avoid">
+        <TextInput
+          value={dc.avoid ?? ""}
+          placeholder="white and black"
+          onChange={(e) => edit((x) => { x.avoid = e.target.value; })}
+        />
+      </Field>
+      <p className="-mt-1 mb-3 text-[11px] text-slate-400">
+        Reads as &ldquo;Kindly avoid white and black&rdquo; — just the colours, no full sentence.
       </p>
+
+      <div className="mb-1.5 flex items-end justify-between gap-2">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+          Colour palette <span className="normal-case tracking-normal text-slate-400">(optional)</span>
+        </p>
+        <div className="w-28 shrink-0">
+          <Select
+            value={dc.swatchShape ?? "circle"}
+            onChange={(v) => edit((x) => { x.swatchShape = v as "circle" | "square"; })}
+            options={[
+              { value: "circle", label: "Round chips" },
+              { value: "square", label: "Square tiles" },
+            ]}
+          />
+        </div>
+      </div>
       {swatches.map((s, i) => (
         <div key={i} className="mb-2 flex items-end gap-2">
           <div className="min-w-0 flex-1">
