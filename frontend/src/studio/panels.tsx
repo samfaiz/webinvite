@@ -383,6 +383,28 @@ export function FamilyFields({ draft, update }: PanelProps) {
   const c = draft.content;
   return (
     <div>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Layout">
+          <Select
+            value={c.families.layout ?? "columns"}
+            onChange={(v) => update((d) => { d.content.families.layout = v as "columns" | "stacked"; })}
+            options={[
+              { value: "columns", label: "Side by side" },
+              { value: "stacked", label: "One above the other" },
+            ]}
+          />
+        </Field>
+        <Field label="Panel">
+          <Select
+            value={c.families.panel ?? "card"}
+            onChange={(v) => update((d) => { d.content.families.panel = v as "card" | "plain"; })}
+            options={[
+              { value: "card", label: "On a card" },
+              { value: "plain", label: "No card" },
+            ]}
+          />
+        </Field>
+      </div>
       <Field label={`${c.couple.partner1.name || "Name 1"} — parents (father, mother)`}>
         <TextInput
           value={[c.couple.partner1.father, c.couple.partner1.mother].filter(Boolean).join(", ")}
@@ -468,6 +490,16 @@ export function SaveDateFields({ draft, update }: PanelProps) {
     <div>
       <Field label="Date (as shown)"><TextInput value={c.dateReveal.eventDate} onChange={(e) => update((d) => { d.content.dateReveal.eventDate = e.target.value; })} /></Field>
       <Field label="Location"><TextInput value={c.dateReveal.location} onChange={(e) => update((d) => { d.content.dateReveal.location = e.target.value; })} /></Field>
+      <Field label="Countdown panel" hint="The frosted card behind the timer — keeps it readable over dark art.">
+        <Select
+          value={c.countdown.panel ?? "card"}
+          onChange={(v) => update((d) => { d.content.countdown.panel = v as "card" | "plain"; })}
+          options={[
+            { value: "card", label: "On a card" },
+            { value: "plain", label: "No card" },
+          ]}
+        />
+      </Field>
       {/* texts drawn on the scratch-off cover; empty falls back to the defaults */}
       <Field label="Scratch card — main text" hint="Shown on the cover guests scratch off.">
         <TextInput
@@ -631,6 +663,7 @@ export function MusicFields({ draft, update }: PanelProps) {
 
 export function StoryFields({ draft, update }: PanelProps) {
   const c = draft.content;
+  const storyCols = c.story.columns ?? 3;
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState("");
   const [photoEditor, setPhotoEditor] = useState<{ idx: number; src: string } | null>(null);
@@ -673,6 +706,17 @@ export function StoryFields({ draft, update }: PanelProps) {
   return (
     <div>
       <Field label="Heading subtitle"><TextInput value={c.story.subtext ?? ""} onChange={(e) => update((d) => { d.content.story.subtext = e.target.value; })} /></Field>
+      <Field label="Photos per row" hint="Applies to the grid layouts; phones always show two.">
+        <Select
+          value={String(storyCols)}
+          onChange={(v) => update((d) => { d.content.story.columns = Number(v) as 2 | 3 | 4; })}
+          options={[
+            { value: "2", label: "Two" },
+            { value: "3", label: "Three" },
+            { value: "4", label: "Four" },
+          ]}
+        />
+      </Field>
 
       {c.story.items.map((item, i) => (
         <div
@@ -1209,6 +1253,17 @@ export function RsvpFields({ draft, update }: PanelProps) {
       </div>
       <Field label="Submit button"><TextInput value={c.rsvp.submitLabel} onChange={(e) => update((d) => { d.content.rsvp.submitLabel = e.target.value; })} /></Field>
       <Field label="Footer line"><TextInput value={c.rsvp.footer ?? ""} onChange={(e) => update((d) => { d.content.rsvp.footer = e.target.value; })} /></Field>
+
+      <Field label="Card size">
+        <Select
+          value={c.rsvp.cardSize ?? "regular"}
+          onChange={(v) => update((d) => { d.content.rsvp.cardSize = v as "regular" | "large"; })}
+          options={[
+            { value: "regular", label: "Regular" },
+            { value: "large", label: "Large — wider card, bigger type" },
+          ]}
+        />
+      </Field>
 
       <p className="mb-1.5 mt-3 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
         Header band

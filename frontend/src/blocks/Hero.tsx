@@ -144,6 +144,7 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
                 targetDate={countdown.targetDate}
                 headline={countdown.headline}
                 subtext={countdown.subtext}
+                panel={countdown.panel}
               />
             </motion.div>
           ) : null}

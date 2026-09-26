@@ -42,19 +42,25 @@ function FamilyColumn({
 
 export function Families({ content }: { content: InvitationContent }) {
   const { families, couple } = content;
+  const stacked = families.layout === "stacked";
+  const plain = families.panel === "plain";
   return (
     <section className="px-5 py-16 text-center">
       {/* frosted vellum panel keeps the text legible over busy background art */}
       <Movable moveKey="families.block" offset={content.offsets?.["families.block"]} className="mx-auto max-w-2xl">
       <div
-        className="rounded-[2rem] px-6 py-10 sm:px-9"
-        style={{
-          background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          boxShadow: "0 16px 44px rgba(40,50,80,0.16)",
-          border: "1px solid rgba(255,255,255,0.5)",
-        }}
+        className={plain ? "px-2 py-6" : "rounded-[2rem] px-6 py-10 sm:px-9"}
+        style={
+          plain
+            ? undefined
+            : {
+                background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                boxShadow: "0 16px 44px rgba(40,50,80,0.16)",
+                border: "1px solid rgba(255,255,255,0.5)",
+              }
+        }
       >
         <Reveal>
           {families.subheading ? (
@@ -77,7 +83,11 @@ export function Families({ content }: { content: InvitationContent }) {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-4">
+          <div
+            className={`mx-auto flex max-w-3xl flex-col items-center gap-8 ${
+              stacked ? "" : "sm:flex-row sm:items-start sm:gap-4"
+            }`}
+          >
             <FamilyColumn person={couple.partner1} align="left" basePath="couple.partner1" />
             <div className="flex shrink-0 items-center justify-center px-2">
               <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={84} />

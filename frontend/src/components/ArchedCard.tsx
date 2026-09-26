@@ -12,10 +12,13 @@ export function ArchedCard({
   children,
   className = "",
   style,
+  maxWidth,
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  /** overrides the default 28rem cap — as a style, so it beats the class */
+  maxWidth?: string;
 }) {
   // identical fill on cap + body so the seam is invisible
   const fill = "color-mix(in srgb, var(--c-surface) 90%, transparent)";
@@ -32,7 +35,7 @@ export function ArchedCard({
   return (
     <div
       className={`relative mx-auto w-full max-w-md ${className}`}
-      style={{ filter: "drop-shadow(0 18px 30px rgba(40,50,80,0.18))", ...style }}
+      style={{ filter: "drop-shadow(0 18px 30px rgba(40,50,80,0.18))", ...(maxWidth ? { maxWidth } : {}), ...style }}
     >
       {/* arched crown */}
       <svg

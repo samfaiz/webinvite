@@ -67,6 +67,7 @@ export function MinimalModernTemplate({
                 targetDate={content.countdown.targetDate}
                 headline={content.countdown.headline}
                 subtext={content.countdown.subtext}
+                panel={content.countdown.panel}
               />
             </FrameBg>
           </FrameBg>

@@ -215,16 +215,25 @@ export interface InvitationContent {
     targetDate: string; // ISO datetime used for the live timer
     headline: string;
     subtext?: string;
+    /** the frosted panel behind the timer */
+    panel?: "card" | "plain";
   };
   families: {
     heading: string;
     subheading?: string;
     footer?: string;
+    /** "columns" sets the two families side by side (default); "stacked" runs
+     *  them down the page, which suits long parent lists */
+    layout?: "columns" | "stacked";
+    /** the frosted panel behind the section */
+    panel?: "card" | "plain";
   };
   story: {
     heading: string;
     subtext?: string;
     items: StoryItem[];
+    /** photos per row in the grid layouts (default 3) */
+    columns?: 2 | 3 | 4;
   };
   schedule: {
     heading: string;
@@ -245,6 +254,8 @@ export interface InvitationContent {
     declineLabel: string;
     submitLabel: string;
     footer?: string;
+    /** how wide the whole reply card sits */
+    cardSize?: "regular" | "large";
     /** the header band above the form: a filled plate, an outline, or nothing */
     bandStyle?: "filled" | "outline" | "none";
     /** how much air the band gives its contents */

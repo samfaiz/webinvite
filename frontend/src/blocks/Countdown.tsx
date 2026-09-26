@@ -29,11 +29,14 @@ export function Countdown({
   targetDate,
   headline,
   subtext,
+  panel = "card",
 }: {
   targetDate: string;
   headline: string;
   subtext?: string;
+  panel?: "card" | "plain";
 }) {
+  const plain = panel === "plain";
   const [t, setT] = useState<Parts | null>(null);
 
   useEffect(() => {
@@ -58,13 +61,17 @@ export function Countdown({
           renders them navy-on-navy. Mixed from --c-surface so it stays almost
           invisible over pale art and only becomes a plate where it's needed. */}
       <div
-        className="mx-auto max-w-md rounded-[1.5rem] px-5 py-4"
-        style={{
-          background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          border: "1px solid color-mix(in srgb, var(--c-surface) 45%, transparent)",
-        }}
+        className={plain ? "mx-auto max-w-md" : "mx-auto max-w-md rounded-[1.5rem] px-5 py-4"}
+        style={
+          plain
+            ? undefined
+            : {
+                background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "1px solid color-mix(in srgb, var(--c-surface) 45%, transparent)",
+              }
+        }
       >
       <Reveal>
         <p

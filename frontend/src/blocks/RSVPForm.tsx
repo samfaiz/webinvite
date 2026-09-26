@@ -45,6 +45,10 @@ export function RSVPForm({
   /* the band follows whatever the couple chose for the opening screen */
   const stackedNames = couple.nameLayout === "stacked";
   /* both questions are on unless the couple turned them off */
+  /* large widens the card, bumps the type, and takes back the side gutter —
+     on a phone the card already fills max-w-md, so a wider cap alone would
+     change nothing there */
+  const large = rsvp.cardSize === "large";
   const band = rsvp.bandStyle ?? "filled";
   /* the band packs a lot into a small plate — this is the air it gets */
   const air = {
@@ -113,9 +117,9 @@ export function RSVPForm({
   } as const;
 
   return (
-    <section className="px-6 py-20">
+    <section className={`py-20 ${large ? "px-3" : "px-6"}`}>
       <Reveal>
-        <ArchedCard>
+        <ArchedCard maxWidth={large ? "34rem" : undefined}>
           {/* ---------- invitation band ---------- */}
           {/* a rounded plate sitting inside the card, not a rectangle bled to
               its edges — square corners against the arch above read as pasted
@@ -148,8 +152,8 @@ export function RSVPForm({
             <h2
               className={`font-display ${air.name} ${
                 stackedNames
-                  ? "flex flex-col items-center text-[28px]"
-                  : "flex flex-wrap items-baseline justify-center gap-x-2 text-[26px] sm:text-[30px]"
+                  ? `flex flex-col items-center ${large ? "text-[34px]" : "text-[28px]"}`
+                  : `flex flex-wrap items-baseline justify-center gap-x-2 ${large ? "text-[30px] sm:text-[36px]" : "text-[26px] sm:text-[30px]"}`
               }`}
               style={{ color: band === "filled" ? ON_BAND : "var(--c-primary)", lineHeight: air.lead }}
             >
@@ -255,7 +259,7 @@ export function RSVPForm({
                   onChange={(e) => form.setName(e.target.value)}
                   placeholder="Your name"
                   autoComplete="name"
-                  className="font-body w-full rounded-xl px-4 py-3.5 text-base outline-none"
+                  className={`font-body w-full rounded-xl px-4 text-base outline-none ${large ? "py-4" : "py-3.5"}`}
                   style={field}
                 />
                 <input
@@ -264,7 +268,7 @@ export function RSVPForm({
                   onChange={(e) => form.setEmail(e.target.value)}
                   placeholder="Email (optional — for your confirmation)"
                   autoComplete="email"
-                  className="font-body mt-3 w-full rounded-xl px-4 py-3.5 text-base outline-none"
+                  className={`font-body mt-3 w-full rounded-xl px-4 text-base outline-none ${large ? "py-4" : "py-3.5"}`}
                   style={field}
                 />
                 {email.trim() ? (
@@ -409,7 +413,7 @@ export function RSVPForm({
                   disabled={busy}
                   whileHover={{ scale: busy ? 1 : 1.02 }}
                   whileTap={{ scale: busy ? 1 : 0.98 }}
-                  className="font-body mt-5 w-full rounded-full py-4 text-base font-bold disabled:opacity-70"
+                  className={`font-body mt-5 w-full rounded-full text-base font-bold disabled:opacity-70 ${large ? "py-5 text-lg" : "py-4"}`}
                   style={{
                     background: "var(--c-primary)",
                     color: "var(--c-bg)",

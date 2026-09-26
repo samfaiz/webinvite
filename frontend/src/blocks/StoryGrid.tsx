@@ -10,6 +10,12 @@ import { Reveal } from "@/components/Reveal";
  * Story as a photo grid with a click-to-enlarge lightbox (alternative to the
  * Polaroid carousel). Used by the Royal Ornate / Minimal templates.
  */
+const STORY_COLS: Record<number, string> = {
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+  4: "sm:grid-cols-4",
+};
+
 export function StoryGrid({ content }: { content: InvitationContent }) {
   const items = content.story.items;
   const [open, setOpen] = useState<number | null>(null);
@@ -33,7 +39,10 @@ export function StoryGrid({ content }: { content: InvitationContent }) {
         <Divider className="my-7" width={90} />
       </Reveal>
 
-      <div className="mx-auto grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-3">
+      {/* two across on a phone whatever the setting; the couple's choice takes
+          over from `sm` up. The three class strings are spelled out so Tailwind
+          keeps them — a computed `sm:grid-cols-${n}` would be purged. */}
+      <div className={`mx-auto grid max-w-2xl grid-cols-2 gap-4 ${STORY_COLS[content.story.columns ?? 3]}`}>
         {items.map((item, i) => (
           <Reveal key={i} delay={(i % 3) * 0.06}>
             <motion.button
