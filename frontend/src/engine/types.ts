@@ -63,6 +63,9 @@ export interface EventItem {
   verseRef?: string;
   /** motif icon key resolved by the active MotifPack (e.g. "church", "lamp", "rings") */
   icon?: string;
+  /** what to wear to THIS event, e.g. "Yellows and greens" for the mehndi.
+   *  Listed by the dress-code section when any event sets one. */
+  attire?: string;
 }
 
 export interface MapPoint {
@@ -248,6 +251,12 @@ export interface InvitationContent {
     /** optional per-guest guidance, shown side by side when both are set */
     her?: string;
     him?: string;
+    /** reference photos for the guidance above */
+    herPhoto?: string;
+    himPhoto?: string;
+    /** a lookbook or board the couple wants to point guests at */
+    link?: string;
+    linkLabel?: string;
     /** the colours to please stay away from, e.g. "white and black" */
     avoid?: string;
     swatches?: { hex: string; label: string }[];

@@ -817,6 +817,8 @@ export function ScheduleFields({ draft, update }: PanelProps) {
           </div>
           {/* changing the venue/address invalidates any previously pasted map
               link — clear it so guests are never directed to the old place */}
+          {/* lives on the event, listed by the dress-code section */}
+          <Field label="What to wear to this event"><TextInput value={ev.attire ?? ""} placeholder="Yellows and greens" onChange={(e) => update((d) => { d.content.schedule.events[i].attire = e.target.value; })} /></Field>
           <Field label="Venue"><TextInput value={ev.venue} onChange={(e) => update((d) => { d.content.schedule.events[i].venue = e.target.value; d.content.schedule.events[i].mapUrl = ""; })} /></Field>
           <Field label="Address"><TextInput value={ev.address ?? ""} onChange={(e) => update((d) => { d.content.schedule.events[i].address = e.target.value; d.content.schedule.events[i].mapUrl = ""; })} /></Field>
           <Field label="Map location (Get Directions)">
@@ -880,6 +882,64 @@ const DRESS_PRESETS: { name: string; swatches: { hex: string; label: string }[] 
     { hex: "#5c5c5c", label: "Charcoal" }, { hex: "#141414", label: "Black" } ] },
 ];
 
+/** A reference photo slot for the "for her" / "for him" guidance. */
+function DressPhoto({
+  label,
+  url,
+  busy,
+  onPick,
+  onClear,
+}: {
+  label: string;
+  url?: string;
+  busy: boolean;
+  onPick: (file?: File) => void;
+  onClear: () => void;
+}) {
+  return (
+    <div>
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <div className="flex gap-2">
+        <div className="h-16 w-12 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+          {url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-center text-[9px] leading-tight text-slate-400">
+              None
+            </div>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <label
+            className={`cursor-pointer rounded-md px-2 py-1.5 text-center text-[11px] font-medium text-white ${
+              busy ? "bg-slate-400" : "bg-[#2b3a67] hover:bg-[#23315a]"
+            }`}
+          >
+            {busy ? "Adding…" : url ? "Change" : "+ Add"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={busy}
+              onChange={(e) => { onPick(e.target.files?.[0]); e.target.value = ""; }}
+            />
+          </label>
+          {url ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
+            >
+              Remove
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Dress code. Everything here is optional — the section renders only once the
  * couple has written a line, so invitations made before it existed are
@@ -888,12 +948,30 @@ const DRESS_PRESETS: { name: string; swatches: { hex: string; label: string }[] 
 export function DressCodeFields({ draft, update }: PanelProps) {
   const dc = draft.content.dressCode ?? {};
   const swatches = dc.swatches ?? [];
+  const [photoBusy, setPhotoBusy] = useState<"herPhoto" | "himPhoto" | null>(null);
+  const [photoErr, setPhotoErr] = useState("");
 
   const edit = (fn: (d: NonNullable<Draft["content"]["dressCode"]>) => void) =>
     update((d) => {
       d.content.dressCode = { ...(d.content.dressCode ?? {}) };
       fn(d.content.dressCode);
     });
+
+  /* held inline while editing so the preview updates at once; the save step
+     uploads it and swaps in the URL (see studio/media flushEmbeddedMedia) */
+  const pickPhoto = async (side: "herPhoto" | "himPhoto", file?: File) => {
+    if (!file) return;
+    setPhotoErr("");
+    setPhotoBusy(side);
+    try {
+      const src = await fileToScaledDataUrl(file, 1200, 0.9);
+      edit((x) => { x[side] = src; });
+    } catch (e) {
+      setPhotoErr((e as Error).message);
+    } finally {
+      setPhotoBusy(null);
+    }
+  };
 
   return (
     <div>
@@ -938,6 +1016,14 @@ export function DressCodeFields({ draft, update }: PanelProps) {
           />
         </Field>
       </div>
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        <DressPhoto label="Photo for her" url={dc.herPhoto} busy={photoBusy === "herPhoto"}
+          onPick={(f) => pickPhoto("herPhoto", f)} onClear={() => edit((x) => { x.herPhoto = ""; })} />
+        <DressPhoto label="Photo for him" url={dc.himPhoto} busy={photoBusy === "himPhoto"}
+          onPick={(f) => pickPhoto("himPhoto", f)} onClear={() => edit((x) => { x.himPhoto = ""; })} />
+      </div>
+      {photoErr ? <p className="-mt-2 mb-3 text-[11px] text-rose-600">{photoErr}</p> : null}
+
       <Field label="Kindly avoid">
         <TextInput
           value={dc.avoid ?? ""}
@@ -948,6 +1034,25 @@ export function DressCodeFields({ draft, update }: PanelProps) {
       <p className="-mt-1 mb-3 text-[11px] text-slate-400">
         Reads as &ldquo;Kindly avoid white and black&rdquo; — just the colours, no full sentence.
       </p>
+
+      <div className="grid grid-cols-[1fr_auto] gap-2">
+        <Field label="Lookbook link">
+          <TextInput
+            value={dc.link ?? ""}
+            placeholder="https://pin.it/…"
+            onChange={(e) => edit((x) => { x.link = e.target.value; })}
+          />
+        </Field>
+        <div className="w-32">
+          <Field label="Button text">
+            <TextInput
+              value={dc.linkLabel ?? ""}
+              placeholder="See the lookbook"
+              onChange={(e) => edit((x) => { x.linkLabel = e.target.value; })}
+            />
+          </Field>
+        </div>
+      </div>
 
       <div className="mb-1.5 flex items-end justify-between gap-2">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">

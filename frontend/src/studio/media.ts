@@ -33,6 +33,8 @@ export function hasEmbeddedMedia(content: Content): boolean {
   if (isDataUrl(content.couple?.logo)) return true;
   if (isDataUrl(content.guestEmails?.photo)) return true;
   if (isDataUrl(content.share?.image)) return true;
+  if (isDataUrl(content.dressCode?.herPhoto)) return true;
+  if (isDataUrl(content.dressCode?.himPhoto)) return true;
   return customSectionDataUrls(content);
 }
 
@@ -73,6 +75,14 @@ export async function flushEmbeddedMedia(content: Content): Promise<void> {
   if (isDataUrl(shareImage)) {
     const { url } = await api.uploadMedia(await dataUrlToFile(shareImage, "share"));
     content.share!.image = url;
+  }
+
+  for (const side of ["herPhoto", "himPhoto"] as const) {
+    const p = content.dressCode?.[side];
+    if (isDataUrl(p)) {
+      const { url } = await api.uploadMedia(await dataUrlToFile(p, `dress-${side}`));
+      content.dressCode![side] = url;
+    }
   }
 
   // composable "custom" sections: backgrounds, story photos, gallery images
