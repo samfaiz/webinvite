@@ -3,6 +3,7 @@ import type { RenderProps } from "@/engine/types";
 import { FlagshipTemplate } from "./flagship/FlagshipTemplate";
 import { RoyalOrnateTemplate } from "./royal/RoyalOrnateTemplate";
 import { MinimalModernTemplate } from "./minimal/MinimalModernTemplate";
+import { VoyageTemplate } from "./voyage/VoyageTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
@@ -28,6 +29,7 @@ const components: Record<string, TemplateComponent> = {
   "flagship-lakecomo": FlagshipTemplate,
   "royal-ornate": RoyalOrnateTemplate,
   "minimal-modern": MinimalModernTemplate,
+  "voyage-kerala": VoyageTemplate,
   custom: CustomTemplate,
 };
 

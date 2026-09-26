@@ -123,6 +123,20 @@ export const themes: Record<string, Theme> = {
     },
     { type: "petals", color: "#ecdcc0" }
   ),
+  /* Pairs with the Voyage template: the navy is the plates' own field colour
+     and the ivory is their card stock, so type tinted from these tokens sits
+     on the artwork without fighting it. `bg` stays light on purpose — shared
+     blocks use it as the colour of text ON a primary-filled button. */
+  "navy-ivory": make(
+    "navy-ivory",
+    "Navy & Ivory",
+    {
+      bg: "#f3efe3", surface: "#faf6ea", primary: "#1a2745", secondary: "#3c5077",
+      accent: "#b8935a", text: "#33405c", muted: "#7d8aa3",
+      gradientFrom: "#efe9d9", gradientTo: "#e5dcc6",
+    },
+    { type: "sparkles", color: "#d8c79a" }
+  ),
 };
 
 export const themeList = Object.values(themes);

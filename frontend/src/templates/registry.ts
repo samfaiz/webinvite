@@ -40,6 +40,21 @@ export const templates: TemplateMeta[] = [
     defaultMotifId: "secular",
     preview: "/assets/previews/minimal.jpg",
   },
+  {
+    id: "voyage-kerala",
+    name: "Kerala Voyage",
+    description:
+      "A destination boarding pass: navy plates, cream ticket stock and a gold flight path threading the scroll past a letter, the venue arch and the day's timeline.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "navy-ivory",
+    defaultMotifId: "kerala-christian",
+    preview: "/assets/templates/voyage/01-ticket.jpg",
+    // the plates are printed navy-on-cream — a blush or emerald palette would
+    // fight the artwork, so this design ships with the one theme
+    themeIds: ["navy-ivory"],
+    // still on stand-in plates — see public/assets/templates/voyage
+    draft: true,
+  },
 ];
 
 export function getTemplateMeta(id: string): TemplateMeta {
@@ -55,8 +70,15 @@ function generatePresets(): DesignPreset[] {
   const out: DesignPreset[] = [];
   for (const community of ALL_COMMUNITIES) {
     for (const tpl of templates) {
+      // a draft template has no presets, which is what keeps it out of the
+      // gallery, the explore feed and the landing page — the Studio lists
+      // `templates` directly, so it stays available to work on
+      if (tpl.draft) continue;
       if (!tpl.supportedCommunities.includes(community)) continue;
-      for (const theme of themeList) {
+      const allowed = tpl.themeIds
+        ? themeList.filter((t) => tpl.themeIds!.includes(t.id))
+        : themeList;
+      for (const theme of allowed) {
         out.push({
           id: `${community}__${tpl.id}__${theme.id}`,
           name: theme.name,

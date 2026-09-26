@@ -25,6 +25,15 @@ export interface Couple {
   partner2: Person;
   /** word shown between the two names, e.g. "weds" */
   connector?: string;
+  /**
+   * How the two names sit against each other on the opening screen.
+   *   "inline"  — Name  weds  Name, on one line
+   *   "stacked" — one above the other, the connector between
+   * Left unset the template keeps its own look (the flagship reads inline,
+   * the classic and minimal layouts stack), so existing invitations are
+   * untouched until a couple actually picks one.
+   */
+  nameLayout?: "inline" | "stacked";
   /** short monogram, e.g. "S | L" — shown in the crest when no custom logo is set */
   monogram?: string;
   /** custom crest/logo image (data URL). When set it replaces the drawn monogram
@@ -227,6 +236,14 @@ export interface InvitationContent {
     submitLabel: string;
     footer?: string;
   };
+  /** What the couple asks guests to wear. Optional — only the designs that
+   *  have a place for it render it, and they fall back to the design's own
+   *  palette when the couple hasn't set one. */
+  dressCode?: {
+    heading?: string;
+    note?: string;
+    swatches?: { hex: string; label: string }[];
+  };
   map: {
     points: MapPoint[];
     /** manual location text for the Get Directions button (overrides the
@@ -328,6 +345,14 @@ export interface TemplateMeta {
   defaultThemeId: string;
   defaultMotifId: string;
   preview?: string;
+  /** Themes this template may be paired with in the gallery. Omit for the
+   *  usual "any theme" templates; set it when the layout is built on fixed
+   *  artwork whose colours only work with certain palettes. */
+  themeIds?: string[];
+  /** Not finished yet: kept out of the customer-facing gallery, explore feed
+   *  and landing page, but still selectable in the Studio so it can be worked
+   *  on. Clear the flag to launch it. */
+  draft?: boolean;
 }
 
 /** A gallery "design" the user picks = a saved combination. */
