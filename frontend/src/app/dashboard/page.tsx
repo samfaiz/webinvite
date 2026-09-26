@@ -9,6 +9,30 @@ import { api, API_BASE } from "@/lib/api";
 const PUBLIC_ORIGIN =
   typeof window !== "undefined" ? window.location.origin : "";
 
+/** how the RSVP form's meal keys read to the couple */
+const MEAL_LABELS: Record<string, string> = {
+  veg: "Veg",
+  "non-veg": "Non-veg",
+  jain: "Jain",
+};
+
+/** "12 veg · 6 non-veg" — heads (not replies) per menu among accepting
+ *  guests, which is the number a caterer is actually given. Empty when
+ *  nobody picked one, so the line stays hidden rather than showing zeros. */
+type MealRow = { attending: string; meal?: string | null; guests?: number };
+
+function mealTally(rsvps: MealRow[]): string {
+  const heads: Record<string, number> = {};
+  for (const r of rsvps) {
+    if (r.attending !== "accept" || !r.meal) continue;
+    heads[r.meal] = (heads[r.meal] ?? 0) + (r.guests || 1);
+  }
+  return Object.keys(MEAL_LABELS)
+    .filter((k) => heads[k])
+    .map((k) => `${heads[k]} ${MEAL_LABELS[k].toLowerCase()}`)
+    .join(" · ");
+}
+
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
@@ -226,15 +250,31 @@ export default function DashboardPage() {
                         <p className="mb-2 text-[rgba(43,27,18,0.75)]">
                           {rsvpData.accepted} accepting ({rsvpData.headcount} guests) · {rsvpData.declined} declining
                         </p>
+                        {/* what the caterer needs: heads per menu among those coming */}
+                        {mealTally(rsvpData.rsvps) ? (
+                          <p className="mb-2 text-[12px] text-[rgba(43,27,18,0.6)]">
+                            Menu — {mealTally(rsvpData.rsvps)}
+                          </p>
+                        ) : null}
                         <ul className="space-y-1">
                           {rsvpData.rsvps.map((r: any) => (
                             <li key={r.id} className="flex justify-between gap-2 border-b border-[rgba(43,27,18,0.08)] py-1">
                               <span className="min-w-0">
                                 {r.guestName}
+                                {r.meal ? (
+                                  <span className="ml-1.5 rounded-full bg-[rgba(43,27,18,0.07)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[rgba(43,27,18,0.6)]">
+                                    {MEAL_LABELS[r.meal] ?? r.meal}
+                                  </span>
+                                ) : null}
                                 {r.email ? (
                                   <span className="block truncate text-[11px] text-[rgba(43,27,18,0.55)]">
                                     {r.email}
                                     {r.subscribed ? " · updates ✓" : ""}
+                                  </span>
+                                ) : null}
+                                {r.message ? (
+                                  <span className="block text-[11px] italic text-[rgba(43,27,18,0.55)]">
+                                    “{r.message}”
                                   </span>
                                 ) : null}
                               </span>

@@ -99,6 +99,8 @@ export const api = {
       attending: string;
       guests?: number;
       message?: string;
+      /** "veg" | "non-veg" | "jain" — the backend rejects anything else */
+      meal?: string;
       email?: string;
       subscribed?: boolean;
     },

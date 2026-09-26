@@ -10,6 +10,10 @@ import {
   Min,
 } from 'class-validator';
 
+/** The catering options the RSVP form offers. Kept here so the validator and
+ *  any future admin summary agree on the exact strings. */
+export const MEALS = ['veg', 'non-veg', 'jain'] as const;
+
 export class CreateRsvpDto {
   @IsString()
   @MaxLength(120)
@@ -28,6 +32,12 @@ export class CreateRsvpDto {
   @IsString()
   @MaxLength(500)
   message?: string;
+
+  /** catering preference — a closed set so the couple's headcount per menu
+   *  is countable; omitted entirely when the guest skips the question */
+  @IsOptional()
+  @IsIn(MEALS)
+  meal?: string;
 
   @IsOptional()
   @IsEmail()

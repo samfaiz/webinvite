@@ -280,6 +280,14 @@ function Schedule(p: Props) {
 }
 
 /* --------------------------------- rsvp -------------------------------- */
+
+/** Must match the backend's accepted `meal` values (see rsvp.dto.ts). */
+const MEAL_OPTIONS = [
+  { key: "veg", label: "Veg" },
+  { key: "non-veg", label: "Non-veg" },
+  { key: "jain", label: "Jain" },
+] as const;
+
 function Rsvp(p: Props) {
   const { section: s, path, offsets, live, slug } = p;
   const c = s.content;
@@ -287,6 +295,8 @@ function Rsvp(p: Props) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(true);
   const [attending, setAttending] = useState<"accept" | "decline">("accept");
+  const [guests, setGuests] = useState(1);
+  const [meal, setMeal] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -301,6 +311,8 @@ function Rsvp(p: Props) {
       await api.createRsvp(slug, {
         guestName: name.trim(),
         attending,
+        ...(attending === "accept" ? { guests } : {}),
+        ...(attending === "accept" && meal ? { meal } : {}),
         message: message.trim() || undefined,
         ...(email.trim() ? { email: email.trim(), subscribed } : {}),
       });
@@ -335,6 +347,30 @@ function Rsvp(p: Props) {
               </button>
             ))}
           </div>
+          {/* party size + menu: only meaningful for a guest who's coming */}
+          {attending === "accept" ? (
+            <>
+              <div className="flex items-center justify-between rounded-lg border px-3 py-2" style={bd}>
+                <span className="text-sm" style={{ color: "var(--c-text)" }}>How many of you?</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" aria-label="One fewer guest" disabled={guests <= 1} onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                    className="h-7 w-7 rounded-full border text-base leading-none disabled:opacity-40" style={{ ...bd, color: "var(--c-primary)" }}>−</button>
+                  <span className="min-w-4 text-center text-sm font-semibold" style={{ color: "var(--c-primary)" }} aria-live="polite">{guests}</span>
+                  <button type="button" aria-label="One more guest" disabled={guests >= 50} onClick={() => setGuests((g) => Math.min(50, g + 1))}
+                    className="h-7 w-7 rounded-full text-base leading-none text-white disabled:opacity-40" style={{ background: "var(--c-primary)" }}>+</button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {MEAL_OPTIONS.map((m) => (
+                  <button key={m.key} type="button" aria-pressed={meal === m.key} onClick={() => setMeal((cur) => (cur === m.key ? null : m.key))}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${meal === m.key ? "text-white" : ""}`}
+                    style={meal === m.key ? { background: "var(--c-primary)", borderColor: "var(--c-primary)" } : { ...bd, color: "var(--c-primary)" }}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
           <textarea className={`${input} min-h-[64px]`} style={bd} placeholder="A note (optional)" value={message} onChange={(e) => setMessage(e.target.value)} />
           {err ? <p className="text-sm text-rose-600">{err}</p> : null}
           <button type="button" onClick={submit} disabled={busy} className="w-full rounded-lg py-2.5 text-sm font-medium text-white disabled:opacity-60" style={{ background: "var(--c-primary)" }}>

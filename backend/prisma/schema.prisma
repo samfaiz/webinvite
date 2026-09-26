@@ -110,6 +110,9 @@ model Rsvp {
   attending    String // "accept" | "decline"
   guests       Int        @default(1)
   message      String?
+  /// "veg" | "non-veg" | "jain" — null when the guest skipped it, and for
+  /// every RSVP taken before the question existed
+  meal         String?
   /// guest's email (optional) — used for the confirmation email and updates
   email        String?
   /// consented to receive wedding updates at `email`

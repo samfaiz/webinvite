@@ -11,6 +11,13 @@ import { MailService } from '../mail/mail.service';
 import { buildGuestEmail } from '../mail/guest-email';
 import { CreateRsvpDto } from './rsvp.dto';
 
+/** how the meal keys read in the couple's notification email */
+const MEAL_LABELS: Record<string, string> = {
+  veg: 'Vegetarian',
+  'non-veg': 'Non-vegetarian',
+  jain: 'Jain',
+};
+
 @Injectable()
 export class RsvpService {
   private readonly logger = new Logger(RsvpService.name);
@@ -41,6 +48,9 @@ export class RsvpService {
         attending: dto.attending,
         guests: dto.guests ?? 1,
         message: dto.message,
+        // only the accepting are eating — a declining guest's leftover chip
+        // selection must not inflate the caterer's counts
+        meal: dto.attending === 'accept' ? dto.meal : null,
         email,
         subscribed: Boolean(email && dto.subscribed),
       },
@@ -150,6 +160,7 @@ export class RsvpService {
       '',
       coming ? '✔ Joyfully accepts' : "✖ Regretfully declines",
       dto.guests && dto.guests > 1 ? `Party of ${dto.guests}` : undefined,
+      coming && dto.meal ? `Meal: ${MEAL_LABELS[dto.meal] ?? dto.meal}` : undefined,
       dto.message ? `Message: “${dto.message}”` : undefined,
       '',
       `Totals so far — coming: ${accepted} (headcount ${headcount._sum.guests ?? 0}), not coming: ${declined}.`,

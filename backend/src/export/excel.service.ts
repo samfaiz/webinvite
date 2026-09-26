@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import type { Rsvp } from '@prisma/client';
 
+/** the RSVP form's meal keys, spelled out for the caterer reading the sheet */
+const MEAL_LABELS: Record<string, string> = {
+  veg: 'Vegetarian',
+  'non-veg': 'Non-vegetarian',
+  jain: 'Jain',
+};
+
 @Injectable()
 export class ExcelService {
   /** Build an .xlsx attendee sheet for a set of RSVPs. */
@@ -14,6 +21,7 @@ export class ExcelService {
       { header: 'Guest Name', key: 'guestName', width: 30 },
       { header: 'Response', key: 'attending', width: 14 },
       { header: 'Guests', key: 'guests', width: 10 },
+      { header: 'Meal', key: 'meal', width: 14 },
       { header: 'Email', key: 'email', width: 30 },
       { header: 'Updates', key: 'subscribed', width: 10 },
       { header: 'Message', key: 'message', width: 45 },
@@ -38,6 +46,7 @@ export class ExcelService {
         guestName: r.guestName,
         attending: r.attending === 'accept' ? 'Accepting' : 'Declining',
         guests: r.guests,
+        meal: MEAL_LABELS[r.meal ?? ''] ?? r.meal ?? '',
         email: r.email || '',
         subscribed: r.email ? (r.subscribed ? 'Yes' : 'No') : '',
         message: r.message || '',
