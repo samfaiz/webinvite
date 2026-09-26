@@ -39,7 +39,7 @@ export function StoryGrid({ content }: { content: InvitationContent }) {
             <motion.button
               onClick={() => setOpen(i)}
               whileHover={{ y: -4 }}
-              className="group relative block aspect-[4/5] w-full overflow-hidden rounded-md"
+              className="group relative block aspect-[4/5] w-full overflow-hidden rounded-xl"
               style={{ boxShadow: "0 10px 26px rgba(40,50,80,0.14)" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,7 +87,7 @@ export function StoryGrid({ content }: { content: InvitationContent }) {
               <img
                 src={items[open].photo}
                 alt={items[open].caption}
-                className="w-full rounded-md"
+                className="w-full rounded-xl"
               />
               <p className="font-script mt-3 text-center text-2xl text-white">
                 {items[open].caption}

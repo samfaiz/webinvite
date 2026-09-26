@@ -104,11 +104,15 @@ export function RSVPForm({
       <Reveal>
         <ArchedCard>
           {/* ---------- invitation band ---------- */}
+          {/* a rounded plate sitting inside the card, not a rectangle bled to
+              its edges — square corners against the arch above read as pasted
+              on, and the hard bottom rule cut the card in two */}
           <div
-            className="-mx-7 -mt-1 px-6 pb-5 pt-5 text-center"
+            className="mt-1 rounded-[1.5rem] px-6 pb-5 pt-5 text-center"
             style={{
               background: "var(--c-primary)",
-              borderBottom: "3px solid var(--c-accent)",
+              border: "1px solid color-mix(in srgb, var(--c-accent) 50%, transparent)",
+              boxShadow: "0 10px 26px color-mix(in srgb, var(--c-primary) 22%, transparent)",
             }}
           >
             <p
@@ -259,7 +263,7 @@ export function RSVPForm({
                 {/* ---------- will you be joining us? ---------- */}
                 <p
                   data-edit="rsvp.prompt"
-                  className="font-display mt-6 text-[20px]"
+                  className="font-display mt-6 text-center text-[20px]"
                   style={{ color: "var(--c-primary)" }}
                 >
                   {rsvp.prompt}

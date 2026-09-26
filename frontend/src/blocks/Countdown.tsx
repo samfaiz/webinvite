@@ -86,7 +86,7 @@ export function Countdown({
           {units.map(([label, value]) => (
             <div
               key={label}
-              className="flex flex-1 flex-col items-center rounded-lg py-2.5"
+              className="flex flex-1 flex-col items-center rounded-xl py-2.5"
               style={{
                 background: "color-mix(in srgb, var(--c-surface) 55%, transparent)",
                 boxShadow: "0 4px 12px rgba(40,50,80,0.07)",

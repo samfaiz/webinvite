@@ -16,7 +16,7 @@ function EventCard({ event, motif, basePath }: { event: EventItem; motif: MotifP
       <motion.article
         whileHover={{ y: -6 }}
         transition={{ type: "spring", stiffness: 200, damping: 18 }}
-        className="relative mx-auto w-full max-w-md rounded-sm px-8 py-9 text-center"
+        className="relative mx-auto w-full max-w-md rounded-[1.5rem] px-8 py-9 text-center"
         style={{
           // frosted glass so the background art shows through
           background: "color-mix(in srgb, var(--c-surface) 52%, transparent)",

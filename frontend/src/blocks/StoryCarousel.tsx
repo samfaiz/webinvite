@@ -126,14 +126,14 @@ function Polaroid({ photo, caption, captionPath, photoPath }: { photo?: string; 
 
   return (
     <div
-      className="flex h-full w-full flex-col rounded-sm p-2.5 pb-3"
+      className="flex h-full w-full flex-col rounded-xl p-2.5 pb-3"
       style={{
         background: "#fffdf8",
         boxShadow: "0 16px 40px rgba(40,50,80,0.22)",
         border: "1px solid rgba(0,0,0,0.05)",
       }}
     >
-      <div className="relative flex-1 overflow-hidden rounded-sm bg-[var(--c-grad-to)]">
+      <div className="relative flex-1 overflow-hidden rounded-lg bg-[var(--c-grad-to)]">
         {showPhoto ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
