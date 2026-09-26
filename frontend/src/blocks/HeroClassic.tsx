@@ -29,6 +29,8 @@ export function HeroClassic({
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "14%"]);
   const variant = (motif.decorativeBorders?.[0] as BorderVariant) ?? "floral-vine";
   const { couple, hero, dateReveal } = content;
+  /* this layout stacks the names unless the couple asked for one line */
+  const stacked = couple.nameLayout !== "inline";
   const heroBg = backgroundFor(theme, "hero");
   const { compact } = usePreview();
 
@@ -67,17 +69,18 @@ export function HeroClassic({
         <div className="flex flex-col items-center">
           <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={110} />
 
-          <h1 className="mt-6">
-            <span className="font-script block text-5xl sm:text-7xl" style={{ color: "var(--c-primary)" }}>
+          {/* this layout stacks unless the couple asked for one line */}
+          <h1 className={stacked ? "mt-6" : "mt-6 flex flex-wrap items-baseline justify-center gap-x-4"}>
+            <span className={`font-script ${stacked ? "block text-5xl sm:text-7xl" : "text-4xl sm:text-6xl"}`} style={{ color: "var(--c-primary)" }}>
               {couple.partner1.name}
             </span>
             <span
-              className="font-display my-1 block text-xs uppercase tracking-[0.3em]"
+              className={`font-display text-xs uppercase tracking-[0.3em] ${stacked ? "my-1 block" : ""}`}
               style={{ color: "var(--c-accent)" }}
             >
               {couple.connector ?? "and"}
             </span>
-            <span className="font-script block text-5xl sm:text-7xl" style={{ color: "var(--c-primary)" }}>
+            <span className={`font-script ${stacked ? "block text-5xl sm:text-7xl" : "text-4xl sm:text-6xl"}`} style={{ color: "var(--c-primary)" }}>
               {couple.partner2.name}
             </span>
           </h1>

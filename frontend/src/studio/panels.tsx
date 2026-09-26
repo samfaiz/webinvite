@@ -280,6 +280,21 @@ export function CoupleFields({ draft, update }: PanelProps) {
         <Field label="Connector"><TextInput value={c.couple.connector ?? ""} onChange={(e) => update((d) => { d.content.couple.connector = e.target.value; })} /></Field>
         <Field label="Monogram"><TextInput value={c.couple.monogram ?? ""} onChange={(e) => update((d) => { d.content.couple.monogram = e.target.value; })} /></Field>
       </div>
+      {/* "" writes the key away again, so an untouched invitation keeps
+          whatever its template already did rather than being pinned here */}
+      <Field label="Name layout">
+        <Select
+          value={c.couple.nameLayout ?? ""}
+          onChange={(v) => update((d) => {
+            d.content.couple.nameLayout = v ? (v as "inline" | "stacked") : undefined;
+          })}
+          options={[
+            { value: "", label: "Template default" },
+            { value: "stacked", label: "Stacked — one name above the other" },
+            { value: "inline", label: "Inline — both names on one line" },
+          ]}
+        />
+      </Field>
       <Field label="Marriage line"><TextInput value={c.hero.marriageText} onChange={(e) => update((d) => { d.content.hero.marriageText = e.target.value; })} /></Field>
 
       {/* Crest / logo — keep the default monogram crest, or upload a custom icon. */}

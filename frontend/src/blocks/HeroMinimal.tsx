@@ -11,6 +11,8 @@ import { MonogramCrest } from "@/components/Ornaments";
  */
 export function HeroMinimal({ content }: { content: InvitationContent }) {
   const { couple, hero, dateReveal } = content;
+  /* this layout stacks the names unless the couple asked for one line */
+  const stacked = couple.nameLayout !== "inline";
   const { compact } = usePreview();
   return (
     <section className={`relative flex ${compact ? "py-16" : "min-h-svh"} flex-col items-center justify-center px-6 text-center`}>
@@ -37,17 +39,17 @@ export function HeroMinimal({ content }: { content: InvitationContent }) {
       </motion.p>
 
       <motion.h1
-        className="mt-8 leading-[1.05]"
+        className={`mt-8 leading-[1.05] ${stacked ? "" : "flex flex-wrap items-baseline justify-center gap-x-4"}`}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.15 }}
         style={{ fontFamily: "var(--font-jost)", fontWeight: 300, color: "var(--c-primary)" }}
       >
-        <span className="block text-5xl sm:text-8xl">{couple.partner1.name}</span>
-        <span className="my-2 block text-2xl" style={{ color: "var(--c-accent)" }}>
+        <span className={stacked ? "block text-5xl sm:text-8xl" : "text-4xl sm:text-6xl"}>{couple.partner1.name}</span>
+        <span className={`text-2xl ${stacked ? "my-2 block" : ""}`} style={{ color: "var(--c-accent)" }}>
           {couple.connector ?? "&"}
         </span>
-        <span className="block text-5xl sm:text-8xl">{couple.partner2.name}</span>
+        <span className={stacked ? "block text-5xl sm:text-8xl" : "text-4xl sm:text-6xl"}>{couple.partner2.name}</span>
       </motion.h1>
 
       <motion.div

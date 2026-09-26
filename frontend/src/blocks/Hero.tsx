@@ -28,6 +28,9 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
   const { couple, hero, dateReveal, countdown } = content;
   const heroBg = backgroundFor(theme, "hero");
   const { compact, editing } = usePreview();
+  /* this layout reads inline unless the couple asked for the names stacked —
+     long names ("Dr. Jessin") wrap awkwardly on a phone otherwise */
+  const stacked = couple.nameLayout === "stacked";
   const [dateRevealed, setDateRevealed] = useState(false);
   // hidden until the card is scratched; always shown in the editor (compact/editing)
   const showCountdown = dateRevealed || compact || editing;
@@ -70,18 +73,22 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
         </motion.div>
 
         <motion.h1
-          className="mt-3 flex flex-wrap items-baseline justify-center gap-x-3"
+          className={
+            stacked
+              ? "mt-3 flex flex-col items-center"
+              : "mt-3 flex flex-wrap items-baseline justify-center gap-x-3"
+          }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.25 }}
         >
-          <span data-edit="couple.partner1.name" className="font-script text-4xl sm:text-6xl" style={{ color: "var(--c-primary)" }}>
+          <span data-edit="couple.partner1.name" className={`font-script ${stacked ? "text-5xl sm:text-7xl" : "text-4xl sm:text-6xl"}`} style={{ color: "var(--c-primary)" }}>
             {couple.partner1.name}
           </span>
-          <span data-edit="couple.connector" className="font-display text-sm uppercase tracking-[0.25em]" style={{ color: "var(--c-accent)" }}>
+          <span data-edit="couple.connector" className={`font-display text-sm uppercase tracking-[0.25em] ${stacked ? "my-1.5" : ""}`} style={{ color: "var(--c-accent)" }}>
             {couple.connector ?? "&"}
           </span>
-          <span data-edit="couple.partner2.name" className="font-script text-4xl sm:text-6xl" style={{ color: "var(--c-primary)" }}>
+          <span data-edit="couple.partner2.name" className={`font-script ${stacked ? "text-5xl sm:text-7xl" : "text-4xl sm:text-6xl"}`} style={{ color: "var(--c-primary)" }}>
             {couple.partner2.name}
           </span>
         </motion.h1>
