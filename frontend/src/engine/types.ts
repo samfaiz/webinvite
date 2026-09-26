@@ -71,7 +71,7 @@ export interface MapPoint {
   mapUrl?: string;
 }
 
-export type SectionKey = "families" | "story" | "schedule" | "rsvp";
+export type SectionKey = "families" | "story" | "schedule" | "dresscode" | "rsvp";
 
 /** Per-element text formatting override (applied by data-edit path). */
 export interface TextStyle {
@@ -302,7 +302,14 @@ export interface Theme {
 
 export type FrameKey = "hero" | "families" | "story" | "schedule" | "rsvp";
 
-export const DEFAULT_SECTION_ORDER: SectionKey[] = ["families", "story", "schedule", "rsvp"];
+export const DEFAULT_SECTION_ORDER: SectionKey[] = [
+  "families",
+  "story",
+  "schedule",
+  // what to wear reads best right after the plan and before the reply
+  "dresscode",
+  "rsvp",
+];
 
 /** A complete, valid section order: the saved order (dropping unknown keys) plus
  *  any missing sections appended — every section appears exactly once. Pass
@@ -310,7 +317,18 @@ export const DEFAULT_SECTION_ORDER: SectionKey[] = ["families", "story", "schedu
 export function orderedSections(order?: SectionKey[], hidden?: SectionKey[]): SectionKey[] {
   const base = (order ?? []).filter((k) => DEFAULT_SECTION_ORDER.includes(k));
   const seen = new Set(base);
-  const all = [...base, ...DEFAULT_SECTION_ORDER.filter((k) => !seen.has(k))];
+  const all = [...base];
+  for (const key of DEFAULT_SECTION_ORDER) {
+    if (seen.has(key)) continue;
+    // Slot a missing section next to the neighbour it normally follows rather
+    // than on the end. Without this, a section added to the product after a
+    // couple saved their order would always appear last — dress code would
+    // land after the RSVP.
+    const before = DEFAULT_SECTION_ORDER.slice(0, DEFAULT_SECTION_ORDER.indexOf(key))
+      .reverse()
+      .find((k) => all.includes(k));
+    all.splice(before ? all.indexOf(before) + 1 : 0, 0, key);
+  }
   return hidden?.length ? all.filter((k) => !hidden.includes(k)) : all;
 }
 

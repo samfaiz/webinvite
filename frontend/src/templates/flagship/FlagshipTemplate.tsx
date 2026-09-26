@@ -22,6 +22,7 @@ import { Families } from "@/blocks/Families";
 import { StoryCarousel } from "@/blocks/StoryCarousel";
 import { Schedule } from "@/blocks/Schedule";
 import { RSVPForm } from "@/blocks/RSVPForm";
+import { DressCode } from "@/blocks/DressCode";
 
 /**
  * Flagship template ("Lake Como Romance") — composes the block library into the
@@ -104,6 +105,8 @@ export function FlagshipTemplate({
             return <FrameBg key={key} id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>;
           if (key === "story")
             return <FrameBg key={key} id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryCarousel content={content} /></FrameBg>;
+          if (key === "dresscode")
+            return <FrameBg key={key} id="frame-dresscode" src={backgroundFor(theme, "rsvp")} fullScreen><DressCode content={content} /></FrameBg>;
           if (key === "schedule")
             return <Schedule key={key} content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />;
           return <FrameBg key={key} id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>;

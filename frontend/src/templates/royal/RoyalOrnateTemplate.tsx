@@ -23,6 +23,7 @@ import { Families } from "@/blocks/Families";
 import { StoryGrid } from "@/blocks/StoryGrid";
 import { TimelineSchedule } from "@/blocks/TimelineSchedule";
 import { RSVPForm } from "@/blocks/RSVPForm";
+import { DressCode } from "@/blocks/DressCode";
 
 /**
  * "Royal Ornate" — traditional/ornamental layout: framed ornate hero (shimmer
@@ -103,6 +104,8 @@ export function RoyalOrnateTemplate({
             return <FrameBg key={key} id="frame-families" src={backgroundFor(theme, "families")} fullScreen><Families content={content} /></FrameBg>;
           if (key === "story")
             return <FrameBg key={key} id="frame-story" src={backgroundFor(theme, "story")} fullScreen><StoryGrid content={content} /></FrameBg>;
+          if (key === "dresscode")
+            return <FrameBg key={key} id="frame-dresscode" src={backgroundFor(theme, "rsvp")} fullScreen><DressCode content={content} /></FrameBg>;
           if (key === "schedule")
             return <TimelineSchedule key={key} content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />;
           return <FrameBg key={key} id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>;

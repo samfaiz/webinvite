@@ -19,6 +19,7 @@ import { Families } from "@/blocks/Families";
 import { StoryGrid } from "@/blocks/StoryGrid";
 import { TimelineSchedule } from "@/blocks/TimelineSchedule";
 import { RSVPForm } from "@/blocks/RSVPForm";
+import { DressCode } from "@/blocks/DressCode";
 
 /**
  * "Minimal Modern" — clean contemporary layout. Sans display type (Jost), no
@@ -77,6 +78,9 @@ export function MinimalModernTemplate({
           )}
           {content.hiddenSections?.includes("schedule") ? null : (
             <TimelineSchedule content={content} motif={motif} bg={backgroundFor(theme, "schedule")} />
+          )}
+          {content.hiddenSections?.includes("dresscode") ? null : (
+            <FrameBg id="frame-dresscode" src={backgroundFor(theme, "rsvp")} fullScreen><DressCode content={content} /></FrameBg>
           )}
           {content.hiddenSections?.includes("rsvp") ? null : (
             <FrameBg id="frame-rsvp" src={backgroundFor(theme, "rsvp")} fullScreen><RSVPForm content={content} live={live} /></FrameBg>

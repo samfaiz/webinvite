@@ -124,6 +124,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   families: "Introducing the Families",
   story: "Our Story",
   schedule: "Schedule of Events",
+  dresscode: "Dress Code",
   rsvp: "RSVP",
 };
 
@@ -851,6 +852,96 @@ export function ScheduleFields({ draft, update }: PanelProps) {
   );
 }
 
+/** Palettes couples reach for most, so nobody starts from an empty row. */
+const DRESS_PRESETS: { name: string; swatches: { hex: string; label: string }[] }[] = [
+  { name: "Ivory & gold", swatches: [
+    { hex: "#f5f1e4", label: "Ivory" }, { hex: "#e3d7bd", label: "Cream" },
+    { hex: "#c9a227", label: "Gold" }, { hex: "#8a6d3b", label: "Bronze" } ] },
+  { name: "Pastels", swatches: [
+    { hex: "#f3d9de", label: "Blush" }, { hex: "#dce6f2", label: "Powder" },
+    { hex: "#dfe8dc", label: "Sage" }, { hex: "#f0e6d2", label: "Sand" } ] },
+  { name: "Jewel tones", swatches: [
+    { hex: "#7a1f3d", label: "Wine" }, { hex: "#1f4d3a", label: "Emerald" },
+    { hex: "#1b2a4a", label: "Navy" }, { hex: "#8a6d1f", label: "Antique gold" } ] },
+];
+
+/**
+ * Dress code. Everything here is optional — the section renders only once the
+ * couple has written a line, so invitations made before it existed are
+ * unaffected. The swatches are a nicety on top of the sentence, not required.
+ */
+export function DressCodeFields({ draft, update }: PanelProps) {
+  const dc = draft.content.dressCode ?? {};
+  const swatches = dc.swatches ?? [];
+
+  const edit = (fn: (d: NonNullable<Draft["content"]["dressCode"]>) => void) =>
+    update((d) => {
+      d.content.dressCode = { ...(d.content.dressCode ?? {}) };
+      fn(d.content.dressCode);
+    });
+
+  return (
+    <div>
+      <Field label="Heading">
+        <TextInput
+          value={dc.heading ?? ""}
+          placeholder="Dress Code"
+          onChange={(e) => edit((x) => { x.heading = e.target.value; })}
+        />
+      </Field>
+      <Field label="What to wear">
+        <TextArea
+          value={dc.note ?? ""}
+          placeholder="Modest and elegant — we'd love to see you in traditional colours."
+          onChange={(e) => edit((x) => { x.note = e.target.value; })}
+        />
+      </Field>
+      <p className="-mt-1 mb-3 text-[11px] text-slate-400">
+        Leave this blank and the whole section stays off the invitation.
+      </p>
+
+      <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        Colour palette <span className="normal-case tracking-normal text-slate-400">(optional)</span>
+      </p>
+      {swatches.map((s, i) => (
+        <div key={i} className="mb-2 flex items-end gap-2">
+          <div className="min-w-0 flex-1">
+            <ColorInput
+              value={s.hex}
+              onChange={(v) => edit((x) => { x.swatches = (x.swatches ?? []).map((w, j) => (j === i ? { ...w, hex: v } : w)); })}
+            />
+          </div>
+          <div className="w-24 shrink-0">
+            <TextInput
+              value={s.label}
+              placeholder="Name"
+              onChange={(e) => edit((x) => { x.swatches = (x.swatches ?? []).map((w, j) => (j === i ? { ...w, label: e.target.value } : w)); })}
+            />
+          </div>
+          <Btn
+            variant="danger"
+            onClick={() => edit((x) => { x.swatches = (x.swatches ?? []).filter((_, j) => j !== i); })}
+          >
+            ✕
+          </Btn>
+        </div>
+      ))}
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Btn onClick={() => edit((x) => { x.swatches = [...(x.swatches ?? []), { hex: "#e3d7bd", label: "" }]; })}>
+          + Add colour
+        </Btn>
+        {swatches.length === 0
+          ? DRESS_PRESETS.map((p) => (
+              <Btn key={p.name} onClick={() => edit((x) => { x.swatches = p.swatches.map((s) => ({ ...s })); })}>
+                {p.name}
+              </Btn>
+            ))
+          : null}
+      </div>
+    </div>
+  );
+}
+
 export function RsvpFields({ draft, update }: PanelProps) {
   const c = draft.content;
   const setVenue = (i: number, k: "label" | "address", v: string) =>
@@ -1209,6 +1300,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
       <Group title="Save the date" frame="frame-couple"><SaveDateFields draft={draft} update={update} /></Group>
       <Group title="Our Story" frame="frame-story" action={<SectionTogglePill draft={draft} update={update} section="story" />}><StoryFields draft={draft} update={update} /></Group>
       <Group title="Schedule of Events" frame="frame-schedule" action={<SectionTogglePill draft={draft} update={update} section="schedule" />}><ScheduleFields draft={draft} update={update} /></Group>
+      <Group title="Dress Code" frame="frame-dresscode" action={<SectionTogglePill draft={draft} update={update} section="dresscode" />}><DressCodeFields draft={draft} update={update} /></Group>
       <Group title="RSVP" frame="frame-rsvp" action={<SectionTogglePill draft={draft} update={update} section="rsvp" />}><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>

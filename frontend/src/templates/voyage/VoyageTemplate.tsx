@@ -427,6 +427,7 @@ export function VoyageTemplate({
             )}
 
             {/* ------------------------- 7 · the dress code -------------------- */}
+            {hidden.includes("dresscode") ? null : (
             <PlainSlide compact={compact}>
               <DressCode
                 heading={dress?.heading ?? "Dress code"}
@@ -437,6 +438,7 @@ export function VoyageTemplate({
                 swatches={dress?.swatches}
               />
             </PlainSlide>
+            )}
 
             {/* ---------------------------- 8 · the stub ----------------------- */}
             {hidden.includes("rsvp") ? null : (
