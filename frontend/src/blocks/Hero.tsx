@@ -75,7 +75,10 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
         <motion.h1
           className={
             stacked
-              ? "mt-3 flex flex-col items-center"
+              ? // script capitals overshoot their line box, so the swash on a
+                // name like "Rejin" climbs into the crest at this size — the
+                // extra leading gives the glyph the room the box doesn't
+                "mt-6 flex flex-col items-center leading-[1.28] sm:mt-7"
               : "mt-3 flex flex-wrap items-baseline justify-center gap-x-3"
           }
           initial={{ opacity: 0, y: 20 }}
