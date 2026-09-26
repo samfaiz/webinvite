@@ -41,7 +41,9 @@ export function RSVPForm({
   content: InvitationContent;
   live?: boolean;
 }) {
-  const { rsvp } = content;
+  const { rsvp, couple } = content;
+  /* the band follows whatever the couple chose for the opening screen */
+  const stackedNames = couple.nameLayout === "stacked";
   // tolerate invitations saved without a map block (API-created / legacy data)
   const map = content.map ?? { points: [] };
   const { editing } = usePreview();
@@ -116,11 +118,26 @@ export function RSVPForm({
             >
               {rsvp.heading}
             </p>
+            {/* "Rejin & Dr. Jessin" used to wrap wherever it ran out of room,
+                which broke mid-name. Each name is now unbreakable, so the only
+                place a line can end is at the connector — and if the couple
+                asked for stacked names, this band stacks with them. */}
             <h2
-              className="font-display mt-2 text-[30px] leading-[1.12]"
+              className={`font-display mt-2 leading-[1.12] ${
+                stackedNames
+                  ? "flex flex-col items-center text-[28px]"
+                  : "flex flex-wrap items-baseline justify-center gap-x-2 text-[26px] sm:text-[30px]"
+              }`}
               style={{ color: ON_BAND }}
             >
-              {names}
+              <span className="whitespace-nowrap">{couple.partner1?.name}</span>
+              <span
+                className={stackedNames ? "text-[0.5em] uppercase tracking-[0.2em]" : "text-[0.72em]"}
+                style={{ color: ON_BAND_SOFT }}
+              >
+                {couple.connector ?? "&"}
+              </span>
+              <span className="whitespace-nowrap">{couple.partner2?.name}</span>
             </h2>
             {whenWhere ? (
               <p className="font-body mt-2 text-[13px]" style={{ color: ON_BAND_SOFT }}>
