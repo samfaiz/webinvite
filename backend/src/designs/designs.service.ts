@@ -65,6 +65,87 @@ export class DesignsService {
     return { ok: true };
   }
 
+  /* ------------------ pushing a design back onto invitations ------------------
+   *
+   * An invitation does not reference a design. When one is created the
+   * design's colours, fonts, particles and background art are COPIED into the
+   * invitation's own themeJson, so later edits to the design row are invisible
+   * to invitations that already exist — deliberately, since a published page
+   * should not restyle itself under a couple.
+   *
+   * The only link back is the stamp `draftFromDesign` leaves on the copied
+   * theme: its id is "design-<designId>". That is what these two methods
+   * match on. Quoted so the id has to be a whole JSON string value rather
+   * than an incidental substring of, say, an uploaded image URL.
+   */
+
+  private fromDesign(id: string) {
+    return { themeJson: { contains: `"design-${id}"` } };
+  }
+
+  /** Preview: which invitations a re-apply would touch. */
+  async usage(id: string) {
+    await this.getOne(id); // 404s if the design is gone
+    const rows = await this.prisma.invitation.findMany({
+      where: this.fromDesign(id),
+      select: { id: true, slug: true, status: true, ownerEmail: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return {
+      total: rows.length,
+      published: rows.filter((r) => r.status === 'published').length,
+      // enough to recognise what is about to change without shipping the lot
+      invitations: rows.slice(0, 50),
+    };
+  }
+
+  /**
+   * Copy the named parts of the design onto every invitation created from it.
+   * Only those keys are replaced — the rest of each invitation's theme, and
+   * all of its content, is left exactly as it was.
+   *
+   * This DOES overwrite a couple's own edits to the parts being re-applied;
+   * there is no way to tell a couple's colour from an older design's colour
+   * once both live in the same snapshot. The admin UI says so before running.
+   */
+  async reapply(id: string, parts: string[]) {
+    const design = await this.prisma.design.findUnique({ where: { id } });
+    if (!design) throw new NotFoundException('Design not found');
+
+    const next: Record<string, unknown> = {};
+    if (parts.includes('backgrounds')) next.backgrounds = JSON.parse(design.backgroundsJson);
+    if (parts.includes('colors')) next.colors = JSON.parse(design.colorsJson);
+    if (parts.includes('fonts')) next.fonts = JSON.parse(design.fontsJson);
+    if (parts.includes('particles')) next.particles = JSON.parse(design.particlesJson);
+    if (Object.keys(next).length === 0)
+      throw new BadRequestException('Pick at least one part to re-apply');
+
+    const rows = await this.prisma.invitation.findMany({
+      where: this.fromDesign(id),
+      select: { id: true, themeJson: true },
+    });
+
+    let updated = 0;
+    let skipped = 0;
+    for (const inv of rows) {
+      let theme: Record<string, unknown>;
+      try {
+        theme = JSON.parse(inv.themeJson) as Record<string, unknown>;
+      } catch {
+        skipped += 1; // unreadable theme — leave it alone rather than replace it
+        continue;
+      }
+      const merged = JSON.stringify({ ...theme, ...next });
+      if (merged === inv.themeJson) continue; // already identical
+      await this.prisma.invitation.update({
+        where: { id: inv.id },
+        data: { themeJson: merged },
+      });
+      updated += 1;
+    }
+    return { ok: true, matched: rows.length, updated, skipped };
+  }
+
   async listAll() {
     const rows = await this.prisma.design.findMany({ orderBy: { createdAt: 'desc' } });
     return rows.map((d) => this.toDto(d));

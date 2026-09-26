@@ -65,6 +65,7 @@ export default function AdminDesignsPage() {
   const [msg, setMsg] = useState("");
   const [status, setStatus] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [reapply, setReapply] = useState<any | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [embedReady, setEmbedReady] = useState(false);
 
@@ -292,6 +293,13 @@ export default function AdminDesignsPage() {
                       Edit
                     </button>
                     <button
+                      onClick={() => setReapply(d)}
+                      className="text-[10px] font-medium text-[var(--b-gold)] hover:underline"
+                      title="Push this design onto the invitations built from it"
+                    >
+                      Re-apply
+                    </button>
+                    <button
                       onClick={() => { if (confirm(`Delete "${d.name}"?`)) api.deleteDesign(d.id).then(refresh); }}
                       className="text-[10px] text-rose-600 hover:underline"
                     >
@@ -305,6 +313,8 @@ export default function AdminDesignsPage() {
           </div>
         </div>
 
+        {reapply ? <ReapplyModal design={reapply} onClose={() => setReapply(null)} /> : null}
+
         {/* live device preview */}
         <div className="lg:sticky lg:top-6 lg:self-start">
           <p className="mb-2 text-center text-[11px] uppercase tracking-[0.16em] text-[var(--b-muted)]">Live preview</p>
@@ -313,6 +323,156 @@ export default function AdminDesignsPage() {
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+/* --------------------------- re-apply a design --------------------------- */
+
+const PARTS = [
+  { key: "backgrounds", label: "Background art", hint: "the usual reason to re-apply" },
+  { key: "colors", label: "Colours" },
+  { key: "fonts", label: "Fonts" },
+  { key: "particles", label: "Particles" },
+] as const;
+
+/**
+ * An invitation holds a COPY of the design it was built from, so editing a
+ * design here never reaches invitations that already exist. This pushes the
+ * chosen parts onto them on purpose, after showing exactly how many pages it
+ * would change.
+ *
+ * Backgrounds only by default: colours and fonts are the parts couples are
+ * most likely to have tuned themselves, and re-applying overwrites their work.
+ */
+function ReapplyModal({ design, onClose }: { design: any; onClose: () => void }) {
+  const [usage, setUsage] = useState<{ total: number; published: number; invitations: any[] } | null>(null);
+  const [parts, setParts] = useState<string[]>(["backgrounds"]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState<{ updated: number; matched: number } | null>(null);
+
+  useEffect(() => {
+    api
+      .designUsage(design.id)
+      .then(setUsage)
+      .catch((e) => setErr((e as Error).message));
+  }, [design.id]);
+
+  const toggle = (k: string) =>
+    setParts((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
+
+  const run = async () => {
+    setBusy(true);
+    setErr("");
+    try {
+      const r = await api.reapplyDesign(design.id, parts);
+      setDone({ updated: r.updated, matched: r.matched });
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(43,27,18,0.4)] p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-[0_20px_60px_rgba(43,27,18,0.25)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="font-display text-lg uppercase tracking-[0.1em] text-[var(--b-ink)]">
+          Re-apply &ldquo;{design.name}&rdquo;
+        </h3>
+
+        {done ? (
+          <>
+            <p className="mt-4 text-sm text-emerald-700">
+              Updated {done.updated} of {done.matched} invitation{done.matched === 1 ? "" : "s"}.
+            </p>
+            <p className="mt-1 text-[12px] text-[var(--b-muted)]">
+              Guests see the change on their next page load — the invitation pages are not cached.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <Btn onClick={onClose}>Done</Btn>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mt-2 text-[13px] text-[var(--b-body)]">
+              Invitations keep a copy of the design they were built from, so your edits haven&apos;t
+              reached the ones that already exist. This copies them across.
+            </p>
+
+            <div className="mt-4 rounded-lg bg-[var(--b-tint)] px-4 py-3 text-[13px] text-[var(--b-body)]">
+              {!usage && !err ? (
+                "Checking which invitations came from this design…"
+              ) : usage ? (
+                usage.total === 0 ? (
+                  <span>No invitations were built from this design — nothing to re-apply.</span>
+                ) : (
+                  <span>
+                    <strong className="text-[var(--b-ink)]">{usage.total}</strong> invitation
+                    {usage.total === 1 ? "" : "s"} came from it
+                    {usage.published > 0 ? (
+                      <>
+                        , <strong className="text-[var(--b-ink)]">{usage.published}</strong> of them
+                        live
+                      </>
+                    ) : null}
+                    .
+                  </span>
+                )
+              ) : null}
+            </div>
+
+            {usage && usage.total > 0 ? (
+              <>
+                <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--b-muted)]">
+                  What to copy across
+                </p>
+                <div className="mt-2 space-y-1.5">
+                  {PARTS.map((p) => (
+                    <label key={p.key} className="flex cursor-pointer items-start gap-2 text-[13px] text-[var(--b-body)]">
+                      <input
+                        type="checkbox"
+                        checked={parts.includes(p.key)}
+                        onChange={() => toggle(p.key)}
+                        className="mt-0.5 h-4 w-4 shrink-0"
+                      />
+                      <span>
+                        {p.label}
+                        {"hint" in p ? (
+                          <span className="text-[var(--b-muted)]"> — {p.hint}</span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+
+                <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-[12px] text-amber-800">
+                  This overwrites whatever those couples set themselves for the parts you tick.
+                  Their photos, text and everything else are untouched, and it cannot be undone.
+                </p>
+              </>
+            ) : null}
+
+            {err ? <p className="mt-3 text-[13px] text-rose-600">{err}</p> : null}
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-[var(--b-border)] px-4 py-2 text-[13px] text-[var(--b-body)] hover:bg-[var(--b-bg)]"
+              >
+                Cancel
+              </button>
+              <Btn variant="primary" onClick={run} disabled={busy || !usage || usage.total === 0 || parts.length === 0}>
+                {busy ? "Applying…" : `Re-apply to ${usage?.total ?? 0}`}
+              </Btn>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

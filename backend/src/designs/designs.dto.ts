@@ -1,4 +1,12 @@
-import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class SaveDesignDto {
   @IsString()
@@ -38,6 +46,16 @@ export class SaveDesignDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+}
+
+/** The parts of a design that can be pushed back onto invitations. */
+export const REAPPLY_PARTS = ['backgrounds', 'colors', 'fonts', 'particles'] as const;
+
+export class ReapplyDesignDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsIn(REAPPLY_PARTS, { each: true })
+  parts!: string[];
 }
 
 export class ReactDto {

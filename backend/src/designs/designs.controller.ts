@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DesignsService } from './designs.service';
-import { ReactDto, SaveDesignDto } from './designs.dto';
+import { ReactDto, ReapplyDesignDto, SaveDesignDto } from './designs.dto';
 import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard } from '../auth/guards';
 import { CurrentUser, Roles, type AuthUser } from '../auth/auth.decorators';
 
@@ -88,5 +88,21 @@ export class DesignsController {
   @Delete('designs/:id')
   remove(@Param('id') id: string) {
     return this.svc.remove(id);
+  }
+
+  /** How many live invitations were built from this design (re-apply preview). */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin/designs/:id/usage')
+  usage(@Param('id') id: string) {
+    return this.svc.usage(id);
+  }
+
+  /** Push the chosen parts of this design onto those invitations. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Post('admin/designs/:id/reapply')
+  reapply(@Param('id') id: string, @Body() dto: ReapplyDesignDto) {
+    return this.svc.reapply(id, dto.parts);
   }
 }

@@ -151,6 +151,20 @@ export const api = {
     request<any>(`/designs/${id}`, { method: "PUT", body: JSON.stringify(body) }, true),
   deleteDesign: (id: string) =>
     request<any>(`/designs/${id}`, { method: "DELETE" }, true),
+  /** Which invitations were built from this design (re-apply preview). */
+  designUsage: (id: string) =>
+    request<{
+      total: number;
+      published: number;
+      invitations: { id: string; slug: string | null; status: string; ownerEmail: string | null }[];
+    }>(`/admin/designs/${id}/usage`, {}, true),
+  /** Copy the chosen parts of this design onto those invitations. */
+  reapplyDesign: (id: string, parts: string[]) =>
+    request<{ ok: boolean; matched: number; updated: number; skipped: number }>(
+      `/admin/designs/${id}/reapply`,
+      { method: "POST", body: JSON.stringify({ parts }) },
+      true,
+    ),
 
   // file upload (multipart; admin) — images and audio
   uploadImage: async (file: File): Promise<{ url: string }> => {
