@@ -238,6 +238,10 @@ export interface InvitationContent {
     declineLabel: string;
     submitLabel: string;
     footer?: string;
+    /** ask an accepting guest how many are coming (default true) */
+    askGuests?: boolean;
+    /** ask an accepting guest for a meal preference (default true) */
+    askMeal?: boolean;
   };
   /** What the couple asks guests to wear. Optional — only the designs that
    *  have a place for it render it, and they fall back to the design's own

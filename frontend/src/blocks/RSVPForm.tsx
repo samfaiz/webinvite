@@ -44,6 +44,9 @@ export function RSVPForm({
   const { rsvp, couple } = content;
   /* the band follows whatever the couple chose for the opening screen */
   const stackedNames = couple.nameLayout === "stacked";
+  /* both questions are on unless the couple turned them off */
+  const askGuests = rsvp.askGuests !== false;
+  const askMeal = rsvp.askMeal !== false;
   // tolerate invitations saved without a map block (API-created / legacy data)
   const map = content.map ?? { points: [] };
   const { editing } = usePreview();
@@ -299,6 +302,7 @@ export function RSVPForm({
                 {showExtras ? (
                   <>
                     {/* ---------- how many ---------- */}
+                    {askGuests ? (
                     <div
                       className="mt-3 flex items-center justify-between rounded-xl px-4 py-3"
                       style={{ background: CARD, border: "1px solid " + CARD_LINE }}
@@ -331,8 +335,10 @@ export function RSVPForm({
                         </StepButton>
                       </div>
                     </div>
+                    ) : null}
 
                     {/* ---------- what they eat ---------- */}
+                    {askMeal ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {MEALS.map((m) => {
                         const active = meal === m.key;
@@ -358,6 +364,7 @@ export function RSVPForm({
                         );
                       })}
                     </div>
+                    ) : null}
                   </>
                 ) : null}
 

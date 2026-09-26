@@ -613,6 +613,8 @@ export function TicketRsvp({
   const { editing } = usePreview();
   const form = useRsvp({ content, live, editing });
   const rsvp = content.rsvp;
+  const askGuests = rsvp?.askGuests !== false;
+  const askMeal = rsvp?.askMeal !== false;
 
   const entry: CSSProperties = {
     ...entryText,
@@ -737,8 +739,9 @@ export function TicketRsvp({
           })}
         </div>
 
-        {form.showExtras ? (
+        {form.showExtras && (askGuests || askMeal) ? (
           <div className="mt-5 flex items-end gap-5">
+            {askGuests ? (
             <TicketField label="Seats" className="shrink-0">
               <span className="flex items-center gap-2 pb-1">
                 <Stepper label="One fewer guest" onClick={() => form.stepGuests(-1)} disabled={editing || form.guests <= 1}>
@@ -752,6 +755,8 @@ export function TicketRsvp({
                 </Stepper>
               </span>
             </TicketField>
+            ) : null}
+            {askMeal ? (
             <TicketField label="Meal" className="flex-1">
               <span className="flex gap-1.5 pb-1">
                 {MEALS.map((m) => {
@@ -779,6 +784,7 @@ export function TicketRsvp({
                 })}
               </span>
             </TicketField>
+            ) : null}
           </div>
         ) : null}
 

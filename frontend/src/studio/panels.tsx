@@ -1158,6 +1158,28 @@ export function DressCodeFields({ draft, update }: PanelProps) {
   );
 }
 
+/** A plain on/off for a question the RSVP asks. Unset means on. */
+function AskToggle({
+  label,
+  hint,
+  on,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  on: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="mb-1.5 flex cursor-pointer items-start gap-2 text-[13px] text-slate-600">
+      <input type="checkbox" checked={on} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0" />
+      <span>
+        {label} <span className="text-slate-400">— {hint}</span>
+      </span>
+    </label>
+  );
+}
+
 export function RsvpFields({ draft, update }: PanelProps) {
   const c = draft.content;
   const setVenue = (i: number, k: "label" | "address", v: string) =>
@@ -1176,6 +1198,26 @@ export function RsvpFields({ draft, update }: PanelProps) {
       </div>
       <Field label="Submit button"><TextInput value={c.rsvp.submitLabel} onChange={(e) => update((d) => { d.content.rsvp.submitLabel = e.target.value; })} /></Field>
       <Field label="Footer line"><TextInput value={c.rsvp.footer ?? ""} onChange={(e) => update((d) => { d.content.rsvp.footer = e.target.value; })} /></Field>
+
+      <p className="mb-1.5 mt-3 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        What the form asks
+      </p>
+      <AskToggle
+        label="How many are coming"
+        hint="the seat counter"
+        on={c.rsvp.askGuests !== false}
+        onChange={(v) => update((d) => { d.content.rsvp.askGuests = v; })}
+      />
+      <AskToggle
+        label="Meal preference"
+        hint="Veg / Non-veg / Jain"
+        on={c.rsvp.askMeal !== false}
+        onChange={(v) => update((d) => { d.content.rsvp.askMeal = v; })}
+      />
+      <p className="mb-3 text-[11px] text-slate-400">
+        Only shown to a guest who accepts. Turning one off hides it from new replies;
+        answers already collected stay on the guest list.
+      </p>
 
       {/* manual map pins — override the venues auto-derived from the schedule */}
       <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
