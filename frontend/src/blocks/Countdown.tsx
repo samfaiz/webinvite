@@ -52,6 +52,20 @@ export function Countdown({
 
   return (
     <section className="px-6 py-3 text-center">
+      {/* Frosted vellum, the same recipe the Families block uses: the heading
+          and the closing line are bare text in the theme's ink, and a hero
+          background that turns dark underneath them (torn-paper art, a photo)
+          renders them navy-on-navy. Mixed from --c-surface so it stays almost
+          invisible over pale art and only becomes a plate where it's needed. */}
+      <div
+        className="mx-auto max-w-md rounded-[1.5rem] px-5 py-4"
+        style={{
+          background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          border: "1px solid color-mix(in srgb, var(--c-surface) 45%, transparent)",
+        }}
+      >
       <Reveal>
         <p
           data-edit="countdown.headline"
@@ -74,8 +88,8 @@ export function Countdown({
               key={label}
               className="flex flex-1 flex-col items-center rounded-lg py-2.5"
               style={{
-                background: "color-mix(in srgb, var(--c-surface) 70%, transparent)",
-                boxShadow: "0 6px 16px rgba(40,50,80,0.10)",
+                background: "color-mix(in srgb, var(--c-surface) 55%, transparent)",
+                boxShadow: "0 4px 12px rgba(40,50,80,0.07)",
                 border:
                   "1px solid color-mix(in srgb, var(--c-accent) 20%, transparent)",
               }}
@@ -117,6 +131,7 @@ export function Countdown({
           {subtext}
         </p>
       ) : null}
+      </div>
     </section>
   );
 }
