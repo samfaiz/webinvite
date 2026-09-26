@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import type { MoveOffset } from "@/engine/types";
 import { normalizeOffset } from "@/components/Movable";
+
+/**
+ * Placement has to land before the browser paints, or the element shows up
+ * where the layout put it and then visibly jumps to where the couple dragged
+ * it. `useLayoutEffect` warns during SSR, so fall back to `useEffect` on the
+ * server, where it never runs anyway.
+ */
+const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
  * Applies saved free-drag offsets for individual text fields (`edit:<path>`
@@ -36,7 +44,7 @@ function applyTextOffsets(offsets?: Record<string, MoveOffset>) {
 }
 
 export function TextOffsets({ offsets }: { offsets?: Record<string, MoveOffset> }) {
-  useEffect(() => {
+  useBeforePaint(() => {
     applyTextOffsets(offsets);
     // sections can mount late (envelope open, carousel slides, lightboxes) —
     // re-apply whenever new nodes appear

@@ -65,8 +65,11 @@ export function Hero({ content, theme }: { content: InvitationContent; theme: Th
       <Movable moveKey="hero.block" offset={content.offsets?.["hero.block"]} className="flex w-full flex-col items-center">
       <motion.div style={{ y: contentY }} className="flex w-full flex-col items-center">
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
+          /* settles in place rather than travelling: a vertical entrance reads
+             as the crest sliding upward after load, and it moves against a
+             crest the couple has dragged into position by hand */
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
           <MonogramCrest monogram={couple.monogram} logo={couple.logo} scale={couple.logoScale} size={66} />
