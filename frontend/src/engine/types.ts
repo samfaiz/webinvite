@@ -248,9 +248,17 @@ export interface InvitationContent {
     attire?: string;
     /** the main line of guidance, e.g. "Modest and elegant" */
     note?: string;
-    /** optional per-guest guidance, shown side by side when both are set */
+    /** optional per-guest guidance, laid out in as many columns as are set */
     her?: string;
     him?: string;
+    kids?: string;
+    /** a practical word about the venue, e.g. "Outdoor lawn — it will be warm" */
+    weather?: string;
+    /** "card" floats the vellum panel (default); "plain" drops it */
+    layout?: "card" | "plain";
+    swatchSize?: "sm" | "md" | "lg";
+    /** false hides the colour names under the chips */
+    swatchLabels?: boolean;
     /** reference photos for the guidance above */
     herPhoto?: string;
     himPhoto?: string;

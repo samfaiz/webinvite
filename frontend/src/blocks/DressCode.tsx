@@ -26,6 +26,8 @@ export function hasDressCode(content: InvitationContent): boolean {
       d.her?.trim() ||
       d.him?.trim() ||
       d.avoid?.trim() ||
+      d.kids?.trim() ||
+      d.weather?.trim() ||
       d.link?.trim() ||
       d.swatches?.length,
   );
@@ -40,6 +42,11 @@ export function DressCode({ content }: { content: InvitationContent }) {
   const forHer = d?.her?.trim();
   const forHim = d?.him?.trim();
   const perEvent = (content.schedule?.events ?? []).filter((e) => e.attire?.trim());
+  const forKids = d?.kids?.trim();
+  const guidance = [forHer, forHim, forKids].filter(Boolean).length;
+  const plain = d?.layout === "plain";
+  const chip = { sm: 56, md: 72, lg: 96 }[d?.swatchSize ?? "md"];
+  const showLabels = d?.swatchLabels !== false;
 
   return (
     <section className="px-5 py-16 text-center">
@@ -51,14 +58,18 @@ export function DressCode({ content }: { content: InvitationContent }) {
         {/* same frosted vellum as the families panel: these sections sit over
             whatever background art the design carries, which can be dark */}
         <div
-          className="rounded-[2rem] px-6 py-10 sm:px-9"
-          style={{
-            background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            boxShadow: "0 16px 44px rgba(40,50,80,0.16)",
-            border: "1px solid rgba(255,255,255,0.5)",
-          }}
+          className={plain ? "px-2 py-4" : "rounded-[2rem] px-6 py-10 sm:px-9"}
+          style={
+            plain
+              ? undefined
+              : {
+                  background: "color-mix(in srgb, var(--c-surface) 62%, transparent)",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  boxShadow: "0 16px 44px rgba(40,50,80,0.16)",
+                  border: "1px solid rgba(255,255,255,0.5)",
+                }
+          }
         >
           <Reveal>
             <h2
@@ -95,16 +106,17 @@ export function DressCode({ content }: { content: InvitationContent }) {
             ) : null}
           </Reveal>
 
-          {forHer || forHim ? (
+          {guidance ? (
             <Reveal delay={0.06}>
               {/* side by side when both are set, full width when only one is */}
               <div
                 className={`mt-7 grid gap-5 text-left sm:gap-7 ${
-                  forHer && forHim ? "grid-cols-2" : "grid-cols-1 text-center"
+                  guidance === 1 ? "grid-cols-1 text-center" : guidance === 2 ? "grid-cols-2" : "grid-cols-3"
                 }`}
               >
                 {forHer ? <Guidance label="For her" text={forHer} path="dressCode.her" photo={d?.herPhoto} /> : null}
                 {forHim ? <Guidance label="For him" text={forHim} path="dressCode.him" photo={d?.himPhoto} /> : null}
+                {forKids ? <Guidance label="For the little ones" text={forKids} path="dressCode.kids" /> : null}
               </div>
             </Reveal>
           ) : null}
@@ -122,7 +134,8 @@ export function DressCode({ content }: { content: InvitationContent }) {
                 {swatches.map((s, i) => (
                   <div
                     key={`${s.hex}-${i}`}
-                    className="flex w-full max-w-[72px] flex-col items-center sm:max-w-[84px]"
+                    className="flex w-full flex-col items-center"
+                    style={{ maxWidth: chip }}
                   >
                     <span
                       className={`block w-full ${square ? "rounded-lg" : "rounded-full"}`}
@@ -133,7 +146,7 @@ export function DressCode({ content }: { content: InvitationContent }) {
                         boxShadow: "0 4px 12px rgba(40,50,80,0.12)",
                       }}
                     />
-                    {s.label?.trim() ? (
+                    {showLabels && s.label?.trim() ? (
                       <span
                         className="font-display mt-2 text-[10px] uppercase tracking-[0.16em]"
                         style={{ color: "var(--c-muted)" }}
@@ -155,6 +168,18 @@ export function DressCode({ content }: { content: InvitationContent }) {
                 style={{ color: "var(--c-muted)" }}
               >
                 Kindly avoid {d.avoid}
+              </p>
+            </Reveal>
+          ) : null}
+
+          {d?.weather?.trim() ? (
+            <Reveal delay={0.13}>
+              <p
+                data-edit="dressCode.weather"
+                className="font-body mx-auto mt-2 max-w-[36ch] text-sm italic"
+                style={{ color: "var(--c-muted)" }}
+              >
+                {d.weather}
               </p>
             </Reveal>
           ) : null}

@@ -975,13 +975,27 @@ export function DressCodeFields({ draft, update }: PanelProps) {
 
   return (
     <div>
-      <Field label="Heading">
-        <TextInput
-          value={dc.heading ?? ""}
-          placeholder="Dress Code"
-          onChange={(e) => edit((x) => { x.heading = e.target.value; })}
-        />
-      </Field>
+      <div className="grid grid-cols-[1fr_auto] gap-2">
+        <Field label="Heading">
+          <TextInput
+            value={dc.heading ?? ""}
+            placeholder="Dress Code"
+            onChange={(e) => edit((x) => { x.heading = e.target.value; })}
+          />
+        </Field>
+        <div className="w-28">
+          <Field label="Style">
+            <Select
+              value={dc.layout ?? "card"}
+              onChange={(v) => edit((x) => { x.layout = v as "card" | "plain"; })}
+              options={[
+                { value: "card", label: "On a card" },
+                { value: "plain", label: "No card" },
+              ]}
+            />
+          </Field>
+        </div>
+      </div>
       <Field label="Attire">
         <TextInput
           value={dc.attire ?? ""}
@@ -1016,6 +1030,20 @@ export function DressCodeFields({ draft, update }: PanelProps) {
           />
         </Field>
       </div>
+      <Field label="For the little ones">
+        <TextInput
+          value={dc.kids ?? ""}
+          placeholder="Anything comfortable"
+          onChange={(e) => edit((x) => { x.kids = e.target.value; })}
+        />
+      </Field>
+      <Field label="A word about the venue">
+        <TextInput
+          value={dc.weather ?? ""}
+          placeholder="Outdoor lawn — it will be warm, and heels sink in grass."
+          onChange={(e) => edit((x) => { x.weather = e.target.value; })}
+        />
+      </Field>
       <div className="mb-3 grid grid-cols-2 gap-2">
         <DressPhoto label="Photo for her" url={dc.herPhoto} busy={photoBusy === "herPhoto"}
           onPick={(f) => pickPhoto("herPhoto", f)} onClear={() => edit((x) => { x.herPhoto = ""; })} />
@@ -1058,17 +1086,39 @@ export function DressCodeFields({ draft, update }: PanelProps) {
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
           Colour palette <span className="normal-case tracking-normal text-slate-400">(optional)</span>
         </p>
-        <div className="w-28 shrink-0">
-          <Select
-            value={dc.swatchShape ?? "circle"}
-            onChange={(v) => edit((x) => { x.swatchShape = v as "circle" | "square"; })}
-            options={[
-              { value: "circle", label: "Round chips" },
-              { value: "square", label: "Square tiles" },
-            ]}
-          />
+        <div className="flex shrink-0 gap-1.5">
+          <div className="w-24">
+            <Select
+              value={dc.swatchShape ?? "circle"}
+              onChange={(v) => edit((x) => { x.swatchShape = v as "circle" | "square"; })}
+              options={[
+                { value: "circle", label: "Round" },
+                { value: "square", label: "Square" },
+              ]}
+            />
+          </div>
+          <div className="w-24">
+            <Select
+              value={dc.swatchSize ?? "md"}
+              onChange={(v) => edit((x) => { x.swatchSize = v as "sm" | "md" | "lg"; })}
+              options={[
+                { value: "sm", label: "Small" },
+                { value: "md", label: "Medium" },
+                { value: "lg", label: "Large" },
+              ]}
+            />
+          </div>
         </div>
       </div>
+      <label className="mb-2 flex cursor-pointer items-center gap-2 text-[12px] text-slate-600">
+        <input
+          type="checkbox"
+          checked={dc.swatchLabels !== false}
+          onChange={(e) => edit((x) => { x.swatchLabels = e.target.checked; })}
+          className="h-3.5 w-3.5"
+        />
+        Show the colour names
+      </label>
       {swatches.map((s, i) => (
         <div key={i} className="mb-2 flex items-end gap-2">
           <div className="min-w-0 flex-1">
