@@ -1211,6 +1211,46 @@ export function RsvpFields({ draft, update }: PanelProps) {
       <Field label="Footer line"><TextInput value={c.rsvp.footer ?? ""} onChange={(e) => update((d) => { d.content.rsvp.footer = e.target.value; })} /></Field>
 
       <p className="mb-1.5 mt-3 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        Header band
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Style">
+          <Select
+            value={c.rsvp.bandStyle ?? "filled"}
+            onChange={(v) => update((d) => { d.content.rsvp.bandStyle = v as "filled" | "outline" | "none"; })}
+            options={[
+              { value: "filled", label: "Filled panel" },
+              { value: "outline", label: "Outlined" },
+              { value: "none", label: "No panel" },
+            ]}
+          />
+        </Field>
+        <Field label="Spacing">
+          <Select
+            value={c.rsvp.bandDensity ?? "regular"}
+            onChange={(v) => update((d) => { d.content.rsvp.bandDensity = v as "compact" | "regular" | "roomy"; })}
+            options={[
+              { value: "compact", label: "Compact" },
+              { value: "regular", label: "Regular" },
+              { value: "roomy", label: "Roomy" },
+            ]}
+          />
+        </Field>
+      </div>
+      <AskToggle
+        label="Date and venue line"
+        hint="under the names"
+        on={c.rsvp.showDateLine !== false}
+        onChange={(v) => update((d) => { d.content.rsvp.showDateLine = v; })}
+      />
+      <AskToggle
+        label="Calendar and directions"
+        hint="the two pills"
+        on={c.rsvp.showActions !== false}
+        onChange={(v) => update((d) => { d.content.rsvp.showActions = v; })}
+      />
+
+      <p className="mb-1.5 mt-3 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
         What the form asks
       </p>
       <AskToggle

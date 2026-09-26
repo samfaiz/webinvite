@@ -245,6 +245,14 @@ export interface InvitationContent {
     declineLabel: string;
     submitLabel: string;
     footer?: string;
+    /** the header band above the form: a filled plate, an outline, or nothing */
+    bandStyle?: "filled" | "outline" | "none";
+    /** how much air the band gives its contents */
+    bandDensity?: "compact" | "regular" | "roomy";
+    /** the "5 January 2027 · Grand Arena" line (default true) */
+    showDateLine?: boolean;
+    /** the Add-to-calendar and Directions pills (default true) */
+    showActions?: boolean;
     /** ask an accepting guest how many are coming (default true) */
     askGuests?: boolean;
     /** ask an accepting guest for a meal preference (default true) */

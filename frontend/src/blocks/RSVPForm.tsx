@@ -45,6 +45,15 @@ export function RSVPForm({
   /* the band follows whatever the couple chose for the opening screen */
   const stackedNames = couple.nameLayout === "stacked";
   /* both questions are on unless the couple turned them off */
+  const band = rsvp.bandStyle ?? "filled";
+  /* the band packs a lot into a small plate — this is the air it gets */
+  const air = {
+    compact: { pad: "px-5 pb-4 pt-4", name: "mt-2", date: "mt-1.5", acts: "mt-3", lead: "1.1" },
+    regular: { pad: "px-6 pb-6 pt-6", name: "mt-3", date: "mt-2.5", acts: "mt-4", lead: "1.2" },
+    roomy: { pad: "px-7 pb-9 pt-9", name: "mt-4", date: "mt-3.5", acts: "mt-6", lead: "1.3" },
+  }[rsvp.bandDensity ?? "regular"];
+  const showDateLine = rsvp.showDateLine !== false;
+  const showActions = rsvp.showActions !== false;
   const askGuests = rsvp.askGuests !== false;
   const askMeal = rsvp.askMeal !== false;
   // tolerate invitations saved without a map block (API-created / legacy data)
@@ -97,9 +106,10 @@ export function RSVPForm({
     color: "var(--c-text)",
   } as const;
 
+  const pillInk = band === "filled" ? ON_BAND_SOFT : "var(--c-secondary)";
   const pill = {
-    color: ON_BAND_SOFT,
-    border: "1px solid color-mix(in srgb, " + ON_BAND_SOFT + " 50%, transparent)",
+    color: pillInk,
+    border: "1px solid color-mix(in srgb, " + pillInk + " 50%, transparent)",
   } as const;
 
   return (
@@ -111,17 +121,23 @@ export function RSVPForm({
               its edges — square corners against the arch above read as pasted
               on, and the hard bottom rule cut the card in two */}
           <div
-            className="mt-1 rounded-[1.5rem] px-6 pb-5 pt-5 text-center"
-            style={{
-              background: "var(--c-primary)",
-              border: "1px solid color-mix(in srgb, var(--c-accent) 50%, transparent)",
-              boxShadow: "0 10px 26px color-mix(in srgb, var(--c-primary) 22%, transparent)",
-            }}
+            className={`mt-1 rounded-[1.5rem] text-center ${air.pad}`}
+            style={
+              band === "filled"
+                ? {
+                    background: "var(--c-primary)",
+                    border: "1px solid color-mix(in srgb, var(--c-accent) 50%, transparent)",
+                    boxShadow: "0 10px 26px color-mix(in srgb, var(--c-primary) 22%, transparent)",
+                  }
+                : band === "outline"
+                  ? { border: "1px solid color-mix(in srgb, var(--c-accent) 55%, transparent)" }
+                  : undefined
+            }
           >
             <p
               data-edit="rsvp.heading"
               className="font-display text-[10px] uppercase tracking-[0.26em]"
-              style={{ color: "color-mix(in srgb, var(--c-accent) 75%, white)" }}
+              style={{ color: band === "filled" ? "color-mix(in srgb, var(--c-accent) 75%, white)" : "var(--c-accent)" }}
             >
               {rsvp.heading}
             </p>
@@ -130,30 +146,33 @@ export function RSVPForm({
                 place a line can end is at the connector — and if the couple
                 asked for stacked names, this band stacks with them. */}
             <h2
-              className={`font-display mt-2 leading-[1.12] ${
+              className={`font-display ${air.name} ${
                 stackedNames
                   ? "flex flex-col items-center text-[28px]"
                   : "flex flex-wrap items-baseline justify-center gap-x-2 text-[26px] sm:text-[30px]"
               }`}
-              style={{ color: ON_BAND }}
+              style={{ color: band === "filled" ? ON_BAND : "var(--c-primary)", lineHeight: air.lead }}
             >
               <span className="whitespace-nowrap">{couple.partner1?.name}</span>
               <span
                 className={stackedNames ? "text-[0.5em] uppercase tracking-[0.2em]" : "text-[0.72em]"}
-                style={{ color: ON_BAND_SOFT }}
+                style={{ color: band === "filled" ? ON_BAND_SOFT : "var(--c-accent)" }}
               >
                 {couple.connector ?? "&"}
               </span>
               <span className="whitespace-nowrap">{couple.partner2?.name}</span>
             </h2>
-            {whenWhere ? (
-              <p className="font-body mt-2 text-[13px]" style={{ color: ON_BAND_SOFT }}>
+            {showDateLine && whenWhere ? (
+              <p
+                className={`font-body ${air.date} text-[13px]`}
+                style={{ color: band === "filled" ? ON_BAND_SOFT : "var(--c-muted)" }}
+              >
                 {whenWhere}
               </p>
             ) : null}
 
-            {cal || canRoute ? (
-              <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
+            {showActions && (cal || canRoute) ? (
+              <div className={`flex flex-wrap items-center justify-center gap-2 ${air.acts}`}>
                 {cal ? (
                   <button
                     type="button"
