@@ -4,6 +4,7 @@ import { FlagshipTemplate } from "./flagship/FlagshipTemplate";
 import { RoyalOrnateTemplate } from "./royal/RoyalOrnateTemplate";
 import { MinimalModernTemplate } from "./minimal/MinimalModernTemplate";
 import { VoyageTemplate } from "./voyage/VoyageTemplate";
+import { ToileTemplate } from "./toile/ToileTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
@@ -30,6 +31,7 @@ const components: Record<string, TemplateComponent> = {
   "royal-ornate": RoyalOrnateTemplate,
   "minimal-modern": MinimalModernTemplate,
   "voyage-kerala": VoyageTemplate,
+  "toile-botanical": ToileTemplate,
   custom: CustomTemplate,
 };
 

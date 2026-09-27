@@ -55,6 +55,19 @@ export const templates: TemplateMeta[] = [
     // still on stand-in plates — see public/assets/templates/voyage
     draft: true,
   },
+  {
+    id: "toile-botanical",
+    name: "Toile",
+    description:
+      "Engraved blue botanicals on paper white: a drawn garland border, a ribboned letter, time-pill programme, a painted palette and a printed RSVP questionnaire.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "toile-blue",
+    defaultMotifId: "secular",
+    preview: "/assets/previews/flagship.jpg",
+    // the ornaments are drawn in the theme's own line colour, so the palette
+    // has to stay in the blue family the engraving was designed around
+    themeIds: ["toile-blue"],
+  },
 ];
 
 export function getTemplateMeta(id: string): TemplateMeta {

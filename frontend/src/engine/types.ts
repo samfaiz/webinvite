@@ -269,6 +269,9 @@ export interface InvitationContent {
     /** ask an accepting guest for a meal preference (default true) */
     askMeal?: boolean;
   };
+  /** Practical notes to guests — flowers, gifts, a group chat. Rendered as a
+   *  ruled list by the designs that have a place for it; omitted when empty. */
+  wishes?: { title: string; body: string }[];
   /** What the couple asks guests to wear. Optional — only the designs that
    *  have a place for it render it, and they fall back to the design's own
    *  palette when the couple hasn't set one. */

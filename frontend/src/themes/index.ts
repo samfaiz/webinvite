@@ -137,6 +137,19 @@ export const themes: Record<string, Theme> = {
     },
     { type: "sparkles", color: "#d8c79a" }
   ),
+  /* Pairs with the Toile template: engraved blue botanicals on paper white,
+     with a powder-blue panel. Muted on purpose — the line work carries the
+     design, so the palette stays quiet behind it. */
+  "toile-blue": make(
+    "toile-blue",
+    "Toile Blue",
+    {
+      bg: "#fdfdfb", surface: "#eef3fa", primary: "#2b3a5c", secondary: "#5d7aa6",
+      accent: "#8ba3c7", text: "#3f4f6b", muted: "#8494ad",
+      gradientFrom: "#eef3fa", gradientTo: "#dbe5f2",
+    },
+    { type: "petals", color: "#dbe5f2" }
+  ),
 };
 
 export const themeList = Object.values(themes);

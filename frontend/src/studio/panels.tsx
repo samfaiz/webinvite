@@ -937,6 +937,56 @@ const DRESS_PRESETS: { name: string; swatches: { hex: string; label: string }[] 
     { hex: "#5c5c5c", label: "Charcoal" }, { hex: "#141414", label: "Black" } ] },
 ];
 
+/**
+ * Notes to guests that aren't dress code and aren't the schedule — flowers,
+ * gifts, a group chat. A short list of title + paragraph, rendered as ruled
+ * rows by the designs that have a place for it.
+ */
+export function WishesFields({ draft, update }: PanelProps) {
+  const items = draft.content.wishes ?? [];
+  const edit = (fn: (list: { title: string; body: string }[]) => void) =>
+    update((d) => {
+      const list = [...(d.content.wishes ?? [])];
+      fn(list);
+      d.content.wishes = list;
+    });
+
+  return (
+    <div>
+      <p className="mb-2 text-[11px] text-slate-400">
+        Leave this empty and the section stays off the invitation.
+      </p>
+      {items.map((w, i) => (
+        <div key={i} className="mb-3 rounded-lg border border-slate-200 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+              Note {i + 1}
+            </p>
+            <Btn variant="danger" onClick={() => edit((l) => { l.splice(i, 1); })}>
+              Remove
+            </Btn>
+          </div>
+          <Field label="Title">
+            <TextInput
+              value={w.title}
+              placeholder="Gifts"
+              onChange={(e) => edit((l) => { l[i] = { ...l[i], title: e.target.value }; })}
+            />
+          </Field>
+          <Field label="Note">
+            <TextArea
+              value={w.body}
+              placeholder="Your presence is the greatest gift — anything more is entirely up to you."
+              onChange={(e) => edit((l) => { l[i] = { ...l[i], body: e.target.value }; })}
+            />
+          </Field>
+        </div>
+      ))}
+      <Btn onClick={() => edit((l) => { l.push({ title: "", body: "" }); })}>+ Add a note</Btn>
+    </div>
+  );
+}
+
 /** A reference photo slot for the "for her" / "for him" guidance. */
 function DressPhoto({
   label,
@@ -1665,6 +1715,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
       <Group title="Our Story" frame="frame-story" action={<SectionTogglePill draft={draft} update={update} section="story" />}><StoryFields draft={draft} update={update} /></Group>
       <Group title="Schedule of Events" frame="frame-schedule" action={<SectionTogglePill draft={draft} update={update} section="schedule" />}><ScheduleFields draft={draft} update={update} /></Group>
       <Group title="Dress Code" frame="frame-dresscode" action={<SectionTogglePill draft={draft} update={update} section="dresscode" />}><DressCodeFields draft={draft} update={update} /></Group>
+      <Group title="Notes for guests"><WishesFields draft={draft} update={update} /></Group>
       <Group title="RSVP" frame="frame-rsvp" action={<SectionTogglePill draft={draft} update={update} section="rsvp" />}><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
