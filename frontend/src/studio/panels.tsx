@@ -987,6 +987,37 @@ export function WishesFields({ draft, update }: PanelProps) {
   );
 }
 
+/** The group chat and the person to call on the day. */
+export function ContactFields({ draft, update }: PanelProps) {
+  const ct = draft.content.contacts ?? {};
+  const edit = (k: keyof NonNullable<Draft["content"]["contacts"]>, v: string) =>
+    update((d) => {
+      d.content.contacts = { ...(d.content.contacts ?? {}), [k]: v };
+    });
+  return (
+    <div>
+      <Field label="Group chat link" hint="WhatsApp or Telegram invite link — guests share photos there.">
+        <TextInput value={ct.chatUrl ?? ""} placeholder="https://chat.whatsapp.com/…" onChange={(e) => edit("chatUrl", e.target.value)} />
+      </Field>
+      <Field label="About the chat">
+        <TextInput
+          value={ct.chatNote ?? ""}
+          placeholder="Share your photos from the day with us"
+          onChange={(e) => edit("chatNote", e.target.value)}
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Contact on the day">
+          <TextInput value={ct.contactName ?? ""} placeholder="Anu (coordinator)" onChange={(e) => edit("contactName", e.target.value)} />
+        </Field>
+        <Field label="Their phone">
+          <TextInput value={ct.phone ?? ""} placeholder="+91 98765 43210" onChange={(e) => edit("phone", e.target.value)} />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
 /** A reference photo slot for the "for her" / "for him" guidance. */
 function DressPhoto({
   label,
@@ -1716,6 +1747,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
       <Group title="Schedule of Events" frame="frame-schedule" action={<SectionTogglePill draft={draft} update={update} section="schedule" />}><ScheduleFields draft={draft} update={update} /></Group>
       <Group title="Dress Code" frame="frame-dresscode" action={<SectionTogglePill draft={draft} update={update} section="dresscode" />}><DressCodeFields draft={draft} update={update} /></Group>
       <Group title="Notes for guests"><WishesFields draft={draft} update={update} /></Group>
+      <Group title="Chat & contact on the day"><ContactFields draft={draft} update={update} /></Group>
       <Group title="RSVP" frame="frame-rsvp" action={<SectionTogglePill draft={draft} update={update} section="rsvp" />}><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>

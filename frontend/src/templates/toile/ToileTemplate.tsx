@@ -50,6 +50,9 @@ const PALETTE = {
   "--t-ribbon": "#bcd0e8",
   "--t-ribbon-hi": "#e4edf8",
   "--t-ribbon-lo": "#93b0d2",
+  "--chrome-bg": "#2b3a5c",
+  "--chrome-fg": "#fdfdfb",
+  "--chrome-ring": "#8ba3c7",
 } as CSSProperties;
 
 /** One page of the invitation. `tint` sets it on the powder panel instead of

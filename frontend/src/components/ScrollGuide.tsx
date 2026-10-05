@@ -193,9 +193,10 @@ export function ScrollGuide({
         bottom: hasMusic
           ? "max(4.75rem, calc(env(safe-area-inset-bottom) + 4.75rem))"
           : "max(1.25rem, env(safe-area-inset-bottom))",
-        background: "var(--c-surface)",
-        color: "var(--c-primary)",
-        border: "1px solid color-mix(in srgb, var(--c-accent) 32%, transparent)",
+        // the inverse of the music button, from the same --chrome-* set
+        background: "var(--chrome-fg, var(--c-surface))",
+        color: "var(--chrome-bg, var(--c-primary))",
+        border: "1px solid var(--chrome-ring, color-mix(in srgb, var(--c-accent) 32%, transparent))",
       }}
     >
       <svg

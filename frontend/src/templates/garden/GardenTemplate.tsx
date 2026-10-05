@@ -16,18 +16,34 @@ import { hasDressCode } from "@/blocks/DressCode";
 import { MEALS, useRsvp } from "@/blocks/useRsvp";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { Plate, Zone, u } from "./stage";
+import {
+  Body,
+  Caps,
+  DateCartouche,
+  Flourish,
+  Heading,
+  OvalSwatch,
+  Pill,
+  Pip,
+  SCRIPT,
+  SERIF,
+  Script,
+  SealMonogram,
+  TimelineStop,
+  pillStyle,
+} from "./kit";
 
 /**
- * "Garden" — an old-master garden at dusk and engraved magnolias on olive.
+ * "Secret Garden" — an old-master garden at dusk and engraved magnolias on olive.
  *
- * Seven painted and engraved plates carry the whole look; this file only
- * writes into them. The boxes below were measured off the plates themselves —
- * the heart on the cover, the lace oval, the empty arch under each garland —
- * so the words sit inside the drawing rather than near it.
+ * Seven painted and engraved plates carry the look; this file composes the
+ * Garden kit (`kit.tsx`) onto them. Every box below was measured off the
+ * plates — the heart's sage face, the lace oval, the empty arch under each
+ * garland, the blank wax seal — so the words sit inside the drawing rather
+ * than beside it.
  *
  * The timeline icons were lifted off their plate and are laid out here, which
- * is why any number of events fits: the plate as generated only left room to
- * write under three of its four drawings.
+ * is why any number of events fits.
  */
 
 const A = (f: string) => `/assets/templates/garden/${f}`;
@@ -38,139 +54,22 @@ const PALETTE = {
   "--g-dusk": "#2a2316", // the paintings' own edge colour
   "--g-cream": "#f1eada",
   "--g-ink": "#4f5337",
-  "--g-soft": "#7e7f60",
+  "--g-soft": "#6f7156",
   "--g-paper": "#efe9d6", // type on the olive and on the paintings
+  // the floating music / scroll buttons: the antique gold of the cover's
+  // sunlit sky — olive would vanish into the olive pages
+  "--chrome-bg": "#9c844f",
+  "--chrome-fg": "#f8f3e6",
+  "--chrome-ring": "rgba(248,243,230,0.6)",
 } as CSSProperties;
 
-const SCRIPT = "var(--font-greatvibes)";
-const SERIF = "var(--font-cormorant)";
+const PAPER_SOFT = "color-mix(in srgb, var(--g-paper) 84%, transparent)";
 
-/* ----------------------------- type ----------------------------- */
-
-function Script({
-  children,
-  size,
-  color = "var(--g-ink)",
-  className = "",
-  edit,
-}: {
-  children: ReactNode;
-  size: number;
-  color?: string;
-  className?: string;
-  edit?: string;
-}) {
-  return (
-    <p
-      data-edit={edit}
-      className={className}
-      style={{ fontFamily: SCRIPT, fontSize: u(size), lineHeight: 1.15, color }}
-    >
-      {children}
-    </p>
-  );
-}
-
-function Caps({
-  children,
-  size,
-  color = "var(--g-ink)",
-  className = "",
-  edit,
-}: {
-  children: ReactNode;
-  size: number;
-  color?: string;
-  className?: string;
-  edit?: string;
-}) {
-  return (
-    <p
-      data-edit={edit}
-      className={`uppercase ${className}`}
-      style={{ fontFamily: SERIF, fontSize: u(size), letterSpacing: "0.16em", lineHeight: 1.45, color }}
-    >
-      {children}
-    </p>
-  );
-}
-
-function Body({
-  children,
-  size = 38,
-  color = "var(--g-soft)",
-  className = "",
-  edit,
-}: {
-  children: ReactNode;
-  size?: number;
-  color?: string;
-  className?: string;
-  edit?: string;
-}) {
-  return (
-    <p
-      data-edit={edit}
-      className={className}
-      style={{ fontFamily: SERIF, fontSize: u(size), lineHeight: 1.55, color }}
-    >
-      {children}
-    </p>
-  );
-}
-
-/** The engraved section break the reference uses between blocks: ─ ✦ ─ */
-function Ornament({ color = "var(--g-soft)" }: { color?: string }) {
-  return (
-    <span aria-hidden className="mx-auto flex items-center gap-[3%]" style={{ width: "34%", color }}>
-      <span className="h-px flex-1" style={{ background: "currentColor", opacity: 0.5 }} />
-      <span style={{ fontSize: u(24), lineHeight: 1 }}>✦</span>
-      <span className="h-px flex-1" style={{ background: "currentColor", opacity: 0.5 }} />
-    </span>
-  );
-}
-
-/** A pill button in the reference's style — filled olive on cream, or the
- *  reverse on the olive pages. */
-function Pill({
-  children,
-  onClick,
-  tone = "olive",
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-  tone?: "olive" | "cream";
-}) {
-  const olive = tone === "olive";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="uppercase"
-      style={{
-        fontFamily: SERIF,
-        fontSize: u(28),
-        letterSpacing: "0.16em",
-        padding: `${u(18)} ${u(48)}`,
-        borderRadius: 999,
-        background: olive ? "var(--g-ink)" : "var(--g-cream)",
-        color: olive ? "var(--g-cream)" : "var(--g-ink)",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-/* ----------------------------- dates ---------------------------- */
-
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-/** "09 | JANUARY | 2027" — the reference's date line. */
-function barDate(content: InvitationContent): string {
-  const d = new Date(content.countdown?.targetDate ?? "");
-  if (Number.isNaN(d.getTime())) return content.dateReveal?.eventDate ?? "";
-  return `${String(d.getDate()).padStart(2, "0")} | ${MONTHS[d.getMonth()]} | ${d.getFullYear()}`;
+function monogram(a?: string, b?: string) {
+  return [a, b]
+    .map((n) => n?.trim().charAt(0).toUpperCase())
+    .filter(Boolean)
+    .join("·");
 }
 
 function useCountdown(target?: string) {
@@ -192,10 +91,10 @@ function useCountdown(target?: string) {
 /* ----------------------------- RSVP ----------------------------- */
 
 /**
- * The guest questionnaire, opened from the details page the way the
- * reference's "fill in the form" button does. It slides up as a cream sheet
- * wearing the set's own garlands; behaviour is the shared `useRsvp`, so the
- * meal keys and decline rules match every other design.
+ * The guest questionnaire, opened from the details page (and the cover's
+ * RSVP link) the way the reference's "fill in the form" button does. It
+ * slides up as a cream sheet wearing the set's own garlands; behaviour is the
+ * shared `useRsvp`, so the meal keys and decline rules match every design.
  */
 function RsvpSheet({
   content,
@@ -213,7 +112,7 @@ function RsvpSheet({
   const askMeal = rsvp?.askMeal !== false;
 
   // the sheet uses real units, not cqw: it's a form a guest types into
-  const label: CSSProperties = { fontFamily: SCRIPT, fontSize: 22, color: "var(--g-ink)", lineHeight: 1.2 };
+  const label: CSSProperties = { fontFamily: SCRIPT, fontSize: 23, color: "var(--g-ink)", lineHeight: 1.2 };
   const field: CSSProperties = {
     fontFamily: SERIF,
     fontSize: 17,
@@ -227,20 +126,30 @@ function RsvpSheet({
   };
   const choice = (on: boolean): CSSProperties => ({
     fontFamily: SERIF,
-    fontSize: 14,
-    letterSpacing: "0.12em",
+    fontSize: 13,
+    fontWeight: 600,
+    letterSpacing: "0.14em",
     textTransform: "uppercase",
     padding: "10px 16px",
     borderRadius: 999,
     background: on ? "var(--g-ink)" : "transparent",
     color: on ? "var(--g-cream)" : "var(--g-ink)",
     border: "1px solid color-mix(in srgb, var(--g-ink) 45%, transparent)",
+    // the same engraved inner line as the plates' buttons, once chosen
+    boxShadow: on ? "inset 0 0 0 2px var(--g-ink), inset 0 0 0 3px rgba(241,234,218,0.5)" : undefined,
   });
+  const rule = (
+    <svg viewBox="0 0 240 24" className="mx-auto mt-1 block w-40" aria-hidden style={{ color: "var(--g-ink)" }}>
+      <path d="M20 12 H 220" stroke="currentColor" strokeWidth="0.6" opacity="0.45" />
+      <path d="M120 5.5 L 126.5 12 L 120 18.5 L 113.5 12 Z" fill="var(--g-cream)" stroke="currentColor" strokeWidth="0.9" />
+      <path d="M120 9 L 123 12 L 120 15 L 117 12 Z" fill="currentColor" fillOpacity="0.55" />
+    </svg>
+  );
 
   return (
     <motion.div
       className="fixed inset-0 z-[80] overflow-y-auto"
-      style={{ background: "color-mix(in srgb, var(--g-olive) 92%, transparent)" }}
+      style={{ background: "color-mix(in srgb, var(--g-olive) 94%, transparent)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -248,7 +157,11 @@ function RsvpSheet({
     >
       <motion.div
         className="relative mx-auto my-8 w-[92%] max-w-md px-7 pb-10 pt-6 text-center"
-        style={{ background: "var(--g-cream)", borderRadius: "220px 220px 220px 220px / 140px 140px 140px 140px" }}
+        style={{
+          background: "var(--g-cream)",
+          borderRadius: "220px 220px 220px 220px / 140px 140px 140px 140px",
+          boxShadow: "0 24px 60px rgba(20,22,10,0.35)",
+        }}
         initial={{ y: 40 }}
         animate={{ y: 0 }}
         exit={{ y: 40 }}
@@ -258,7 +171,7 @@ function RsvpSheet({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-6 top-5"
+          className="absolute right-7 top-6"
           style={{ fontFamily: SERIF, fontSize: 22, color: "var(--g-soft)" }}
         >
           ✕
@@ -268,9 +181,10 @@ function RsvpSheet({
 
         {form.submitted ? (
           <div className="py-8">
-            <p style={{ fontFamily: SCRIPT, fontSize: 38, color: "var(--g-ink)" }}>
+            <p style={{ fontFamily: SCRIPT, fontSize: 42, color: "var(--g-ink)" }}>
               {form.attending === "accept" ? "Thank you!" : "We will miss you"}
             </p>
+            {rule}
             <p className="mx-auto mt-3 max-w-[30ch]" style={{ fontFamily: SERIF, fontSize: 17, color: "var(--g-soft)" }}>
               {form.attending === "accept"
                 ? `${form.guests > 1 ? `${form.guests} seats are` : "Your seat is"} saved — we cannot wait to see you.`
@@ -282,11 +196,18 @@ function RsvpSheet({
           </div>
         ) : (
           <form onSubmit={editing ? (e) => e.preventDefault() : form.submit} className="text-left">
-            <p className="text-center" style={{ fontFamily: SCRIPT, fontSize: 40, color: "var(--g-ink)" }}>
+            <p className="text-center" style={{ fontFamily: SCRIPT, fontSize: 44, color: "var(--g-ink)", lineHeight: 1.1 }}>
               {rsvp?.heading}
             </p>
+            {rule}
+            <p
+              className="mx-auto mt-2 max-w-[28ch] text-center"
+              style={{ fontFamily: SERIF, fontSize: 15, fontStyle: "italic", color: "var(--g-soft)" }}
+            >
+              Please reply so we can prepare for your arrival with care.
+            </p>
 
-            <label className="mt-5 block">
+            <label className="mt-6 block">
               <span style={label}>Your name</span>
               <input style={field} value={form.name} onChange={(e) => form.setName(e.target.value)} autoComplete="name" />
             </label>
@@ -320,7 +241,9 @@ function RsvpSheet({
                   <button type="button" style={choice(false)} disabled={form.guests <= 1} onClick={() => form.stepGuests(-1)}>
                     −
                   </button>
-                  <span style={{ fontFamily: SERIF, fontSize: 20, color: "var(--g-ink)" }}>{form.guests}</span>
+                  <span style={{ fontFamily: SERIF, fontSize: 22, color: "var(--g-ink)", minWidth: 18, textAlign: "center" }}>
+                    {form.guests}
+                  </span>
                   <button type="button" style={choice(false)} disabled={form.guests >= 50} onClick={() => form.stepGuests(1)}>
                     +
                   </button>
@@ -358,19 +281,23 @@ function RsvpSheet({
               </p>
             ) : null}
 
-            <div className="mt-7 text-center">
+            <div className="mt-8 text-center">
               <button
                 type="submit"
                 disabled={form.busy}
-                className="uppercase disabled:opacity-60"
+                className="disabled:opacity-60"
                 style={{
                   fontFamily: SERIF,
-                  fontSize: 15,
-                  letterSpacing: "0.18em",
-                  padding: "13px 34px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  padding: "14px 38px",
                   borderRadius: 999,
                   background: "var(--g-ink)",
                   color: "var(--g-cream)",
+                  boxShadow:
+                    "inset 0 0 0 3px var(--g-ink), inset 0 0 0 4px rgba(241,234,218,0.55), 0 6px 18px rgba(30,32,18,0.2)",
                 }}
               >
                 {form.busy ? "Sending…" : rsvp?.submitLabel}
@@ -383,6 +310,23 @@ function RsvpSheet({
         <img src={A("garland-bottom.png")} alt="" className="mx-auto mt-6 w-[86%]" />
       </motion.div>
     </motion.div>
+  );
+}
+
+/* ---------------------------- details ---------------------------- */
+
+/** One of the small cards under the RSVP: a script title, a line, a button.
+ *  Two sit side by side, so the line is clamped rather than left to run. */
+function ContactCard({ title, line, action }: { title: string; line: ReactNode; action: ReactNode }) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center text-center">
+      <Script size={54}>{title}</Script>
+      <Body size={27} className="line-clamp-2 max-w-[94%] leading-snug">
+        {line}
+      </Body>
+      {/* pinned to the foot so both buttons line up whatever the line above */}
+      <div style={{ marginTop: "auto", paddingTop: u(18) }}>{action}</div>
+    </div>
   );
 }
 
@@ -403,17 +347,20 @@ export function GardenTemplate({
   editing?: boolean;
 }) {
   const [sheet, setSheet] = useState(false);
-  const { couple, families, hero, schedule, countdown, rsvp, story, map } = content;
+  const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
-  const date = barDate(content);
   const firstEv = schedule?.events?.[0];
   const photo = story?.items?.find((s) => s.photo)?.photo;
   const hidden = content.hiddenSections ?? [];
   const dress = content.dressCode;
   const wishes = content.wishes ?? [];
+  const contacts = content.contacts ?? {};
   const left = useCountdown(countdown?.targetDate);
   // the plate leaves room for five rows at most before they crowd the garland
   const events = (schedule?.events ?? []).slice(0, 5);
+  const showDress = !hidden.includes("dresscode") && (hasDressCode(content) || wishes.length > 0);
+  const showRsvp = !hidden.includes("rsvp");
+  const date = { iso: countdown?.targetDate, fallback: dateReveal?.eventDate };
 
   const target = firstEv ? targetFromEvent(firstEv) : {};
   if (map?.directionsQuery?.trim()) {
@@ -423,6 +370,45 @@ export function GardenTemplate({
   if (map?.directionsUrl?.trim()) target.url = map.directionsUrl.trim();
 
   const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const openSheet = () => {
+    if (!editing) setSheet(true);
+  };
+
+  // under the RSVP on the details plate: the group chat and a day-of
+  // contact, side by side, each only when the couple has set it
+  const cards: { key: string; title: string; line: ReactNode; action: ReactNode }[] = [];
+  if (contacts.chatUrl?.trim()) {
+    cards.push({
+      key: "chat",
+      title: "Our chat",
+      line: contacts.chatNote?.trim() || "Photos and wishes, all in one place",
+      action: (
+        <Pill href={contacts.chatUrl.trim()} size={19}>
+          Join
+        </Pill>
+      ),
+    });
+  }
+  if (contacts.phone?.trim()) {
+    cards.push({
+      key: "day",
+      title: "On the day",
+      line: contacts.contactName?.trim() ? `Ask for ${contacts.contactName.trim()}` : contacts.phone.trim(),
+      action: (
+        <Pill href={`tel:${contacts.phone.replace(/[^\d+]/g, "")}`} size={19}>
+          Call
+        </Pill>
+      ),
+    });
+  }
+
+  const attireCols = (
+    [
+      ["For her", dress?.her],
+      ["For him", dress?.him],
+      ["Children", dress?.kids],
+    ] as [string, string | undefined][]
+  ).filter(([, v]) => v?.trim());
 
   return (
     <PreviewContext.Provider value={{ compact, editing }}>
@@ -438,42 +424,63 @@ export function GardenTemplate({
           <main>
             {/* ------------------------------ 1 · cover ------------------------------ */}
             <Plate id="frame-couple" art={A("01-cover.jpg")} field="var(--g-dusk)">
-              <Zone box={{ x0: 0.06, y0: 0.018, x1: 0.94, y1: 0.05 }} className="flex-row items-center justify-between">
-                {[
-                  ["Venue", "frame-venue"],
-                  ["Timing", "frame-schedule"],
-                  ["Details", "frame-dresscode"],
-                  ["RSVP", "frame-rsvp"],
-                ].map(([label, id]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => goTo(id)}
-                    className="uppercase"
-                    style={{
-                      fontFamily: SERIF,
-                      fontSize: u(28),
-                      letterSpacing: "0.14em",
-                      color: "var(--g-paper)",
-                      textShadow: "0 1px 6px rgba(0,0,0,0.55)",
-                    }}
-                  >
-                    {label}
-                  </button>
+              <Zone box={{ x0: 0.04, y0: 0.016, x1: 0.96, y1: 0.052 }} className="flex-row items-center justify-center">
+                {(
+                  [
+                    ["Venue", () => goTo("frame-venue")],
+                    ["Timing", () => goTo("frame-schedule")],
+                    ["Details", () => goTo(showDress ? "frame-dresscode" : "frame-rsvp")],
+                    ...(showRsvp ? ([["RSVP", openSheet]] as [string, () => void][]) : []),
+                  ] as [string, () => void][]
+                ).map(([label, act], i) => (
+                  <span key={label} className="flex items-center">
+                    {i > 0 ? (
+                      <span
+                        aria-hidden
+                        style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(24)}` }}
+                      >
+                        ◆
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={act}
+                      className="uppercase"
+                      style={{
+                        fontFamily: SERIF,
+                        fontSize: u(25),
+                        fontWeight: 600,
+                        letterSpacing: "0.2em",
+                        color: "var(--g-paper)",
+                        textShadow: "0 1px 8px rgba(0,0,0,0.6)",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  </span>
                 ))}
               </Zone>
 
-              {/* on the sage face of the heart — measured, it narrows fast below .73 */}
-              <Zone box={{ x0: 0.31, y0: 0.612, x1: 0.69, y1: 0.75 }} className="items-center justify-center text-center">
-                <Script size={88} color="#fbf8f0">
+              {/* On the sage face of the heart, one line per band. Measured: the
+                  lobes join at .65 where it is .31–.69 wide; .70 → .32–.68;
+                  .74 → .37–.63; then it closes fast. */}
+              <Zone box={{ x0: 0.3, y0: 0.627, x1: 0.7, y1: 0.684 }} className="items-center justify-end">
+                <Script size={74} color="#fbf8f0" className="whitespace-nowrap drop-shadow-[0_1px_2px_rgba(40,48,30,0.35)]">
                   Wedding Day
                 </Script>
-                <Caps size={32} color="#fbf8f0" className="mt-[2%]">
+              </Zone>
+              <Zone box={{ x0: 0.33, y0: 0.686, x1: 0.67, y1: 0.712 }} className="items-center justify-center text-center">
+                <Caps size={names.join(" & ").length > 18 ? 21 : 26} color="#fbf8f0" track={0.2} className="leading-tight">
                   {names.join(" & ")}
                 </Caps>
-                <Caps size={25} color="#f3efe4" className="mt-[1%]">
-                  {date}
-                </Caps>
+              </Zone>
+              <Zone box={{ x0: 0.35, y0: 0.714, x1: 0.65, y1: 0.742 }} className="items-center justify-center">
+                <DateCartouche {...date} color="#f6f2e6" size={19} />
+              </Zone>
+
+              {/* the blank wax seal, pressed with their initials */}
+              <Zone box={{ x0: 0.475, y0: 0.7936, x1: 0.525, y1: 0.8215 }}>
+                <SealMonogram initials={monogram(couple.partner1?.name, couple.partner2?.name)} />
               </Zone>
             </Plate>
 
@@ -486,57 +493,51 @@ export function GardenTemplate({
                     <img src={photo} alt="" className="h-full w-full object-cover" style={{ borderRadius: "50%" }} />
                   </Zone>
                 ) : null}
-                <Zone box={{ x0: 0.12, y0: 0.378, x1: 0.88, y1: 0.606 }} className="items-center justify-center text-center">
-                  <Script size={84} edit="families.heading">
+                <Zone box={{ x0: 0.11, y0: 0.376, x1: 0.89, y1: 0.608 }} className="items-center justify-center text-center">
+                  <Heading size={76} flourish={250} edit="families.heading">
                     {families?.heading}
-                  </Script>
-                  <Body className="mt-[3%] max-w-[86%]" edit="families.footer">
+                  </Heading>
+                  <Body className="mt-[3%] max-w-[88%]" edit="families.footer">
                     {families?.footer || hero?.tagline}
                   </Body>
-                  <Script size={72} className="mt-[6%]">
+                  <Script size={66} className="mt-[5%]">
                     Save the Date
                   </Script>
-                  <Caps size={28} color="var(--g-soft)" className="mt-[1%]">
-                    {date}
-                  </Caps>
+                  {countdown?.subtext ? (
+                    <Caps size={20} color="var(--g-soft)" track={0.26} edit="countdown.subtext">
+                      {countdown.subtext}
+                    </Caps>
+                  ) : null}
+                  <div className="mt-[3%]">
+                    <DateCartouche {...date} size={26} />
+                  </div>
                 </Zone>
               </Plate>
             )}
 
             {/* ------------------------------ 3 · venue ------------------------------ */}
             <Plate id="frame-venue" art={A("03-venue.jpg")}>
-              <Zone box={{ x0: 0.1, y0: 0.07, x1: 0.9, y1: 0.46 }} className="items-center justify-center text-center">
-                <Script size={92} color="var(--g-paper)">
+              <Zone box={{ x0: 0.08, y0: 0.07, x1: 0.92, y1: 0.465 }} className="items-center justify-center text-center">
+                <Heading size={92} color="var(--g-paper)" flourish={300}>
                   Venue
-                </Script>
-                <Caps size={30} color="var(--g-paper)" className="mt-[3%] opacity-80">
-                  {date}
-                </Caps>
-                <Ornament color="var(--g-paper)" />
-                <Caps size={36} color="var(--g-paper)" className="mt-[4%]">
-                  {firstEv?.venue}
-                </Caps>
+                </Heading>
+                <div className="mt-[5%]">
+                  <DateCartouche {...date} color="var(--g-paper)" size={28} />
+                </div>
+                {firstEv?.venue ? (
+                  <Caps size={36} color="var(--g-paper)" track={0.18} className="mt-[7%]">
+                    “{firstEv.venue}”
+                  </Caps>
+                ) : null}
                 {firstEv?.address ? (
-                  <Body color="color-mix(in srgb, var(--g-paper) 80%, transparent)" className="mt-[2%]">
+                  <Body color={PAPER_SOFT} className="mt-[1.5%] max-w-[86%]">
                     {firstEv.address}
                   </Body>
                 ) : null}
               </Zone>
               {hasMapTarget(target) ? (
-                <Zone box={{ x0: 0.1, y0: 0.835, x1: 0.9, y1: 0.93 }} className="items-center justify-center">
-                  <DirectionsLink
-                    target={target}
-                    className="uppercase"
-                    style={{
-                      fontFamily: SERIF,
-                      fontSize: u(28),
-                      letterSpacing: "0.16em",
-                      padding: `${u(18)} ${u(48)}`,
-                      borderRadius: 999,
-                      background: "var(--g-cream)",
-                      color: "var(--g-ink)",
-                    }}
-                  >
+                <Zone box={{ x0: 0.1, y0: 0.83, x1: 0.9, y1: 0.94 }} className="items-center justify-center">
+                  <DirectionsLink target={target} style={pillStyle("cream")}>
                     {map?.directionsLabel ?? "View on map"}
                   </DirectionsLink>
                 </Zone>
@@ -547,27 +548,27 @@ export function GardenTemplate({
             {hidden.includes("schedule") || !events.length ? null : (
               <Plate id="frame-schedule" art={A("04-timing.jpg")}>
                 {/* the empty arch under the garland's crown */}
-                <Zone box={{ x0: 0.3, y0: 0.226, x1: 0.7, y1: 0.278 }} className="items-center justify-center">
+                <Zone box={{ x0: 0.3, y0: 0.224, x1: 0.7, y1: 0.28 }} className="items-center justify-center">
                   <Script size={64} edit="schedule.heading">
                     {schedule.heading}
                   </Script>
                 </Zone>
-                <Zone box={{ x0: 0.18, y0: 0.29, x1: 0.82, y1: 0.722 }} className="items-center justify-between text-center">
+                <Zone box={{ x0: 0.17, y0: 0.288, x1: 0.83, y1: 0.724 }} className="items-center justify-around text-center">
                   {events.map((ev, i) => (
-                    <div key={ev.id} className="flex flex-col items-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={A(ICONS[i % ICONS.length])} alt="" style={{ height: u(events.length > 4 ? 72 : events.length > 3 ? 96 : 118) }} />
-                      <Caps size={32} className="mt-[3%]">
-                        {ev.time}
-                      </Caps>
-                      <Caps size={27} color="var(--g-ink)">
-                        {ev.name}
-                      </Caps>
-                      {ev.venue && events.length < 5 ? (
-                        <Body size={28} className="leading-tight">
-                          {ev.venue}
-                        </Body>
+                    <div key={ev.id} className="flex w-full flex-col items-center">
+                      {i > 0 ? (
+                        <div className="w-full" style={{ marginBottom: u(events.length > 3 ? 6 : 14) }}>
+                          <Pip width={140} color="var(--g-ink)" />
+                        </div>
                       ) : null}
+                      <TimelineStop
+                        icon={A(ICONS[i % ICONS.length])}
+                        time={ev.time}
+                        name={ev.name}
+                        note={ev.venue}
+                        iconSize={events.length > 4 ? 62 : events.length > 3 ? 80 : 100}
+                        compact={events.length > 3}
+                      />
                     </div>
                   ))}
                 </Zone>
@@ -575,39 +576,73 @@ export function GardenTemplate({
             )}
 
             {/* --------------------------- 5 · dress code ---------------------------- */}
-            {hidden.includes("dresscode") || (!hasDressCode(content) && !wishes.length) ? null : (
+            {showDress ? (
               <Plate id="frame-dresscode" art={A("05-dresscode.jpg")}>
                 {/* the column the calla lilies leave free, top to bottom */}
-                <Zone box={{ x0: 0.22, y0: 0.06, x1: 0.71, y1: 0.95 }} className="items-center justify-center text-center">
+                <Zone box={{ x0: 0.215, y0: 0.05, x1: 0.715, y1: 0.955 }} className="items-center justify-center text-center">
                   {hasDressCode(content) ? (
                     <>
-                      <Script size={80} color="var(--g-paper)" edit="dressCode.heading">
+                      <Heading size={94} color="var(--g-paper)" flourish={260} edit="dressCode.heading">
                         {dress?.heading?.trim() || "Dress Code"}
-                      </Script>
+                      </Heading>
+                      {dress?.attire?.trim() ? (
+                        <span
+                          className="mt-[6%] inline-block uppercase"
+                          style={{
+                            fontFamily: SERIF,
+                            fontSize: u(20),
+                            fontWeight: 600,
+                            letterSpacing: "0.26em",
+                            color: "var(--g-paper)",
+                            padding: `${u(10)} ${u(30)}`,
+                            borderRadius: 999,
+                            border: "1px solid color-mix(in srgb, var(--g-paper) 55%, transparent)",
+                            boxShadow: `inset 0 0 0 ${u(4)} var(--g-olive), inset 0 0 0 ${u(5)} color-mix(in srgb, var(--g-paper) 30%, transparent)`,
+                          }}
+                        >
+                          {dress.attire}
+                        </span>
+                      ) : null}
                       {dress?.note?.trim() ? (
-                        <Body color="color-mix(in srgb, var(--g-paper) 82%, transparent)" className="mt-[4%]" edit="dressCode.note">
+                        <Body size={40} color={PAPER_SOFT} className="mt-[5%]" edit="dressCode.note">
                           {dress.note}
                         </Body>
                       ) : null}
                       {dress?.swatches?.length ? (
-                        <div className="mt-[6%] flex flex-wrap justify-center gap-[5%]">
-                          {dress.swatches.map((s, i) => (
-                            <span
+                        <div className="mt-[7%] flex flex-wrap justify-center" style={{ gap: `${u(30)} ${u(26)}` }}>
+                          {dress.swatches.slice(0, 6).map((s, i) => (
+                            <OvalSwatch
                               key={`${s.hex}-${i}`}
-                              title={s.label}
-                              className="block rounded-full"
-                              style={{
-                                width: u(84),
-                                height: u(84),
-                                background: s.hex,
-                                border: "1px solid color-mix(in srgb, var(--g-paper) 55%, transparent)",
-                              }}
+                              hex={s.hex}
+                              label={dress.swatchLabels === false ? undefined : s.label}
                             />
                           ))}
                         </div>
                       ) : null}
+                      {attireCols.length ? (
+                        <div
+                          className="mt-[8%] grid w-full"
+                          style={{ gridTemplateColumns: `repeat(${Math.min(attireCols.length, 2)}, 1fr)`, gap: u(30) }}
+                        >
+                          {attireCols.map(([k, v]) => (
+                            <div key={k} className="flex flex-col items-center">
+                              <Caps size={22} color="var(--g-paper)" track={0.26}>
+                                {k}
+                              </Caps>
+                              <span
+                                aria-hidden
+                                className="my-[4%] block"
+                                style={{ width: u(46), height: 1, background: "var(--g-paper)", opacity: 0.4 }}
+                              />
+                              <Body size={33} color={PAPER_SOFT} className="leading-snug">
+                                {v}
+                              </Body>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                       {dress?.avoid?.trim() ? (
-                        <Body size={30} color="color-mix(in srgb, var(--g-paper) 70%, transparent)" className="mt-[5%] italic">
+                        <Body size={32} italic color="color-mix(in srgb, var(--g-paper) 70%, transparent)" className="mt-[7%]">
                           Kindly avoid {dress.avoid}
                         </Body>
                       ) : null}
@@ -615,63 +650,105 @@ export function GardenTemplate({
                   ) : null}
 
                   {wishes.length ? (
-                    <div className={hasDressCode(content) ? "mt-[10%]" : ""}>
-                      <Script size={76} color="var(--g-paper)">
+                    <div className={`flex flex-col items-center ${hasDressCode(content) ? "mt-[10%]" : ""}`}>
+                      <Heading size={72} color="var(--g-paper)" flourish={220}>
                         Our wishes
-                      </Script>
-                      {wishes.map((w, i) => (
-                        <div key={i} className="mt-[5%]">
-                          <Caps size={28} color="var(--g-paper)">
+                      </Heading>
+                      {wishes.slice(0, 3).map((w, i) => (
+                        <div key={i} className="mt-[6%] flex flex-col items-center">
+                          <Caps size={22} color="var(--g-paper)" track={0.24}>
                             {w.title}
                           </Caps>
-                          <Body color="color-mix(in srgb, var(--g-paper) 82%, transparent)">{w.body}</Body>
+                          <Body size={30} color={PAPER_SOFT}>
+                            {w.body}
+                          </Body>
                         </div>
                       ))}
                     </div>
                   ) : null}
                 </Zone>
               </Plate>
-            )}
+            ) : null}
 
             {/* ----------------------------- 6 · details ----------------------------- */}
-            {hidden.includes("rsvp") ? null : (
+            {showRsvp ? (
               <Plate id="frame-rsvp" art={A("06-details.jpg")}>
-                <Zone box={{ x0: 0.3, y0: 0.235, x1: 0.7, y1: 0.285 }} className="items-center justify-center">
-                  <Script size={80} edit="rsvp.heading">
+                <Zone box={{ x0: 0.3, y0: 0.232, x1: 0.7, y1: 0.285 }} className="items-center justify-center">
+                  <Script size={76} edit="rsvp.heading">
                     {rsvp?.heading}
                   </Script>
                 </Zone>
-                <Zone box={{ x0: 0.15, y0: 0.29, x1: 0.85, y1: 0.585 }} className="items-center justify-center text-center">
-                  <Body className="max-w-[88%]">
-                    Please let us know whether you can join us, so we can prepare for your arrival with care.
+                {/* the plate's wide band: .29–.587 */}
+                <Zone box={{ x0: 0.16, y0: 0.29, x1: 0.84, y1: 0.587 }} className="items-center justify-center text-center">
+                  <Body size={cards.length ? 32 : 36} className="max-w-[90%]" edit="rsvp.footer">
+                    {rsvp?.footer?.trim() || "Please let us know whether you can join us, so we can prepare for your arrival with care."}
                   </Body>
-                  {rsvp?.footer ? (
-                    <Body className="mt-[3%] max-w-[88%] italic" edit="rsvp.footer">
-                      {rsvp.footer}
-                    </Body>
-                  ) : null}
-                  <div className="mt-[8%]">
-                    <Pill onClick={editing ? undefined : () => setSheet(true)}>Fill in the RSVP</Pill>
+                  <div style={{ marginTop: u(cards.length ? 26 : 40) }}>
+                    <Pill onClick={openSheet} size={cards.length ? 23 : 26}>
+                      Fill in the RSVP
+                    </Pill>
                   </div>
+                  {cards.length ? (
+                    <>
+                      <div className="w-full" style={{ margin: `${u(34)} 0 ${u(16)}` }}>
+                        <Flourish width={200} color="var(--g-ink)" className="opacity-60" />
+                      </div>
+                      <div className="flex w-full items-stretch justify-center" style={{ gap: u(24) }}>
+                        {cards.map((c, i) => (
+                          <div key={c.key} className="flex min-w-0 flex-1 items-stretch" style={{ gap: u(24) }}>
+                            {i > 0 ? (
+                              <span
+                                aria-hidden
+                                style={{ width: 1, background: "linear-gradient(transparent, var(--g-ink), transparent)", opacity: 0.35 }}
+                              />
+                            ) : null}
+                            <ContactCard title={c.title} line={c.line} action={c.action} />
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
                 </Zone>
               </Plate>
-            )}
+            ) : null}
 
             {/* ----------------------------- 7 · closing ----------------------------- */}
             <Plate art={A("07-closing.jpg")} field="var(--g-dusk)">
-              <Zone box={{ x0: 0.1, y0: 0.63, x1: 0.9, y1: 0.95 }} className="items-center justify-center text-center">
+              <Zone box={{ x0: 0.09, y0: 0.625, x1: 0.91, y1: 0.955 }} className="items-center justify-center text-center">
                 {left ? (
-                  <Caps size={29} color="color-mix(in srgb, var(--g-paper) 75%, transparent)">
-                    {left.d} days · {left.h} hours · {left.m} minutes
-                  </Caps>
+                  <div className="flex items-start" style={{ gap: u(34), color: "var(--g-paper)" }}>
+                    {(
+                      [
+                        [left.d, "days"],
+                        [left.h, "hours"],
+                        [left.m, "minutes"],
+                      ] as [number, string][]
+                    ).map(([n, l], i) => (
+                      <div key={l} className="flex items-start" style={{ gap: u(34) }}>
+                        {i > 0 ? (
+                          <span aria-hidden className="self-stretch" style={{ width: 1, background: "var(--g-paper)", opacity: 0.3 }} />
+                        ) : null}
+                        <div className="flex flex-col items-center">
+                          <span style={{ fontFamily: SERIF, fontSize: u(60), lineHeight: 1 }}>{String(n).padStart(2, "0")}</span>
+                          <span
+                            className="uppercase"
+                            style={{ fontFamily: SERIF, fontSize: u(17), letterSpacing: "0.26em", opacity: 0.75, marginTop: u(10) }}
+                          >
+                            {l}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : null}
-                <Body color="color-mix(in srgb, var(--g-paper) 85%, transparent)" className="mt-[5%] max-w-[86%]" edit="hero.closingLine">
+                <Flourish width={260} color="var(--g-paper)" className="mt-[5%] opacity-70" />
+                <Body color={PAPER_SOFT} className="mt-[4%] max-w-[86%]" edit="hero.closingLine">
                   {hero?.closingLine}
                 </Body>
-                <Script size={96} color="var(--g-paper)" className="mt-[6%]">
+                <Script size={98} color="var(--g-paper)" className="mt-[4%]">
                   We await you!
                 </Script>
-                <Caps size={30} color="color-mix(in srgb, var(--g-paper) 75%, transparent)" className="mt-[3%]">
+                <Caps size={26} color="color-mix(in srgb, var(--g-paper) 75%, transparent)" track={0.24} className="mt-[2%]">
                   {names.join(" & ")}
                 </Caps>
               </Zone>

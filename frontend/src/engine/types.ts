@@ -269,6 +269,17 @@ export interface InvitationContent {
     /** ask an accepting guest for a meal preference (default true) */
     askMeal?: boolean;
   };
+  /** Ways for guests to reach the couple: a group chat to share photos in,
+   *  and a person to call on the day. Optional — designs that have a place
+   *  for them show only what is filled in. */
+  contacts?: {
+    /** WhatsApp / Telegram group invite link */
+    chatUrl?: string;
+    chatNote?: string;
+    /** who to call on the day, and their number */
+    contactName?: string;
+    phone?: string;
+  };
   /** Practical notes to guests — flowers, gifts, a group chat. Rendered as a
    *  ruled list by the designs that have a place for it; omitted when empty. */
   wishes?: { title: string; body: string }[];

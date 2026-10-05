@@ -56,7 +56,14 @@ export function MusicToggle({ trackUrl }: { trackUrl?: string }) {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         className="fixed right-5 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg"
-        style={{ background: "var(--c-primary)", color: "var(--c-surface)" }}
+        // --chrome-* is set by templates whose colour lives in their artwork
+        // rather than the theme (Voyage, Toile, Garden); everything else
+        // falls back to the theme, as before
+        style={{
+          background: "var(--chrome-bg, var(--c-primary))",
+          color: "var(--chrome-fg, var(--c-surface))",
+          border: "1px solid var(--chrome-ring, transparent)",
+        }}
       >
         {playing ? (
           <span className="flex items-end gap-[3px]" aria-hidden>

@@ -64,6 +64,9 @@ const PALETTE = {
   "--f-display": "var(--font-cinzel)",
   "--f-body": "var(--font-karla)",
   "--f-script": "var(--font-parisienne)",
+  "--chrome-bg": "#1a2745",
+  "--chrome-fg": "#f5f1e4",
+  "--chrome-ring": "#b8935a",
 } as CSSProperties;
 
 /** 21.06.2025 — the boarding-pass way to write a date. */
