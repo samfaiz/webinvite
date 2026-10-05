@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { EventItem, InvitationContent, Person, RenderProps } from "@/engine/types";
 import { PreviewContext, usePreview } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -29,7 +30,9 @@ import {
   Heading,
   Icon,
   OvalSwatch,
+  PenReveal,
   PhotoOval,
+  PhotoViewer,
   Pip,
   Rise,
   SERIF,
@@ -93,7 +96,9 @@ function FamilyBlock({ person }: { person?: Person }) {
   const parents = [person.father, person.mother].filter((p) => p?.trim()).join(" & ");
   return (
     <div className="flex flex-col items-center">
-      <Script size={100}>{person.name}</Script>
+      <PenReveal delay={0.2}>
+        <Script size={100}>{person.name}</Script>
+      </PenReveal>
       {parents ? (
         <>
           {person.parentsPrefix?.trim() ? (
@@ -115,11 +120,20 @@ function FamilyBlock({ person }: { person?: Person }) {
 /** One stop of the day. A day with a single event gets it large, with the
  *  full date; several share the panel and step down in size. */
 function Stop({ ev, icon, scale, dateLine }: { ev: EventItem; icon: string; scale: number; dateLine?: string }) {
+  const { compact, editing } = usePreview();
   const target = targetFromEvent(ev);
   return (
     <div className="flex w-full flex-col items-center text-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={icon} alt="" style={{ height: u(150 * scale) }} />
+      {/* the engraving springs up as the stop comes into view */}
+      <motion.img
+        src={icon}
+        alt=""
+        style={{ height: u(150 * scale) }}
+        initial={compact || editing ? false : { opacity: 0, scale: 0.6, y: 14 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ type: "spring", stiffness: 180, damping: 14 }}
+      />
       {dateLine ? (
         <Caps size={32} track={0.12} className="mt-[3%]">
           {dateLine}
@@ -410,6 +424,45 @@ export function GardenTemplate({
     return () => window.clearTimeout(t);
   }, [opened, guide]);
   const pages = useRef<HTMLDivElement | null>(null);
+  const reduce = useReducedMotion();
+  const [viewer, setViewer] = useState<number | null>(null);
+
+  /* The tour: after the card is written the invitation plays itself, a page
+     every few seconds (a tall page shows its top, then its foot), and stops at
+     the RSVP so the guest can reply. Any touch, scroll or key ends it at once —
+     the guest is then in charge. A thin gold line at the top shows it's on. */
+  const DWELL = 7000;
+  const [touring, setTouring] = useState(false);
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (!touring) return;
+    const root = pages.current;
+    if (!root) return;
+    const stops: { el: HTMLElement; block: ScrollLogicalPosition }[] = [];
+    for (const el of Array.from(root.querySelectorAll<HTMLElement>(":scope > section"))) {
+      stops.push({ el, block: "start" });
+      if (el.id === "frame-rsvp") break;
+      if (el.offsetHeight > window.innerHeight + 60) stops.push({ el, block: "end" });
+    }
+    let i = 0; // the first stop is where `onward` has just taken them
+    let timer = 0;
+    const end = () => setTouring(false);
+    const next = () => {
+      i += 1;
+      if (i >= stops.length) return end();
+      stops[i].el.scrollIntoView({ behavior: "smooth", block: stops[i].block });
+      setStep(i);
+      if (stops[i].el.id === "frame-rsvp") return end();
+      timer = window.setTimeout(next, DWELL);
+    };
+    timer = window.setTimeout(next, DWELL);
+    const kinds = ["pointerdown", "wheel", "touchstart", "keydown"] as const;
+    kinds.forEach((k) => window.addEventListener(k, end, { passive: true, capture: true }));
+    return () => {
+      window.clearTimeout(timer);
+      kinds.forEach((k) => window.removeEventListener(k, end, { capture: true }));
+    };
+  }, [touring]);
 
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
@@ -440,6 +493,7 @@ export function GardenTemplate({
     const cover = document.getElementById("frame-couple");
     if (cover && Math.abs(cover.getBoundingClientRect().top) > 40) return;
     pages.current?.querySelector("section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!reduce) setTouring(true);
   };
 
   const nav: [string, () => void][] = [
@@ -491,13 +545,42 @@ export function GardenTemplate({
                   pad={150}
                   head={
                     photos.length ? (
-                      // the lace oval: art .383–.616 × .174–.348, here as fractions of the top slice
-                      <Zone box={{ x0: 0.383, y0: 0.458, x1: 0.616, y1: 0.916 }}>
-                        <PhotoOval photos={photos} />
-                      </Zone>
+                      <>
+                        {/* the lace oval: art .383–.616 × .174–.348, here as fractions of the top slice */}
+                        <Zone box={{ x0: 0.383, y0: 0.458, x1: 0.616, y1: 0.916 }}>
+                          <PhotoOval photos={photos} onOpen={editing || compact ? undefined : setViewer} />
+                        </Zone>
+                      </>
                     ) : null
                   }
                 >
+                  {photos.length > 1 && !editing && !compact ? (
+                    <Rise style={{ marginBottom: u(30) }}>
+                      <button
+                        type="button"
+                        onClick={() => setViewer(0)}
+                        className="inline-flex items-center"
+                        style={{
+                          gap: 8,
+                          minHeight: 40,
+                          padding: "0 16px",
+                          borderRadius: 999,
+                          fontFamily: SERIF,
+                          fontSize: 17,
+                          fontWeight: 600,
+                          color: "var(--g-ink)",
+                          border: "1px solid color-mix(in srgb, var(--g-ink) 35%, transparent)",
+                          background: "rgba(255,255,255,0.45)",
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinejoin="round" aria-hidden>
+                          <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+                          <path d="M3.5 15l4.5-4 4 3.5 3-2.5 5 4" />
+                        </svg>
+                        See all {photos.length} photos
+                      </button>
+                    </Rise>
+                  ) : null}
                   <Rise>
                     <Heading size={100} flourish={300} edit="families.heading">
                       {families?.heading}
@@ -530,9 +613,9 @@ export function GardenTemplate({
                         {hero.marriageText}
                       </Caps>
                     ) : null}
-                    <Script size={96} className="mt-[1%]">
-                      Save the Date
-                    </Script>
+                    <PenReveal delay={0.3} className="mt-[1%]">
+                      <Script size={96}>Save the Date</Script>
+                    </PenReveal>
                     <div style={{ marginTop: u(18) }}>
                       <DateCartouche {...date} size={40} />
                     </div>
@@ -787,6 +870,22 @@ export function GardenTemplate({
               </Plate>
             </div>
           </main>
+
+          <AnimatePresence>
+            {viewer !== null ? <PhotoViewer key="viewer" photos={photos} start={viewer} onClose={() => setViewer(null)} /> : null}
+          </AnimatePresence>
+
+          {touring ? (
+            <motion.div
+              key={step}
+              aria-hidden
+              className="pointer-events-none fixed left-0 top-0 z-[70] h-[3px]"
+              style={{ background: "var(--chrome-bg)" }}
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: DWELL / 1000, ease: "linear" }}
+            />
+          ) : null}
 
           <MusicToggle trackUrl={content.music?.trackUrl} />
           {guide ? <ScrollGuide active hasMusic={!!content.music?.trackUrl} /> : null}

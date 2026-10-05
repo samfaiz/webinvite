@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePreview } from "@/components/PreviewContext";
@@ -35,32 +35,63 @@ export function Flourish({
   color?: string;
   className?: string;
 }) {
+  const { compact, editing } = usePreview();
+  const still = compact || editing;
+  // the scrolls are drawn on as if by pen when they come into view
+  const draw = (delay: number, duration = 1.5) =>
+    still
+      ? {}
+      : {
+          initial: { pathLength: 0, opacity: 0 },
+          whileInView: { pathLength: 1, opacity: 1 },
+          viewport: { once: true, amount: 0.8 },
+          transition: { duration, ease: "easeInOut" as const, delay },
+        };
+  const pop = (delay: number) =>
+    still
+      ? {}
+      : {
+          initial: { opacity: 0, scale: 0.4 },
+          whileInView: { opacity: 1, scale: 1 },
+          viewport: { once: true, amount: 0.8 },
+          transition: { duration: 0.5, delay },
+        };
   const half = (
     <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
       {/* the main scroll, ending in a small spiral */}
-      <path d="M110 12 C 96 12, 85 6, 72 9.5 C 62 12.5, 58 20, 49 18 C 41 16, 43 7.5, 50.5 7.5 C 55.5 7.5, 56.5 12.5, 52.5 13.5" strokeWidth="1.15" />
+      <motion.path
+        d="M110 12 C 96 12, 85 6, 72 9.5 C 62 12.5, 58 20, 49 18 C 41 16, 43 7.5, 50.5 7.5 C 55.5 7.5, 56.5 12.5, 52.5 13.5"
+        strokeWidth="1.15"
+        {...draw(0.2)}
+      />
       {/* the finer echo under it */}
-      <path d="M110 12.6 C 99 14.5, 90 18.5, 79 16.5 C 74 15.6, 70 16.4, 67 18" strokeWidth="0.6" />
+      <motion.path d="M110 12.6 C 99 14.5, 90 18.5, 79 16.5 C 74 15.6, 70 16.4, 67 18" strokeWidth="0.6" {...draw(0.4, 1.1)} />
       {/* a leaf on the scroll */}
-      <path d="M86 9 C 89.5 4.6, 95.5 4.4, 98.5 7.4 C 94.5 9.8, 90 10.2, 86 9 Z" strokeWidth="0.7" fill={color} fillOpacity="0.18" />
-      <path d="M86.5 9 C 90 8, 94 7.6, 98 7.4" strokeWidth="0.45" />
+      <motion.path
+        d="M86 9 C 89.5 4.6, 95.5 4.4, 98.5 7.4 C 94.5 9.8, 90 10.2, 86 9 Z"
+        strokeWidth="0.7"
+        fill={color}
+        fillOpacity="0.18"
+        {...draw(0.7, 0.8)}
+      />
+      <motion.path d="M86.5 9 C 90 8, 94 7.6, 98 7.4" strokeWidth="0.45" {...draw(0.9, 0.6)} />
       {/* the trailing hairline, tapering out */}
-      <path d="M49 18 C 36 21.5, 22 18, 6 12" strokeWidth="0.55" />
-      <circle cx="4.5" cy="11.4" r="1.1" fill={color} stroke="none" />
+      <motion.path d="M49 18 C 36 21.5, 22 18, 6 12" strokeWidth="0.55" {...draw(1.1, 0.9)} />
+      <motion.circle cx="4.5" cy="11.4" r="1.1" fill={color} stroke="none" {...pop(1.8)} />
     </g>
   );
   return (
     <svg
       viewBox="0 0 240 24"
       className={`mx-auto block ${className}`}
-      style={{ width: u(width), height: "auto", color }}
+      style={{ width: u(width), height: "auto", color, overflow: "visible" }}
       aria-hidden
     >
       {half}
       <g transform="translate(240 0) scale(-1 1)">{half}</g>
       {/* the centre: a diamond with a pip */}
-      <path d="M120 5.5 L 126.5 12 L 120 18.5 L 113.5 12 Z" fill="none" stroke={color} strokeWidth="0.9" />
-      <path d="M120 9 L 123 12 L 120 15 L 117 12 Z" fill={color} fillOpacity="0.55" stroke="none" />
+      <motion.path d="M120 5.5 L 126.5 12 L 120 18.5 L 113.5 12 Z" fill="none" stroke={color} strokeWidth="0.9" {...pop(0)} />
+      <motion.path d="M120 9 L 123 12 L 120 15 L 117 12 Z" fill={color} fillOpacity="0.55" stroke="none" {...pop(0.15)} />
     </svg>
   );
 }
@@ -532,7 +563,7 @@ export function ActionButton({
 
 /** The lace oval on the welcome plate, showing each of the couple's photos in
  *  turn with a slow crossfade. */
-export function PhotoOval({ photos }: { photos: string[] }) {
+export function PhotoOval({ photos, onOpen }: { photos: string[]; onOpen?: (index: number) => void }) {
   const { compact, editing } = usePreview();
   const [i, setI] = useState(0);
   const cycling = photos.length > 1 && !compact && !editing;
@@ -543,7 +574,13 @@ export function PhotoOval({ photos }: { photos: string[] }) {
   }, [cycling, photos.length]);
   if (!photos.length) return null;
   return (
-    <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "50%" }}>
+    <div
+      className={`relative h-full w-full overflow-hidden ${onOpen ? "cursor-pointer" : ""}`}
+      style={{ borderRadius: "50%" }}
+      role={onOpen ? "button" : undefined}
+      aria-label={onOpen ? "See all the photos" : undefined}
+      onClick={onOpen ? () => onOpen(i) : undefined}
+    >
       <AnimatePresence initial={false}>
         <motion.img
           key={photos[i]}
@@ -615,8 +652,24 @@ export function CountdownTiles({
             background: `color-mix(in srgb, ${ink} 6%, transparent)`,
           }}
         >
-          <span style={{ fontFamily: SERIF, fontSize: u(size), lineHeight: 1, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>
-            {String(n).padStart(2, "0")}
+          {/* each change rolls the new number in from above */}
+          <span
+            className="relative block overflow-hidden"
+            style={{ height: `calc(${u(size)} * 1.08)`, width: "100%", textAlign: "center" }}
+          >
+            <AnimatePresence initial={false} mode="popLayout">
+              <motion.span
+                key={n}
+                className="block"
+                style={{ fontFamily: SERIF, fontSize: u(size), lineHeight: 1.08, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}
+                initial={{ y: "-100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "100%", opacity: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+              >
+                {String(n).padStart(2, "0")}
+              </motion.span>
+            </AnimatePresence>
           </span>
           <span style={{ fontFamily: SERIF, fontSize: u(size * 0.38), letterSpacing: "0.06em", marginTop: u(8), opacity: 0.85 }}>
             {label}
@@ -624,6 +677,114 @@ export function CountdownTiles({
         </div>
       ))}
     </div>
+  );
+}
+
+
+/* ------------------------------ more motion ------------------------------ */
+
+/**
+ * Script written on as if by pen, left to right, when it comes into view.
+ * The wrapper is what is watched: an element clipped to nothing never counts
+ * as on screen, so the clip lives on the inner layer and takes its cue from it.
+ */
+export function PenReveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+  const { compact, editing } = usePreview();
+  if (compact || editing) return <div className={className}>{children}</div>;
+  return (
+    <motion.div className={className} initial="hidden" whileInView="shown" viewport={{ once: true, amount: 0.6 }}>
+      <motion.div
+        variants={{
+          hidden: { clipPath: "inset(-40% 112% -40% -12%)" },
+          shown: { clipPath: "inset(-40% -12% -40% -12%)", transition: { duration: 1.6, ease: [0.45, 0, 0.25, 1], delay } },
+        }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/**
+ * The couple's photos full screen: big arrows, a large close button, a count,
+ * and swiping — whichever a guest happens to try.
+ */
+export function PhotoViewer({ photos, start, onClose }: { photos: string[]; start: number; onClose: () => void }) {
+  const [i, setI] = useState(start);
+  const from = useRef<number | null>(null);
+  const go = (d: number) => setI((n) => (n + d + photos.length) % photos.length);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setI((n) => (n + 1) % photos.length);
+      if (e.key === "ArrowLeft") setI((n) => (n - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, photos.length]);
+  const round: CSSProperties = {
+    width: 56,
+    height: 56,
+    borderRadius: 999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(248,243,230,0.14)",
+    border: "1px solid rgba(248,243,230,0.5)",
+    color: "#f8f3e6",
+  };
+  return (
+    <motion.div
+      className="fixed inset-0 z-[90] flex flex-col items-center justify-center"
+      style={{ background: "rgba(20,18,10,0.95)", touchAction: "pan-y" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onPointerDown={(e) => {
+        from.current = e.clientX;
+      }}
+      onPointerUp={(e) => {
+        if (from.current !== null && Math.abs(e.clientX - from.current) > 50) go(e.clientX < from.current ? 1 : -1);
+        from.current = null;
+      }}
+    >
+      <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4" style={round}>
+        <svg viewBox="0 0 24 24" width={26} height={26} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden>
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={photos[i]}
+          src={photos[i]}
+          alt=""
+          draggable={false}
+          className="select-none rounded-xl object-contain"
+          style={{ maxHeight: "72svh", maxWidth: "92vw" }}
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.35 }}
+        />
+      </AnimatePresence>
+      {photos.length > 1 ? (
+        <div className="mt-6 flex items-center" style={{ gap: 22, color: "#f8f3e6" }}>
+          <button type="button" onClick={() => go(-1)} aria-label="Previous photo" style={round}>
+            <svg viewBox="0 0 24 24" width={26} height={26} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <span style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 600, minWidth: 70, textAlign: "center" }}>
+            {i + 1} of {photos.length}
+          </span>
+          <button type="button" onClick={() => go(1)} aria-label="Next photo" style={round}>
+            <svg viewBox="0 0 24 24" width={26} height={26} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      ) : null}
+    </motion.div>
   );
 }
 

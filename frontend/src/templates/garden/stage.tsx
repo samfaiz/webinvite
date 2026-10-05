@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { usePreview } from "@/components/PreviewContext";
 
 /**
@@ -51,6 +52,9 @@ export function Plate({
   children: ReactNode;
 }) {
   const { compact } = usePreview();
+  const reduce = useReducedMotion();
+  // a painting with nothing else moving on it drifts closer, very slowly
+  const drift = fill && !video && !compact && !reduce;
   return (
     <section
       id={id}
@@ -58,7 +62,7 @@ export function Plate({
       style={{ background: field }}
     >
       <div
-        className="relative shrink-0"
+        className={`relative shrink-0 ${drift ? "overflow-hidden" : ""}`}
         style={{
           aspectRatio: `${ART_W} / ${ART_H}`,
           width: compact
@@ -73,6 +77,17 @@ export function Plate({
           backgroundRepeat: "no-repeat",
         }}
       >
+        {drift ? (
+          <motion.div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ backgroundImage: `url(${art})`, backgroundSize: "100% 100%" }}
+            initial={{ scale: 1 }}
+            whileInView={{ scale: 1.06 }}
+            viewport={{ amount: 0.4 }}
+            transition={{ duration: 16, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+          />
+        ) : null}
         {video && !compact ? (
           <video
             src={video}

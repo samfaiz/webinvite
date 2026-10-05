@@ -24,31 +24,45 @@ import { Caps, DateCartouche, Icon, SCRIPT, SERIF, SealMonogram } from "./kit";
 
 const A = (f: string) => `/assets/templates/garden/${f}`;
 
-/** The sealed envelope as a still, and the video of it opening (first frame
- *  = the still, last frame = 01-cover.jpg). null until both are made. */
-const OPENING: { still: string; video: string } | null = null;
+/** The sealed envelope as a still, and the film of it opening. The film's
+ *  first frame is the still; it ends on the cover's own garden and envelope,
+ *  with the heart a little smaller than the plate's, so it hands over with a
+ *  slow crossfade that reads as the card settling. The seal sits exactly where
+ *  the cover's does throughout, so their initials can be on it from the start. */
+const OPENING: { still: string; video: string } | null = { still: A("00-sealed.jpg"), video: A("00-opening.mp4") };
+
+/** How long the film takes to dissolve into the cover, in seconds. */
+const HANDOFF = 1.3;
+
+/** If nobody taps, the envelope opens by itself after this long (ms), so a
+ *  guest who doesn't think to tap still sees it. */
+const AUTO_OPEN = 12000;
 
 type Stage = "sealed" | "opening" | "written";
 
 const EASE = [0.45, 0, 0.25, 1] as const;
 
 // one set of variants per element, so the card is written in order
+// (each takes a lead-in as `custom`: the film's dissolve, when there was one)
 const pen: Variants = {
   // swashes overhang the line, so the clip reaches past the box on every side
   hidden: { clipPath: "inset(-40% 112% -40% -12%)" },
-  shown: { clipPath: "inset(-40% -12% -40% -12%)", transition: { duration: 1.9, ease: EASE, delay: 0.7 } },
+  shown: (lead = 0) => ({
+    clipPath: "inset(-40% -12% -40% -12%)",
+    transition: { duration: 1.9, ease: EASE, delay: 0.7 + lead },
+  }),
 };
 const surface: Variants = {
   hidden: { opacity: 0, filter: "blur(6px)" },
-  shown: { opacity: 1, filter: "blur(0px)", transition: { duration: 1.1, ease: "easeOut", delay: 1.9 } },
+  shown: (lead = 0) => ({ opacity: 1, filter: "blur(0px)", transition: { duration: 1.1, ease: "easeOut", delay: 1.9 + lead } }),
 };
 const unfold: Variants = {
   hidden: { opacity: 0, scaleX: 0.55 },
-  shown: { opacity: 1, scaleX: 1, transition: { duration: 1, ease: EASE, delay: 2.6 } },
+  shown: (lead = 0) => ({ opacity: 1, scaleX: 1, transition: { duration: 1, ease: EASE, delay: 2.6 + lead } }),
 };
 const arrive: Variants = {
   hidden: { opacity: 0 },
-  shown: { opacity: 1, transition: { duration: 0.9, delay: 3.6 } },
+  shown: (lead = 0) => ({ opacity: 1, transition: { duration: 0.9, delay: 3.6 + lead } }),
 };
 
 /** Their initials as the card's title: two script capitals around a small
@@ -111,15 +125,19 @@ export function Cover({
   const from = gated ? "hidden" : false;
   const to = written ? "shown" : "hidden";
 
-  const write = () => {
+  // the writing waits for the film to finish dissolving, when it played
+  const [lead, setLead] = useState(0);
+  const write = (afterFilm = false) => {
+    const wait = afterFilm ? HANDOFF : 0;
+    setLead(wait);
     setStage("written");
     onOpen();
     // the writing takes about four seconds; give them a moment with it
-    if (onDone) window.setTimeout(onDone, 5600);
+    if (onDone) window.setTimeout(onDone, 5600 + wait * 1000);
   };
 
   const open = () => {
-    if (stage === "opening") return write(); // a second tap skips the film
+    if (stage === "opening") return write(true); // a second tap skips the film
     if (stage !== "sealed") return;
     // the invitation's music starts inside the guest's tap, so it is allowed to
     try {
@@ -130,8 +148,19 @@ export function Cover({
     const v = film.current;
     if (!OPENING || !v || reduce) return write();
     setStage("opening");
-    v.play().catch(write);
+    v.play().catch(() => write(true));
   };
+
+  // open by itself if nobody taps (the film is muted, so it may autoplay)
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  });
+  useEffect(() => {
+    if (stage !== "sealed") return;
+    const t = window.setTimeout(() => openRef.current(), AUTO_OPEN);
+    return () => window.clearTimeout(t);
+  }, [stage]);
 
   // nothing below the cover to scroll to until it has been opened
   useEffect(() => {
@@ -145,7 +174,13 @@ export function Cover({
   }, [written]);
 
   return (
-    <Plate id="frame-couple" art={A("01-cover.jpg")} video={A("01-cover.mp4")} field="var(--g-dusk)" fill>
+    <Plate
+      id="frame-couple"
+      art={A("01-cover.jpg")}
+      video={written || !OPENING ? A("01-cover.mp4") : undefined}
+      field="var(--g-dusk)"
+      fill
+    >
       {/* the sealed envelope and its opening, laid over the living cover and
           dissolved away once the film reaches the cover's own frame */}
       <AnimatePresence>
@@ -159,19 +194,19 @@ export function Cover({
             playsInline
             preload="auto"
             aria-hidden
-            onEnded={write}
+            onEnded={() => write(true)}
             className="absolute inset-0 h-full w-full"
             style={{ objectFit: "fill" }}
-            exit={{ opacity: 0, transition: { duration: 0.8 } }}
+            exit={{ opacity: 0, transition: { duration: HANDOFF, ease: "easeInOut" } }}
           />
         ) : null}
       </AnimatePresence>
 
-      <motion.div initial={from} animate={to} variants={arrive} className="contents">
+      <motion.div custom={lead} initial={from} animate={to} variants={arrive} className="contents">
         {/* (a filled plate loses up to ~9% each side on a tall phone) */}
         <Zone box={{ x0: 0.12, y0: 0.018, x1: 0.88, y1: 0.056 }} className="flex-row items-center justify-center">
           {nav.map(([label, act], i) => (
-            <motion.span key={label} className="flex items-center" initial={from} animate={to} variants={arrive}>
+            <motion.span key={label} className="flex items-center" custom={lead} initial={from} animate={to} variants={arrive}>
               {i > 0 ? (
                 <span aria-hidden style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(18)}` }}>
                   ◆
@@ -216,19 +251,19 @@ export function Cover({
           lobes join at .65 where it is .31–.69 wide (above that a cream flap
           tip divides them); .70 → .32–.68; .74 → .37–.63; then it closes. */}
       <Zone box={{ x0: 0.3, y0: 0.632, x1: 0.7, y1: 0.697 }} className="items-center justify-end">
-        <motion.div initial={from} animate={to} variants={pen}>
+        <motion.div custom={lead} initial={from} animate={to} variants={pen}>
           <Monogram letters={letters} size={104} />
         </motion.div>
       </Zone>
       <Zone box={{ x0: 0.33, y0: 0.697, x1: 0.67, y1: 0.72 }} className="items-center justify-center text-center">
-        <motion.div initial={from} animate={to} variants={surface}>
+        <motion.div custom={lead} initial={from} animate={to} variants={surface}>
           <Caps size={names.length > 18 ? 22 : 27} color="#fbf8f0" track={0.16} className="leading-tight">
             {names}
           </Caps>
         </motion.div>
       </Zone>
       <Zone box={{ x0: 0.35, y0: 0.721, x1: 0.65, y1: 0.748 }} className="items-center justify-center">
-        <motion.div initial={from} animate={to} variants={unfold}>
+        <motion.div custom={lead} initial={from} animate={to} variants={unfold}>
           <DateCartouche {...date} color="#f6f2e6" size={20} />
         </motion.div>
       </Zone>
@@ -237,11 +272,9 @@ export function Cover({
           is the first thing on the envelope that is theirs */}
       {/* (the closed envelope in the film has its seal elsewhere, so over the
           film it waits for the cover's own seal) */}
-      {OPENING && !written ? null : (
-        <Zone box={{ x0: 0.475, y0: 0.7936, x1: 0.525, y1: 0.8215 }}>
-          <SealMonogram initials={seal} />
-        </Zone>
-      )}
+      <Zone box={{ x0: 0.475, y0: 0.7936, x1: 0.525, y1: 0.8215 }} className="z-[2]">
+        <SealMonogram initials={seal} />
+      </Zone>
 
       {/* the invitation to open it: the envelope breathes with a soft light,
           and a plain, large "Tap here to open" sits right under it */}
@@ -253,7 +286,10 @@ export function Cover({
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.5 } }}
           >
-            <Zone box={{ x0: 0.2, y0: 0.55, x1: 0.8, y1: 0.87 }} className="pointer-events-none">
+            <Zone
+              box={OPENING ? { x0: 0.18, y0: 0.63, x1: 0.82, y1: 0.95 } : { x0: 0.2, y0: 0.55, x1: 0.8, y1: 0.87 }}
+              className="pointer-events-none"
+            >
               <motion.span
                 aria-hidden
                 className="absolute inset-0"
@@ -262,7 +298,7 @@ export function Cover({
                 transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
               />
             </Zone>
-            <Zone box={{ x0: 0.14, y0: 0.888, x1: 0.86, y1: 0.962 }} className="items-center justify-center">
+            <Zone box={{ x0: 0.14, y0: 0.9, x1: 0.86, y1: 0.97 }} className="items-center justify-center">
               <motion.span
                 className="inline-flex items-center"
                 style={{
