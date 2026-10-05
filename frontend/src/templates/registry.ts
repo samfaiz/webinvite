@@ -80,6 +80,17 @@ export const templates: TemplateMeta[] = [
     // painted and engraved plates — the colours are in the art, not the theme
     themeIds: ["garden-olive"],
   },
+  {
+    id: "garden-kerala",
+    name: "Kerala Garden",
+    description:
+      "Secret Garden with a Kerala venue: the same garden, lace heart and engraved magnolias, with a Kerala engraving on the venue page — a church, a tharavad or the backwaters, chosen by the couple's community.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "garden-olive",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["garden-olive"],
+  },
 ];
 
 export function getTemplateMeta(id: string): TemplateMeta {

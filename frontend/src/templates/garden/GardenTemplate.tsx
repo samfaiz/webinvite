@@ -56,6 +56,29 @@ import {
  */
 
 const A = (f: string) => `/assets/templates/garden/${f}`;
+
+/** The design comes in two variants that differ only in the venue engraving:
+ *  the original old-world house, and Kerala — a tharavad, a church or the
+ *  backwaters. Each engraving leaves a different height of open olive above
+ *  it, so each carries where its words end and where its button sits. */
+type Variant = "olive" | "kerala";
+type VenueArt = { file: string; textTo: number; button: [number, number] };
+const VENUES: Record<"house" | "tharavad" | "church" | "backwaters", VenueArt> = {
+  house: { file: "03-venue.jpg", textTo: 0.475, button: [0.83, 0.95] },
+  tharavad: { file: "03-venue-tharavad.jpg", textTo: 0.43, button: [0.87, 0.965] },
+  church: { file: "03-venue-church.jpg", textTo: 0.395, button: [0.855, 0.96] },
+  backwaters: { file: "03-venue-backwaters.jpg", textTo: 0.405, button: [0.79, 0.9] },
+};
+
+function venueFor(variant: Variant, content: InvitationContent, community?: string): VenueArt {
+  if (variant === "olive") return VENUES.house;
+  const pick = content.venueArt;
+  if (pick && pick !== "auto") return VENUES[pick];
+  if (community === "kerala-christian") return VENUES.church;
+  if (community === "hindu") return VENUES.tharavad;
+  return VENUES.backwaters;
+}
+
 const ICONS = ["icon-guests.png", "icon-swans.png", "icon-cake.png", "icon-glasses.png"];
 
 // slice heights in art pixels. Cut where each panel's sides run straight and
@@ -398,21 +421,30 @@ function ReplyForm({ content, live }: { content: InvitationContent; live: boolea
 
 /* --------------------------- the template --------------------------- */
 
-export function GardenTemplate({
-  content,
-  theme,
-  intro = true,
-  live = false,
-  snap = false,
-  compact = false,
-  editing = false,
-}: RenderProps & {
+type GardenProps = RenderProps & {
   intro?: boolean;
   live?: boolean;
   snap?: boolean;
   compact?: boolean;
   editing?: boolean;
-}) {
+};
+
+/** "Kerala Garden": the same design with a Kerala engraving on the venue page. */
+export function GardenKeralaTemplate(props: GardenProps) {
+  return <GardenTemplate {...props} variant="kerala" />;
+}
+
+export function GardenTemplate({
+  content,
+  theme,
+  motif,
+  intro = true,
+  live = false,
+  snap = false,
+  compact = false,
+  editing = false,
+  variant = "olive",
+}: GardenProps & { variant?: Variant }) {
   // guests open the envelope; the Studio, gallery and thumbnails don't
   const gated = intro && !editing && !compact;
   const [opened, setOpened] = useState(!gated);
@@ -478,6 +510,7 @@ export function GardenTemplate({
   const showRsvp = !hidden.includes("rsvp");
   const date = { iso: countdown?.targetDate, fallback: dateReveal?.eventDate };
   const cal = calendarEvent(content);
+  const venue = venueFor(variant, content, motif?.id ?? content.meta?.community);
 
   const target = firstEv ? targetFromEvent(firstEv) : {};
   if (map?.directionsQuery?.trim()) {
@@ -637,9 +670,9 @@ export function GardenTemplate({
               )}
 
               {/* ------------------------------ 3 · venue ------------------------------ */}
-              <Plate id="frame-venue" art={A("03-venue.jpg")} fill>
+              <Plate id="frame-venue" art={A(venue.file)} fill>
                 {/* the flat olive above the engraving; inside what a phone keeps */}
-                <Zone box={{ x0: 0.12, y0: 0.05, x1: 0.88, y1: 0.475 }} className="items-center justify-center text-center">
+                <Zone box={{ x0: 0.12, y0: 0.04, x1: 0.88, y1: venue.textTo }} className="items-center justify-center text-center">
                   <Rise className="flex flex-col items-center">
                     <Heading size={104} color="var(--g-paper)" flourish={300}>
                       Venue
@@ -667,7 +700,7 @@ export function GardenTemplate({
                   ) : null}
                 </Zone>
                 {hasMapTarget(target) ? (
-                  <Zone box={{ x0: 0.1, y0: 0.83, x1: 0.9, y1: 0.95 }} className="items-center justify-center">
+                  <Zone box={{ x0: 0.1, y0: venue.button[0], x1: 0.9, y1: venue.button[1] }} className="items-center justify-center">
                     <DirectionsLink target={target} style={actionStyle("cream")}>
                       <Icon name="pin" />
                       {map?.directionsLabel?.trim() || "Get directions"}

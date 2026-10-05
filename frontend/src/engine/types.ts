@@ -272,6 +272,10 @@ export interface InvitationContent {
   /** Ways for guests to reach the couple: a group chat to share photos in,
    *  and a person to call on the day. Optional — designs that have a place
    *  for them show only what is filled in. */
+  /** Kerala Garden's venue engraving. Unset or "auto" follows the couple's
+   *  community: church for Kerala Christian, tharavad for Hindu, backwaters
+   *  for everyone else. Other designs ignore it. */
+  venueArt?: "auto" | "tharavad" | "church" | "backwaters";
   contacts?: {
     /** WhatsApp / Telegram group invite link */
     chatUrl?: string;

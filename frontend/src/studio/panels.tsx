@@ -96,6 +96,20 @@ export function DesignPanel({ draft, update }: PanelProps) {
           ]}
         />
       </Field>
+      {draft.templateId === "garden-kerala" ? (
+        <Field label="Venue picture">
+          <Select
+            value={draft.content.venueArt ?? "auto"}
+            onChange={(v) => update((d) => { d.content.venueArt = v as typeof d.content.venueArt; })}
+            options={[
+              { value: "auto", label: "Automatic (by community)" },
+              { value: "church", label: "Kerala church" },
+              { value: "tharavad", label: "Kerala tharavad" },
+              { value: "backwaters", label: "Kerala backwaters" },
+            ]}
+          />
+        </Field>
+      ) : null}
       {isCustom ? (
         <p className="mb-3 -mt-1 rounded-lg bg-[#2b3a67]/[0.04] px-3 py-2 text-[11px] text-slate-500">
           Section-first mode. Build your invitation in the <strong>Content</strong> tab — add sections, pick a layout for each, set backgrounds &amp; fonts. Colours/fonts here apply as global defaults.
