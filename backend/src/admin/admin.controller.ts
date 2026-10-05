@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/auth.decorators';
 import { MailSettingsDto, TestMailDto, UserPermissionsDto } from '../settings/settings.dto';
+import { ChangeDesignDto, RestoreDesignDto } from './admin.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
@@ -24,6 +25,18 @@ export class AdminController {
   @Get('invitations')
   invitations() {
     return this.svc.listInvitations();
+  }
+
+  /** Move a couple onto another saved design, keeping all their details. */
+  @Put('invitations/:id/design')
+  changeDesign(@Param('id') id: string, @Body() dto: ChangeDesignDto) {
+    return this.svc.changeDesign(id, dto.designId);
+  }
+
+  /** Undo the above with the snapshot it returned. */
+  @Put('invitations/:id/design/restore')
+  restoreDesign(@Param('id') id: string, @Body() dto: RestoreDesignDto) {
+    return this.svc.restoreDesign(id, dto);
   }
 
   @Get('users')

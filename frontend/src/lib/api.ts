@@ -13,6 +13,9 @@ export const tokenStore = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 };
 
+/** An invitation's look before a design change: what "Undo" puts back. */
+export type DesignSnapshot = { templateId: string; themeId: string; motifId: string; themeJson: string };
+
 async function request<T = any>(
   path: string,
   opts: RequestInit = {},
@@ -262,6 +265,20 @@ export const api = {
   adminDashboard: () => request<any>("/admin/dashboard", {}, true),
   adminStats: () => request<any>("/admin/stats", {}, true),
   adminInvitations: () => request<any[]>("/admin/invitations", {}, true),
+  /** Move a couple onto another saved design; their details are kept. */
+  adminChangeDesign: (id: string, designId: string) =>
+    request<{ ok: boolean; design: string; templateId: string; previous: DesignSnapshot }>(
+      `/admin/invitations/${id}/design`,
+      { method: "PUT", body: JSON.stringify({ designId }) },
+      true,
+    ),
+  /** Undo `adminChangeDesign` with the snapshot it returned. */
+  adminRestoreDesign: (id: string, previous: DesignSnapshot) =>
+    request<{ ok: boolean }>(
+      `/admin/invitations/${id}/design/restore`,
+      { method: "PUT", body: JSON.stringify(previous) },
+      true,
+    ),
   adminUsers: () => request<any[]>("/admin/users", {}, true),
   resetUserPassword: (id: string, password?: string) =>
     request<{ ok: boolean; email: string; password?: string }>(

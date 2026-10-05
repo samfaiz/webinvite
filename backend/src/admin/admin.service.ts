@@ -156,6 +156,70 @@ export class AdminService {
     }));
   }
 
+  /**
+   * Move a couple onto another design. Only the look is replaced: layout,
+   * theme and community motif, exactly as if they had started from that
+   * design. Their content (names, events, photos, wishes), link, status and
+   * RSVPs are not touched. The previous look is returned so it can be undone.
+   */
+  async changeDesign(invitationId: string, designId: string) {
+    const inv = await this.prisma.invitation.findUnique({
+      where: { id: invitationId },
+      select: { templateId: true, themeId: true, motifId: true, themeJson: true },
+    });
+    if (!inv) throw new NotFoundException('Invitation not found');
+    const d = await this.prisma.design.findUnique({ where: { id: designId } });
+    if (!d) throw new NotFoundException('Design not found');
+
+    // the same theme a new invitation made from this design gets — including
+    // the "design-<id>" stamp, so the design's re-apply tool reaches it later
+    const theme = {
+      id: `design-${d.id}`,
+      name: d.name,
+      colors: JSON.parse(d.colorsJson),
+      fonts: JSON.parse(d.fontsJson),
+      particles: JSON.parse(d.particlesJson),
+      backgrounds: JSON.parse(d.backgroundsJson),
+    };
+    await this.prisma.invitation.update({
+      where: { id: invitationId },
+      data: {
+        templateId: d.templateId,
+        themeId: theme.id,
+        motifId: d.community,
+        themeJson: JSON.stringify(theme),
+      },
+    });
+    return { ok: true, design: d.name, templateId: d.templateId, previous: inv };
+  }
+
+  /** Undo for `changeDesign`: put back the look it returned. */
+  async restoreDesign(
+    invitationId: string,
+    prev: { templateId: string; themeId: string; motifId: string; themeJson: string },
+  ) {
+    const exists = await this.prisma.invitation.findUnique({
+      where: { id: invitationId },
+      select: { id: true },
+    });
+    if (!exists) throw new NotFoundException('Invitation not found');
+    try {
+      JSON.parse(prev.themeJson);
+    } catch {
+      throw new BadRequestException('That snapshot is not a theme');
+    }
+    await this.prisma.invitation.update({
+      where: { id: invitationId },
+      data: {
+        templateId: prev.templateId,
+        themeId: prev.themeId,
+        motifId: prev.motifId,
+        themeJson: prev.themeJson,
+      },
+    });
+    return { ok: true };
+  }
+
   async listUsers() {
     const rows = await this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
