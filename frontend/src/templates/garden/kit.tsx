@@ -366,9 +366,9 @@ export function SealMonogram({ initials }: { initials: string }) {
       className="flex h-full w-full items-center justify-center"
       style={{
         fontFamily: "var(--font-cinzel)",
-        fontSize: u(24),
+        fontSize: u(28),
         letterSpacing: "0.04em",
-        color: "rgba(236, 228, 206, 0.55)",
+        color: "rgba(240, 233, 214, 0.78)",
         textShadow: "0 -1px 0 rgba(30,24,14,0.55), 0 1px 0 rgba(255,250,235,0.25)",
       }}
     >

@@ -16,6 +16,7 @@ import { hasDressCode } from "@/blocks/DressCode";
 import { MEALS, useRsvp } from "@/blocks/useRsvp";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { Plate, Zone, u } from "./stage";
+import { Cover } from "./cover";
 import {
   Body,
   Caps,
@@ -28,7 +29,6 @@ import {
   SCRIPT,
   SERIF,
   Script,
-  SealMonogram,
   TimelineStop,
   pillStyle,
 } from "./kit";
@@ -335,6 +335,7 @@ function ContactCard({ title, line, action }: { title: string; line: ReactNode; 
 export function GardenTemplate({
   content,
   theme,
+  intro = true,
   live = false,
   snap = false,
   compact = false,
@@ -347,6 +348,17 @@ export function GardenTemplate({
   editing?: boolean;
 }) {
   const [sheet, setSheet] = useState(false);
+  // guests open the envelope; the Studio, gallery and thumbnails don't
+  const gated = intro && !editing && !compact;
+  const [opened, setOpened] = useState(!gated);
+  // the scroll arrow (and its one-time nudge onwards) waits until the card
+  // has been written, so the guest has a moment with their names first
+  const [guide, setGuide] = useState(!gated);
+  useEffect(() => {
+    if (!opened || guide) return;
+    const t = window.setTimeout(() => setGuide(true), 4500);
+    return () => window.clearTimeout(t);
+  }, [opened, guide]);
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
   const firstEv = schedule?.events?.[0];
@@ -423,67 +435,22 @@ export function GardenTemplate({
 
           <main>
             {/* ------------------------------ 1 · cover ------------------------------ */}
-            <Plate id="frame-couple" art={A("01-cover.jpg")} video={A("01-cover.mp4")} field="var(--g-dusk)">
-              <Zone box={{ x0: 0.04, y0: 0.016, x1: 0.96, y1: 0.052 }} className="flex-row items-center justify-center">
-                {(
-                  [
-                    ["Venue", () => goTo("frame-venue")],
-                    ["Timing", () => goTo("frame-schedule")],
-                    ["Details", () => goTo(showDress ? "frame-dresscode" : "frame-rsvp")],
-                    ...(showRsvp ? ([["RSVP", openSheet]] as [string, () => void][]) : []),
-                  ] as [string, () => void][]
-                ).map(([label, act], i) => (
-                  <span key={label} className="flex items-center">
-                    {i > 0 ? (
-                      <span
-                        aria-hidden
-                        style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(24)}` }}
-                      >
-                        ◆
-                      </span>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={act}
-                      className="uppercase"
-                      style={{
-                        fontFamily: SERIF,
-                        fontSize: u(25),
-                        fontWeight: 600,
-                        letterSpacing: "0.2em",
-                        color: "var(--g-paper)",
-                        textShadow: "0 1px 8px rgba(0,0,0,0.6)",
-                      }}
-                    >
-                      {label}
-                    </button>
-                  </span>
-                ))}
-              </Zone>
+            <Cover
+              gated={gated}
+              names={names.join(" & ")}
+              initials={monogram(couple.partner1?.name, couple.partner2?.name)}
+              date={date}
+              nav={[
+                ["Venue", () => goTo("frame-venue")],
+                ["Timing", () => goTo("frame-schedule")],
+                ["Details", () => goTo(showDress ? "frame-dresscode" : "frame-rsvp")],
+                ...(showRsvp ? ([["RSVP", openSheet]] as [string, () => void][]) : []),
+              ]}
+              onOpen={() => setOpened(true)}
+            />
 
-              {/* On the sage face of the heart, one line per band. Measured: the
-                  lobes join at .65 where it is .31–.69 wide; .70 → .32–.68;
-                  .74 → .37–.63; then it closes fast. */}
-              <Zone box={{ x0: 0.3, y0: 0.627, x1: 0.7, y1: 0.684 }} className="items-center justify-end">
-                <Script size={74} color="#fbf8f0" className="whitespace-nowrap drop-shadow-[0_1px_2px_rgba(40,48,30,0.35)]">
-                  Wedding Day
-                </Script>
-              </Zone>
-              <Zone box={{ x0: 0.33, y0: 0.686, x1: 0.67, y1: 0.712 }} className="items-center justify-center text-center">
-                <Caps size={names.join(" & ").length > 18 ? 21 : 26} color="#fbf8f0" track={0.2} className="leading-tight">
-                  {names.join(" & ")}
-                </Caps>
-              </Zone>
-              <Zone box={{ x0: 0.35, y0: 0.714, x1: 0.65, y1: 0.742 }} className="items-center justify-center">
-                <DateCartouche {...date} color="#f6f2e6" size={19} />
-              </Zone>
-
-              {/* the blank wax seal, pressed with their initials */}
-              <Zone box={{ x0: 0.475, y0: 0.7936, x1: 0.525, y1: 0.8215 }}>
-                <SealMonogram initials={monogram(couple.partner1?.name, couple.partner2?.name)} />
-              </Zone>
-            </Plate>
-
+            {/* the rest waits until the envelope has been opened */}
+            <div hidden={!opened}>
             {/* ----------------------------- 2 · welcome ----------------------------- */}
             {hidden.includes("families") ? null : (
               <Plate id="frame-families" art={A("02-welcome.jpg")}>
@@ -753,6 +720,7 @@ export function GardenTemplate({
                 </Caps>
               </Zone>
             </Plate>
+            </div>
           </main>
 
           <AnimatePresence>
@@ -760,7 +728,7 @@ export function GardenTemplate({
           </AnimatePresence>
 
           <MusicToggle trackUrl={content.music?.trackUrl} />
-          <ScrollGuide active hasMusic={!!content.music?.trackUrl} />
+          {guide ? <ScrollGuide active hasMusic={!!content.music?.trackUrl} /> : null}
         </div>
       </ThemeProvider>
     </PreviewContext.Provider>
