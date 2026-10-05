@@ -68,6 +68,18 @@ export const templates: TemplateMeta[] = [
     // has to stay in the blue family the engraving was designed around
     themeIds: ["toile-blue"],
   },
+  {
+    id: "garden-olive",
+    name: "Secret Garden",
+    description:
+      "An old-master garden at dusk and engraved magnolias on olive: a lace heart in an envelope, an oval portrait, an engraved venue, an illustrated timeline and an RSVP that opens as a sheet.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "garden-olive",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    // painted and engraved plates — the colours are in the art, not the theme
+    themeIds: ["garden-olive"],
+  },
 ];
 
 export function getTemplateMeta(id: string): TemplateMeta {

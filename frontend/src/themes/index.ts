@@ -137,6 +137,18 @@ export const themes: Record<string, Theme> = {
     },
     { type: "sparkles", color: "#d8c79a" }
   ),
+  /* Pairs with the Garden template. Its plates carry the colour; this keeps the
+     shared chrome (music button, scroll guide) in the same olive and cream. */
+  "garden-olive": make(
+    "garden-olive",
+    "Garden Olive",
+    {
+      bg: "#f1eada", surface: "#f1eada", primary: "#4f5337", secondary: "#7e7f60",
+      accent: "#a59d73", text: "#4f5337", muted: "#7e7f60",
+      gradientFrom: "#f1eada", gradientTo: "#e4dcc4",
+    },
+    { type: "none", color: "#f1eada" }
+  ),
   /* Pairs with the Toile template: engraved blue botanicals on paper white,
      with a powder-blue panel. Muted on purpose — the line work carries the
      design, so the palette stays quiet behind it. */
