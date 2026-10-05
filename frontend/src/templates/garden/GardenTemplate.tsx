@@ -65,11 +65,10 @@ const PALETTE = {
 
 const PAPER_SOFT = "color-mix(in srgb, var(--g-paper) 84%, transparent)";
 
-function monogram(a?: string, b?: string) {
-  return [a, b]
-    .map((n) => n?.trim().charAt(0).toUpperCase())
-    .filter(Boolean)
-    .join("·");
+/** "Rejin", "Jessin" → ["R", "J"]. From the names rather than
+ *  `couple.monogram`, which new invitations inherit from the sample couple. */
+function initialsOf(...names: (string | undefined)[]) {
+  return names.map((n) => n?.trim().charAt(0).toUpperCase()).filter((c): c is string => Boolean(c));
 }
 
 function useCountdown(target?: string) {
@@ -361,6 +360,7 @@ export function GardenTemplate({
   }, [opened, guide]);
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
+  const letters = initialsOf(couple.partner1?.name, couple.partner2?.name);
   const firstEv = schedule?.events?.[0];
   const photo = story?.items?.find((s) => s.photo)?.photo;
   const hidden = content.hiddenSections ?? [];
@@ -438,7 +438,8 @@ export function GardenTemplate({
             <Cover
               gated={gated}
               names={names.join(" & ")}
-              initials={monogram(couple.partner1?.name, couple.partner2?.name)}
+              letters={letters}
+              seal={content.envelope?.seal?.trim() || letters.join("·")}
               date={date}
               nav={[
                 ["Venue", () => goTo("frame-venue")],

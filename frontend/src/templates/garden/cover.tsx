@@ -5,17 +5,17 @@ import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Plate, Zone, u } from "./stage";
-import { Caps, DateCartouche, SCRIPT, SERIF, Script, SealMonogram } from "./kit";
+import { Caps, DateCartouche, SCRIPT, SERIF, SealMonogram } from "./kit";
 
 /**
  * The Garden cover, and the opening of the invitation.
  *
  * A guest arrives at the envelope still sealed in the garden. Tapping it
  * plays the envelope opening — a video framed exactly like the cover plate,
- * which ends on it — and then the card is written in: "Wedding Day" drawn
+ * which ends on it — and then the card is written in: their initials drawn
  * left to right as if by pen, the names surfacing out of a soft blur, the date
- * opening out from the centre. Before that the card carries only their
- * monogram, and the seal their initials. Names can't be in the video — every couple's are different — so that
+ * opening out from the centre. The seal carries their initials throughout.
+ * Names can't be in the video — every couple's are different — so that
  * part is done here, on top of it.
  *
  * Until the opening video exists the cover opens straight into the writing.
@@ -51,17 +51,51 @@ const arrive: Variants = {
   shown: { opacity: 1, transition: { duration: 0.9, delay: 3.6 } },
 };
 
+/** Their initials as the card's title: two script capitals around a small
+ *  italic ampersand. */
+function Monogram({ letters, size }: { letters: string[]; size: number }) {
+  const cap: CSSProperties = { fontFamily: SCRIPT, fontSize: u(size), lineHeight: 1.05 };
+  return (
+    <span
+      className="flex items-center whitespace-nowrap drop-shadow-[0_1px_2px_rgba(40,48,30,0.35)]"
+      style={{ color: "#fbf8f0" }}
+    >
+      <span style={cap}>{letters[0]}</span>
+      {letters[1] ? (
+        <>
+          <span
+            style={{
+              fontFamily: SERIF,
+              fontStyle: "italic",
+              fontSize: u(size * 0.4),
+              opacity: 0.85,
+              margin: `0 ${u(size * 0.22)} 0 ${u(size * 0.12)}`,
+            }}
+          >
+            &amp;
+          </span>
+          <span style={cap}>{letters[1]}</span>
+        </>
+      ) : null}
+    </span>
+  );
+}
+
 export function Cover({
   gated,
   names,
-  initials,
+  letters,
+  seal,
   date,
   nav,
   onOpen,
 }: {
   gated: boolean;
   names: string;
-  initials: string;
+  /** the couple's initials, written on the card as it is revealed */
+  letters: string[];
+  /** what is pressed into the wax seal */
+  seal: string;
   date: { iso?: string; fallback?: string };
   nav: [string, () => void][];
   onOpen: () => void;
@@ -70,7 +104,6 @@ export function Cover({
   const [stage, setStage] = useState<Stage>(gated ? "sealed" : "written");
   const film = useRef<HTMLVideoElement | null>(null);
   const written = stage === "written";
-  const letters = initials.split("·").filter(Boolean);
   // the Studio and thumbnails render the finished card with no animation
   const from = gated ? "hidden" : false;
   const to = written ? "shown" : "hidden";
@@ -175,26 +208,24 @@ export function Cover({
         </Zone>
       ) : null}
 
-      {/* On the sage face of the heart, one line per band. Measured: the lobes
-          join at .65 where it is .31–.69 wide; .70 → .32–.68; .74 → .37–.63;
-          then it closes fast. */}
-      <Zone box={{ x0: 0.3, y0: 0.627, x1: 0.7, y1: 0.684 }} className="items-center justify-end">
+      {/* On the sage face of the heart, one line per band. Measured: the
+          lobes join at .65 where it is .31–.69 wide (above that a cream flap
+          tip divides them); .70 → .32–.68; .74 → .37–.63; then it closes. */}
+      <Zone box={{ x0: 0.3, y0: 0.632, x1: 0.7, y1: 0.697 }} className="items-center justify-end">
         <motion.div initial={from} animate={to} variants={pen}>
-          <Script size={74} color="#fbf8f0" className="whitespace-nowrap drop-shadow-[0_1px_2px_rgba(40,48,30,0.35)]">
-            Wedding Day
-          </Script>
+          <Monogram letters={letters} size={104} />
         </motion.div>
       </Zone>
-      <Zone box={{ x0: 0.33, y0: 0.686, x1: 0.67, y1: 0.712 }} className="items-center justify-center text-center">
+      <Zone box={{ x0: 0.33, y0: 0.697, x1: 0.67, y1: 0.72 }} className="items-center justify-center text-center">
         <motion.div initial={from} animate={to} variants={surface}>
-          <Caps size={names.length > 18 ? 21 : 26} color="#fbf8f0" track={0.2} className="leading-tight">
+          <Caps size={names.length > 18 ? 20 : 24} color="#fbf8f0" track={0.2} className="leading-tight">
             {names}
           </Caps>
         </motion.div>
       </Zone>
-      <Zone box={{ x0: 0.35, y0: 0.714, x1: 0.65, y1: 0.742 }} className="items-center justify-center">
+      <Zone box={{ x0: 0.35, y0: 0.721, x1: 0.65, y1: 0.748 }} className="items-center justify-center">
         <motion.div initial={from} animate={to} variants={unfold}>
-          <DateCartouche {...date} color="#f6f2e6" size={19} />
+          <DateCartouche {...date} color="#f6f2e6" size={18} />
         </motion.div>
       </Zone>
 
@@ -204,42 +235,9 @@ export function Cover({
           film it waits for the cover's own seal) */}
       {OPENING && !written ? null : (
         <Zone box={{ x0: 0.475, y0: 0.7936, x1: 0.525, y1: 0.8215 }}>
-          <SealMonogram initials={initials} />
+          <SealMonogram initials={seal} />
         </Zone>
       )}
-
-      {/* before it is opened, the card carries only their monogram */}
-      <AnimatePresence>
-        {!OPENING && stage === "sealed" && letters.length ? (
-          <motion.div
-            key="monogram"
-            className="contents"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(5px)", transition: { duration: 0.6 } }}
-          >
-            <Zone box={{ x0: 0.3, y0: 0.618, x1: 0.7, y1: 0.75 }} className="flex-row items-center justify-center">
-              <span style={{ fontFamily: SCRIPT, fontSize: u(150), lineHeight: 1, color: "#fbf8f0" }}>{letters[0]}</span>
-              {letters[1] ? (
-                <>
-                  <span
-                    style={{
-                      fontFamily: SERIF,
-                      fontStyle: "italic",
-                      fontSize: u(58),
-                      color: "rgba(251,248,240,0.8)",
-                      margin: `0 ${u(22)} 0 ${u(12)}`,
-                      alignSelf: "center",
-                    }}
-                  >
-                    &amp;
-                  </span>
-                  <span style={{ fontFamily: SCRIPT, fontSize: u(150), lineHeight: 1, color: "#fbf8f0" }}>{letters[1]}</span>
-                </>
-              ) : null}
-            </Zone>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
 
       {/* the invitation to open it */}
       <AnimatePresence>
