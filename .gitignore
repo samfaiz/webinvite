@@ -31,6 +31,8 @@ backend/exports/
 # ---- large media / reference recordings (not source) ----
 *.mp4
 *.mov
+# …but a design's own small, compressed videos are part of the design
+!frontend/public/assets/templates/**/*.mp4
 
 # ---- os / editor ----
 .DS_Store

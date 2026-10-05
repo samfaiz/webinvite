@@ -423,7 +423,7 @@ export function GardenTemplate({
 
           <main>
             {/* ------------------------------ 1 · cover ------------------------------ */}
-            <Plate id="frame-couple" art={A("01-cover.jpg")} field="var(--g-dusk)">
+            <Plate id="frame-couple" art={A("01-cover.jpg")} video={A("01-cover.mp4")} field="var(--g-dusk)">
               <Zone box={{ x0: 0.04, y0: 0.016, x1: 0.96, y1: 0.052 }} className="flex-row items-center justify-center">
                 {(
                   [

@@ -33,11 +33,15 @@ export function u(artPx: number): string {
 export function Plate({
   id,
   art,
+  video,
   field = "var(--g-olive)",
   children,
 }: {
   id?: string;
   art: string;
+  /** a moving version of the same plate, framed identically — the art stays
+   *  underneath as its poster and for anyone who prefers reduced motion */
+  video?: string;
   field?: string;
   children: ReactNode;
 }) {
@@ -60,6 +64,21 @@ export function Plate({
           backgroundRepeat: "no-repeat",
         }}
       >
+        {video && !compact ? (
+          <video
+            src={video}
+            poster={art}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden
+            className="absolute inset-0 h-full w-full motion-reduce:hidden"
+            // `fill`, like the art: the measured boxes hold for the video too
+            style={{ objectFit: "fill" }}
+          />
+        ) : null}
         {children}
       </div>
     </section>
