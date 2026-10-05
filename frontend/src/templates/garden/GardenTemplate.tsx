@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { EventItem, InvitationContent, Person, RenderProps } from "@/engine/types";
+import type { EventItem, InvitationContent, MotifPack, Person, RenderProps } from "@/engine/types";
 import { PreviewContext, usePreview } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -19,6 +19,7 @@ import { initialOf } from "@/lib/initials";
 import { FlowPlate, Plate, Zone, u } from "./stage";
 import type { Slices } from "./stage";
 import { Cover } from "./cover";
+import { useTour } from "./tour";
 import { ReplyForm } from "./reply";
 import {
   ActionButton,
@@ -35,6 +36,7 @@ import {
   PhotoViewer,
   Pip,
   Rise,
+  SCRIPT,
   SERIF,
   Script,
   actionStyle,
@@ -192,6 +194,106 @@ function Stop({ ev, icon, scale, dateLine }: { ev: EventItem; icon: string; scal
   );
 }
 
+/* ------------------------- the welcome oval ------------------------- */
+
+type OvalFill = "photos" | "swans" | "initials" | "date" | "venue" | "blessing";
+
+/** What fills the lace oval: the couple's choice (Studio → Design), else
+ *  their photos when there are any, else the swans engraving. */
+function gardenOvalFill(chosen: InvitationContent["frameFill"], hasPhotos: boolean): OvalFill {
+  if (chosen === "swans" || chosen === "initials" || chosen === "date" || chosen === "venue" || chosen === "blessing") return chosen;
+  if (chosen === "flowers") return "swans"; // Blue Hydrangea's no-photo choice
+  return hasPhotos ? "photos" : "swans";
+}
+
+/** Which venue drawing the oval shows: the house for Secret Garden, the Kerala
+ *  drawing (chosen, or by community) for Kerala Garden. */
+function ovalVenue(variant: Variant, content: InvitationContent, community?: string): string {
+  const pick = content.venueArt && content.venueArt !== "auto" ? content.venueArt : null;
+  if (variant === "olive") return pick ?? "house";
+  return pick ?? (community === "kerala-christian" ? "church" : community === "hindu" ? "tharavad" : "backwaters");
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** The lace oval for couples who'd rather not show photos. It's small, so
+ *  each fill is a single strong thing: the swans, their initials, the date,
+ *  or the place. (A blessing puts the swans here and its words below.) */
+function GardenOval({ kind, content, letters, venueKey }: { kind: OvalFill; content: InvitationContent; letters: string[]; venueKey: string }) {
+  const cream: CSSProperties = { background: "radial-gradient(circle at 50% 42%, #faf6ec, #ebe3cf)", borderRadius: "50%" };
+  const box = "relative flex h-full w-full flex-col items-center justify-center overflow-hidden text-center";
+  if (kind === "venue") {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={content.venuePhoto || A(`oval-${venueKey}.jpg`)}
+        alt=""
+        className="h-full w-full object-cover"
+        style={{ borderRadius: "50%" }}
+      />
+    );
+  }
+  if (kind === "initials") {
+    return (
+      <div className={`${box} flex-row`} style={{ ...cream, paddingRight: u(18) }}>
+        <span style={{ fontFamily: SCRIPT, fontSize: u(96), lineHeight: 1, color: "var(--g-ink)" }}>{letters[0]}</span>
+        {letters[1] ? (
+          <>
+            <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: u(40), color: "var(--g-soft)", margin: `0 ${u(10)} 0 ${u(2)}` }}>&amp;</span>
+            <span style={{ fontFamily: SCRIPT, fontSize: u(96), lineHeight: 1, color: "var(--g-ink)" }}>{letters[1]}</span>
+          </>
+        ) : null}
+      </div>
+    );
+  }
+  if (kind === "date") {
+    const d = new Date(content.countdown?.targetDate ?? "");
+    const ok = !Number.isNaN(d.getTime());
+    return (
+      <div className={box} style={cream}>
+        <span style={{ fontFamily: SCRIPT, fontSize: u(40), color: "var(--g-ink)", lineHeight: 1.1 }}>Save the Date</span>
+        {ok ? (
+          <>
+            <span style={{ fontFamily: SERIF, fontWeight: 700, fontSize: u(104), lineHeight: 1, color: "var(--g-ink)" }}>{d.getDate()}</span>
+            <span style={{ fontFamily: SERIF, fontWeight: 600, fontSize: u(26), letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--g-ink)" }}>
+              {MONTHS[d.getMonth()]}
+            </span>
+            <span style={{ fontFamily: SERIF, fontSize: u(40), color: "var(--g-soft)" }}>{d.getFullYear()}</span>
+          </>
+        ) : null}
+      </div>
+    );
+  }
+  // swans — the engraving from the timeline, two necks making a heart
+  return (
+    <div className={box} style={cream}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={A("icon-swans.png")} alt="" style={{ width: "100%", transform: "scale(1.2)" }} />
+    </div>
+  );
+}
+
+/** A blessing or wish under the oval: the couple's own words, else the verse
+ *  on their first event, else their community's blessing. */
+function Blessing({ content, motif }: { content: InvitationContent; motif?: MotifPack }) {
+  const own = content.frameText?.trim();
+  const ev = content.schedule?.events?.[0];
+  const text = own || ev?.verse?.trim() || motif?.defaultBlessing || "Two hearts, one journey.";
+  const ref = own ? "" : ev?.verse?.trim() ? ev.verseRef ?? "" : motif?.defaultBlessingRef ?? "";
+  return (
+    <Rise className="flex flex-col items-center" style={{ marginBottom: u(40) }}>
+      <Body size={text.length <= 40 ? 50 : 44} italic className="leading-snug">
+        “{text}”
+      </Body>
+      {ref ? (
+        <Caps size={28} track={0.16} className="mt-[2%]">
+          {ref}
+        </Caps>
+      ) : null}
+    </Rise>
+  );
+}
+
 /* --------------------------- the template --------------------------- */
 
 type GardenProps = RenderProps & {
@@ -232,49 +334,24 @@ export function GardenTemplate({
   const reduce = useReducedMotion();
   const [viewer, setViewer] = useState<number | null>(null);
 
-  /* The tour: after the card is written the invitation plays itself, a page
-     every few seconds (a tall page shows its top, then its foot), and stops at
-     the RSVP so the guest can reply. Any touch, scroll or key ends it at once —
-     the guest is then in charge. A thin gold line at the top shows it's on. */
-  const DWELL = 7000;
-  const [touring, setTouring] = useState(false);
-  const [step, setStep] = useState(0);
+  /* The tour: once the card is written the invitation plays itself, page by
+     page to the end, holding the reply page longer. A touch pauses it; it
+     picks up again after a while with no touching (useTour). A thin gold
+     line at the top shows it's playing. */
+  const viewerOpen = useRef(false);
   useEffect(() => {
-    if (!touring) return;
-    const root = pages.current;
-    if (!root) return;
-    const stops: { el: HTMLElement; block: ScrollLogicalPosition }[] = [];
-    for (const el of Array.from(root.querySelectorAll<HTMLElement>(":scope > section"))) {
-      stops.push({ el, block: "start" });
-      if (el.id === "frame-rsvp") break;
-      if (el.offsetHeight > window.innerHeight + 60) stops.push({ el, block: "end" });
-    }
-    let i = 0; // the first stop is where `onward` has just taken them
-    let timer = 0;
-    const end = () => setTouring(false);
-    const next = () => {
-      i += 1;
-      if (i >= stops.length) return end();
-      stops[i].el.scrollIntoView({ behavior: "smooth", block: stops[i].block });
-      setStep(i);
-      if (stops[i].el.id === "frame-rsvp") return end();
-      timer = window.setTimeout(next, DWELL);
-    };
-    timer = window.setTimeout(next, DWELL);
-    const kinds = ["pointerdown", "wheel", "touchstart", "keydown"] as const;
-    kinds.forEach((k) => window.addEventListener(k, end, { passive: true, capture: true }));
-    return () => {
-      window.clearTimeout(timer);
-      kinds.forEach((k) => window.removeEventListener(k, end, { capture: true }));
-    };
-  }, [touring]);
+    viewerOpen.current = viewer !== null;
+  }, [viewer]);
+  const tour = useTour(pages, { hold: () => viewerOpen.current });
 
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
   const letters = [initialOf(couple.partner1?.name), initialOf(couple.partner2?.name)].filter(Boolean);
   const firstEv = schedule?.events?.[0];
-  const photos = (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
   const hidden = content.hiddenSections ?? [];
+  // hiding "Our Story" in the Studio keeps the couple's photos off the card
+  const photos = hidden.includes("story") ? [] : (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
+  const ovalFill = gardenOvalFill(content.frameFill, photos.length > 0);
   const dress = content.dressCode;
   const wishes = content.wishes ?? [];
   const contacts = content.contacts ?? {};
@@ -299,7 +376,7 @@ export function GardenTemplate({
     const cover = document.getElementById("frame-couple");
     if (cover && Math.abs(cover.getBoundingClientRect().top) > 40) return;
     pages.current?.querySelector("section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (!reduce) setTouring(true);
+    if (!reduce) tour.start();
   };
 
   const nav: [string, () => void][] = [
@@ -350,17 +427,18 @@ export function GardenTemplate({
                   slices={WELCOME}
                   pad={150}
                   head={
-                    photos.length ? (
-                      <>
-                        {/* the lace oval: art .383–.616 × .174–.348, here as fractions of the top slice */}
-                        <Zone box={{ x0: 0.383, y0: 0.458, x1: 0.616, y1: 0.916 }}>
-                          <PhotoOval photos={photos} onOpen={editing || compact ? undefined : setViewer} />
-                        </Zone>
-                      </>
-                    ) : null
+                    // the lace oval: art .383–.616 × .174–.348, here as fractions of the top slice
+                    <Zone box={{ x0: 0.383, y0: 0.458, x1: 0.616, y1: 0.916 }}>
+                      {ovalFill === "photos" ? (
+                        <PhotoOval photos={photos} onOpen={editing || compact ? undefined : setViewer} />
+                      ) : (
+                        <GardenOval kind={ovalFill} content={content} letters={letters} venueKey={ovalVenue(variant, content, motif?.id ?? content.meta?.community)} />
+                      )}
+                    </Zone>
                   }
                 >
-                  {photos.length > 1 && !editing && !compact ? (
+                  {ovalFill === "blessing" ? <Blessing content={content} motif={motif} /> : null}
+                  {ovalFill === "photos" && photos.length > 1 && !editing && !compact ? (
                     <Rise style={{ marginBottom: u(30) }}>
                       <button
                         type="button"
@@ -681,15 +759,15 @@ export function GardenTemplate({
             {viewer !== null ? <PhotoViewer key="viewer" photos={photos} start={viewer} onClose={() => setViewer(null)} /> : null}
           </AnimatePresence>
 
-          {touring ? (
+          {tour.running && !tour.paused ? (
             <motion.div
-              key={step}
+              key={tour.stop.n}
               aria-hidden
               className="pointer-events-none fixed left-0 top-0 z-[70] h-[3px]"
               style={{ background: "var(--chrome-bg)" }}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: DWELL / 1000, ease: "linear" }}
+              transition={{ duration: tour.stop.ms / 1000, ease: "linear" }}
             />
           ) : null}
 

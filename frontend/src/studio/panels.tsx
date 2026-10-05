@@ -111,7 +111,23 @@ export function DesignPanel({ draft, update }: PanelProps) {
           />
         </Field>
       ) : null}
-      {draft.templateId === "hydrangea-blush" && draft.content.frameFill === "blessing" ? (
+      {draft.templateId === "garden-olive" || draft.templateId === "garden-kerala" ? (
+        <Field label="Inside the photo oval (welcome page)" hint="Hiding “Our Story” below also keeps photos off the card.">
+          <Select
+            value={draft.content.frameFill ?? "photos"}
+            onChange={(v) => update((d) => { d.content.frameFill = v as typeof d.content.frameFill; })}
+            options={[
+              { value: "photos", label: "Our photos" },
+              { value: "swans", label: "Swans engraving (no photos)" },
+              { value: "initials", label: "Our initials (no photos)" },
+              { value: "date", label: "The wedding date (no photos)" },
+              { value: "venue", label: "The venue — photo or drawing" },
+              { value: "blessing", label: "A blessing or wish" },
+            ]}
+          />
+        </Field>
+      ) : null}
+      {["hydrangea-blush", "garden-olive", "garden-kerala"].includes(draft.templateId) && draft.content.frameFill === "blessing" ? (
         <Field label="Blessing or wish (optional)" hint="Leave empty to use the verse on your first event, or your community's blessing.">
           <TextArea
             rows={3}
@@ -121,7 +137,7 @@ export function DesignPanel({ draft, update }: PanelProps) {
           />
         </Field>
       ) : null}
-      {draft.templateId === "garden-kerala" || (draft.templateId === "hydrangea-blush" && draft.content.frameFill === "venue") ? (
+      {draft.templateId === "garden-kerala" || (["hydrangea-blush", "garden-olive"].includes(draft.templateId) && draft.content.frameFill === "venue") ? (
         <Field label="Venue picture">
           <Select
             value={draft.content.venueArt ?? "auto"}

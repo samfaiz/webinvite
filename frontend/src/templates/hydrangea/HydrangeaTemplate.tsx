@@ -17,6 +17,7 @@ import { calendarEvent, downloadIcs } from "@/lib/calendar";
 import { initialOf } from "@/lib/initials";
 import { ActionButton, CountdownTiles, Icon, PenReveal, PhotoOval, PhotoViewer, Rise, SCRIPT, SERIF, actionStyle } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
+import { useTour } from "@/templates/garden/tour";
 import { BLUE, BLUSH, Flower, FlowerBand, OrnateFrame, Swatches, WeekStrip, laceStyle, v } from "./parts";
 
 /**
@@ -218,7 +219,13 @@ export function HydrangeaTemplate({
     ? []
     : (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
   const chosen = content.frameFill;
-  const fill = chosen === "date" || chosen === "venue" || chosen === "blessing" ? chosen : chosen === "flowers" || !photos.length ? "flowers" : "photos";
+  // (the Garden designs' swans / initials have no place here: flowers instead)
+  const fill =
+    chosen === "date" || chosen === "venue" || chosen === "blessing"
+      ? chosen
+      : (chosen && chosen !== "photos") || !photos.length
+        ? "flowers"
+        : "photos";
   const events = (schedule?.events ?? []).slice(0, 6);
   const firstEv = events[0];
   const dress = content.dressCode;
@@ -234,14 +241,16 @@ export function HydrangeaTemplate({
   }
   if (map?.directionsUrl?.trim()) target.url = map.directionsUrl.trim();
 
-  /* The tour: "Tap here to begin" starts the music and the invitation walks
-     itself through, a part every seven seconds (a tall part shows its top,
-     then its foot), stopping at the reply. Any touch hands control back. If
-     nobody taps, it begins by itself after twelve seconds (without music —
-     a browser won't play sound before a tap). */
-  const DWELL = 7000;
-  const [touring, setTouring] = useState(false);
-  const [step, setStep] = useState(0);
+  /* "Tap here to begin" starts the music and the invitation plays itself,
+     page by page to the end, holding the reply page longer; a touch pauses it
+     and it picks up again after a while (useTour). If nobody taps, it begins
+     by itself after twelve seconds (without music — a browser won't play
+     sound before a tap). */
+  const viewerOpen = useRef(false);
+  useEffect(() => {
+    viewerOpen.current = viewer !== null;
+  }, [viewer]);
+  const tour = useTour(main, { hold: () => viewerOpen.current });
   const begin = (withSound: boolean) => {
     if (begun) return;
     setBegun(true);
@@ -252,7 +261,7 @@ export function HydrangeaTemplate({
         /* no window */
       }
     }
-    if (!reduce) setTouring(true);
+    if (!reduce) tour.start();
   };
   const beginRef = useRef(begin);
   useEffect(() => {
@@ -270,37 +279,6 @@ export function HydrangeaTemplate({
       window.removeEventListener("wheel", stop);
     };
   }, [begun]);
-  useEffect(() => {
-    if (!touring) return;
-    const root = main.current;
-    if (!root) return;
-    const stops: { el: HTMLElement; block: ScrollLogicalPosition }[] = [];
-    for (const el of Array.from(root.querySelectorAll<HTMLElement>(":scope > section"))) {
-      stops.push({ el, block: "start" });
-      if (el.id === "frame-rsvp") break;
-      if (el.offsetHeight > window.innerHeight + 60) stops.push({ el, block: "end" });
-    }
-    let i = 0;
-    let timer = 0;
-    const end = () => setTouring(false);
-    const next = () => {
-      i += 1;
-      if (i >= stops.length) return end();
-      stops[i].el.scrollIntoView({ behavior: "smooth", block: stops[i].block });
-      setStep(i);
-      if (stops[i].el.id === "frame-rsvp") return end();
-      timer = window.setTimeout(next, DWELL);
-    };
-    timer = window.setTimeout(next, DWELL);
-    const kinds = ["pointerdown", "wheel", "touchstart", "keydown"] as const;
-    // (the tap that began the tour is already over by the time these listen)
-    const arm = window.setTimeout(() => kinds.forEach((k) => window.addEventListener(k, end, { passive: true, capture: true })), 300);
-    return () => {
-      window.clearTimeout(timer);
-      window.clearTimeout(arm);
-      kinds.forEach((k) => window.removeEventListener(k, end, { capture: true }));
-    };
-  }, [touring]);
 
   const family = (p?: (typeof couple)["partner1"]) => {
     if (!p?.name) return null;
@@ -644,15 +622,15 @@ export function HydrangeaTemplate({
           <AnimatePresence>
             {viewer !== null ? <PhotoViewer key="viewer" photos={photos} start={viewer} onClose={() => setViewer(null)} /> : null}
           </AnimatePresence>
-          {touring ? (
+          {tour.running && !tour.paused ? (
             <motion.div
-              key={step}
+              key={tour.stop.n}
               aria-hidden
               className="pointer-events-none fixed left-0 top-0 z-[70] h-[3px]"
               style={{ background: BLUSH }}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: DWELL / 1000, ease: "linear" }}
+              transition={{ duration: tour.stop.ms / 1000, ease: "linear" }}
             />
           ) : null}
           <MusicToggle trackUrl={content.music?.trackUrl} />
