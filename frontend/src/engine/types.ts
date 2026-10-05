@@ -276,6 +276,8 @@ export interface InvitationContent {
    *  community: church for Kerala Christian, tharavad for Hindu, backwaters
    *  for everyone else. Other designs ignore it. */
   venueArt?: "auto" | "tharavad" | "church" | "backwaters";
+  /** a photo of the venue, for designs that show one (Blue Hydrangea) */
+  venuePhoto?: string;
   contacts?: {
     /** WhatsApp / Telegram group invite link */
     chatUrl?: string;

@@ -35,6 +35,7 @@ export function hasEmbeddedMedia(content: Content): boolean {
   if (isDataUrl(content.share?.image)) return true;
   if (isDataUrl(content.dressCode?.herPhoto)) return true;
   if (isDataUrl(content.dressCode?.himPhoto)) return true;
+  if (isDataUrl(content.venuePhoto)) return true;
   return customSectionDataUrls(content);
 }
 
@@ -75,6 +76,11 @@ export async function flushEmbeddedMedia(content: Content): Promise<void> {
   if (isDataUrl(shareImage)) {
     const { url } = await api.uploadMedia(await dataUrlToFile(shareImage, "share"));
     content.share!.image = url;
+  }
+
+  if (isDataUrl(content.venuePhoto)) {
+    const { url } = await api.uploadMedia(await dataUrlToFile(content.venuePhoto, "venue"));
+    content.venuePhoto = url;
   }
 
   for (const side of ["herPhoto", "himPhoto"] as const) {

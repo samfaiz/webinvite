@@ -149,6 +149,18 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Blue Hydrangea template: dusty blue and blush, the two
+     grounds its pages alternate between. */
+  "hydrangea-blue": make(
+    "hydrangea-blue",
+    "Hydrangea Blue",
+    {
+      bg: "#fdeef4", surface: "#fdeef4", primary: "#4b678d", secondary: "#6f86ab",
+      accent: "#4b678d", text: "#4b678d", muted: "#7d8fae",
+      gradientFrom: "#fdeef4", gradientTo: "#f6dde8",
+    },
+    { type: "none", color: "#fdeef4" }
+  ),
   /* Pairs with the Toile template: engraved blue botanicals on paper white,
      with a powder-blue panel. Muted on purpose — the line work carries the
      design, so the palette stays quiet behind it. */

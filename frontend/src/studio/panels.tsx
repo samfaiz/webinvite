@@ -843,6 +843,34 @@ export function ScheduleFields({ draft, update }: PanelProps) {
   const dragIndex = useRef<number | null>(null);
   return (
     <div>
+      <Field label="Venue photo (optional)" hint="Shown by designs with a venue picture, e.g. Blue Hydrangea.">
+        <div className="flex flex-wrap items-center gap-2">
+          {c.venuePhoto ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={c.venuePhoto} alt="" className="h-12 w-20 rounded object-cover" />
+          ) : null}
+          <label className="cursor-pointer rounded-md bg-[#2b3a67] px-3 py-2 text-xs font-medium text-white hover:bg-[#23315a]">
+            {c.venuePhoto ? "Replace photo" : "Add photo"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                const url = await fileToScaledDataUrl(f, 1600, 0.9);
+                update((d) => { d.content.venuePhoto = url; });
+              }}
+            />
+          </label>
+          {c.venuePhoto ? (
+            <button type="button" onClick={() => update((d) => { d.content.venuePhoto = undefined; })} className="rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50">
+              Remove
+            </button>
+          ) : null}
+        </div>
+      </Field>
       <Field label="Subtitle"><TextInput value={c.schedule.subtext ?? ""} onChange={(e) => update((d) => { d.content.schedule.subtext = e.target.value; })} /></Field>
       <Field label="Layout">
         <Select

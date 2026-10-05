@@ -81,6 +81,17 @@ export const templates: TemplateMeta[] = [
     themeIds: ["garden-olive"],
   },
   {
+    id: "hydrangea-blush",
+    name: "Blue Hydrangea",
+    description:
+      "Dusty blue and blush with rows of blue flowers: a monogram and framed photo on a blush oval, the wedding week in a blue circle, a programme on lace and the reply on the page.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "hydrangea-blue",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/hydrangea/preview.jpg",
+    themeIds: ["hydrangea-blue"],
+  },
+  {
     id: "garden-kerala",
     name: "Kerala Garden",
     description:

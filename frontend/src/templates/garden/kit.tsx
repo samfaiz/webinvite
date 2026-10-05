@@ -696,7 +696,7 @@ export function PenReveal({ children, delay = 0, className = "" }: { children: R
       <motion.div
         variants={{
           hidden: { clipPath: "inset(-40% 112% -40% -12%)" },
-          shown: { clipPath: "inset(-40% -12% -40% -12%)", transition: { duration: 1.6, ease: [0.45, 0, 0.25, 1], delay } },
+          shown: { clipPath: "inset(-40% -30% -40% -12%)", transition: { duration: 1.6, ease: [0.45, 0, 0.25, 1], delay } },
         }}
       >
         {children}
