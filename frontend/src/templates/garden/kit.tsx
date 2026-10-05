@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePreview } from "@/components/PreviewContext";
 import { u } from "./stage";
 
 /**
@@ -376,3 +379,251 @@ export function SealMonogram({ initials }: { initials: string }) {
     </span>
   );
 }
+
+
+/* ------------------------------- motion ------------------------------- */
+
+/**
+ * Content rises into place as its page scrolls into view, once. The Studio
+ * and thumbnails get it in place with no motion.
+ */
+export function Rise({
+  children,
+  delay = 0,
+  className = "",
+  style,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  const { compact, editing } = usePreview();
+  const still = compact || editing;
+  return (
+    <motion.div
+      className={className}
+      style={style}
+      initial={still ? false : { opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.9, ease: [0.25, 0.6, 0.3, 1], delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ------------------------------ big buttons ------------------------------ */
+
+const ICONS = {
+  pin: <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />,
+  calendar: (
+    <>
+      <rect x="4" y="5.5" width="16" height="14.5" rx="2" />
+      <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
+    </>
+  ),
+  phone: <path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 5.5 5.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z" />,
+  chat: <path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5a1.5 1.5 0 0 1-1.5-1.5v-8.5Z" />,
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  send: <path d="M4 11.5 20 4l-7.5 16-2.5-6.5L4 11.5Z" />,
+  hand: (
+    <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.6-2.2L4.5 15.6a1.6 1.6 0 0 1 2.4-2.1L9 15.5V11" />
+  ),
+};
+
+export type IconName = keyof typeof ICONS;
+
+export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="shrink-0"
+    >
+      {ICONS[name]}
+    </svg>
+  );
+}
+
+/**
+ * The buttons a guest actually needs (directions, calendar, call, reply),
+ * sized for any hand and any eyesight: a 52px target, plain words in sentence
+ * case rather than tracked capitals, and an icon that says the same thing.
+ * Real pixels, not plate units, so they never shrink on a small phone.
+ */
+export function actionStyle(tone: "olive" | "cream" = "olive", wide = false): CSSProperties {
+  const olive = tone === "olive";
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    minHeight: 52,
+    width: wide ? "100%" : undefined,
+    padding: "0 26px",
+    borderRadius: 999,
+    fontFamily: SERIF,
+    fontSize: 19,
+    fontWeight: 600,
+    letterSpacing: "0.01em",
+    lineHeight: 1.1,
+    background: olive ? "var(--g-ink)" : "var(--g-cream)",
+    color: olive ? "var(--g-cream)" : "var(--g-ink)",
+    boxShadow: olive
+      ? "inset 0 0 0 3px var(--g-ink), inset 0 0 0 4px rgba(241,234,218,0.5), 0 6px 18px rgba(30,32,18,0.22)"
+      : "inset 0 0 0 3px var(--g-cream), inset 0 0 0 4px rgba(79,83,55,0.45), 0 6px 18px rgba(0,0,0,0.25)",
+  };
+}
+
+export function ActionButton({
+  icon,
+  children,
+  onClick,
+  href,
+  tone = "olive",
+  wide = false,
+  type = "button",
+  disabled,
+}: {
+  icon?: IconName;
+  children: ReactNode;
+  onClick?: () => void;
+  href?: string;
+  tone?: "olive" | "cream";
+  wide?: boolean;
+  type?: "button" | "submit";
+  disabled?: boolean;
+}) {
+  const inner = (
+    <>
+      {icon ? <Icon name={icon} /> : null}
+      <span>{children}</span>
+    </>
+  );
+  if (href) {
+    return (
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel="noopener noreferrer"
+        style={actionStyle(tone, wide)}
+      >
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <button type={type} onClick={onClick} disabled={disabled} style={actionStyle(tone, wide)} className="disabled:opacity-60">
+      {inner}
+    </button>
+  );
+}
+
+/* ------------------------------- photos ------------------------------- */
+
+/** The lace oval on the welcome plate, showing each of the couple's photos in
+ *  turn with a slow crossfade. */
+export function PhotoOval({ photos }: { photos: string[] }) {
+  const { compact, editing } = usePreview();
+  const [i, setI] = useState(0);
+  const cycling = photos.length > 1 && !compact && !editing;
+  useEffect(() => {
+    if (!cycling) return;
+    const id = window.setInterval(() => setI((n) => (n + 1) % photos.length), 3800);
+    return () => window.clearInterval(id);
+  }, [cycling, photos.length]);
+  if (!photos.length) return null;
+  return (
+    <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "50%" }}>
+      <AnimatePresence initial={false}>
+        <motion.img
+          key={photos[i]}
+          src={photos[i]}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.4, ease: "easeInOut" }}
+        />
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ------------------------------ countdown ------------------------------ */
+
+function useTicking(target?: string) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    if (!target) return;
+    const tick = () => setNow(Date.now());
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [target]);
+  if (!target || now === null) return null;
+  const ms = new Date(target).getTime() - now;
+  if (Number.isNaN(ms) || ms <= 0) return null;
+  return {
+    days: Math.floor(ms / 864e5),
+    hours: Math.floor((ms % 864e5) / 36e5),
+    minutes: Math.floor((ms % 36e5) / 6e4),
+    seconds: Math.floor((ms % 6e4) / 1e3),
+  };
+}
+
+/** Days, hours, minutes and seconds to the day, in four engraved tiles; the
+ *  seconds keep it visibly alive. */
+export function CountdownTiles({
+  target,
+  ink = "var(--g-paper)",
+  size = 64,
+}: {
+  target?: string;
+  ink?: string;
+  size?: number;
+}) {
+  const left = useTicking(target);
+  if (!left) return null;
+  const tiles: [number, string][] = [
+    [left.days, "Days"],
+    [left.hours, "Hours"],
+    [left.minutes, "Minutes"],
+    [left.seconds, "Seconds"],
+  ];
+  return (
+    <div className="flex justify-center" style={{ gap: u(16), color: ink }}>
+      {tiles.map(([n, label]) => (
+        <div
+          key={label}
+          className="flex flex-col items-center"
+          style={{
+            minWidth: u(size * 2.15),
+            padding: `${u(size * 0.32)} ${u(8)} ${u(size * 0.26)}`,
+            border: `1px solid color-mix(in srgb, ${ink} 45%, transparent)`,
+            borderRadius: u(18),
+            background: `color-mix(in srgb, ${ink} 6%, transparent)`,
+          }}
+        >
+          <span style={{ fontFamily: SERIF, fontSize: u(size), lineHeight: 1, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>
+            {String(n).padStart(2, "0")}
+          </span>
+          <span style={{ fontFamily: SERIF, fontSize: u(size * 0.38), letterSpacing: "0.06em", marginTop: u(8), opacity: 0.85 }}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+

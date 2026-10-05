@@ -9,3 +9,12 @@ export function sealInitials(p1?: string, p2?: string): string {
 export function resolveSeal(manual: string | undefined, p1?: string, p2?: string): string {
   return manual?.trim() || sealInitials(p1, p2);
 }
+
+/** Titles that come before a name and aren't part of it: "Dr. Jessin" → "Jessin". */
+const TITLES = /^(?:(?:dr|mr|mrs|ms|miss|mx|er|adv|prof|capt|lt|col|maj|rev|fr|sr|smt|shri|sri|kum|km|ca)\.?\s+)+/i;
+
+/** The initial of a name, skipping any title: "Dr. Jessin" → "J". */
+export function initialOf(name?: string): string {
+  return (name || "").trim().replace(TITLES, "").trim().charAt(0).toUpperCase();
+}
+

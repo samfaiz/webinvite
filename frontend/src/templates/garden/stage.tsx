@@ -34,6 +34,7 @@ export function Plate({
   id,
   art,
   video,
+  fill = false,
   field = "var(--g-olive)",
   children,
 }: {
@@ -42,6 +43,10 @@ export function Plate({
   /** a moving version of the same plate, framed identically — the art stays
    *  underneath as its poster and for anyone who prefers reduced motion */
   video?: string;
+  /** Always as tall as the screen. Phones are taller than the art, so this
+   *  trims a little off each side instead of leaving bands above and below —
+   *  for the plates whose edges are foliage or flat colour, never type. */
+  fill?: boolean;
   field?: string;
   children: ReactNode;
 }) {
@@ -53,10 +58,14 @@ export function Plate({
       style={{ background: field }}
     >
       <div
-        className="relative"
+        className="relative shrink-0"
         style={{
           aspectRatio: `${ART_W} / ${ART_H}`,
-          width: compact ? "100%" : `min(100%, calc(100svh * ${ART_W} / ${ART_H}))`,
+          width: compact
+            ? "100%"
+            : fill
+              ? `calc(100svh * ${ART_W} / ${ART_H})`
+              : `min(100%, calc(100svh * ${ART_W} / ${ART_H}))`,
           containerType: "size",
           backgroundImage: `url(${art})`,
           // exact, not `cover` — the measured boxes depend on it
@@ -110,5 +119,81 @@ export function Zone({
     >
       {children}
     </div>
+  );
+}
+
+
+/**
+ * A plate whose middle grows with what is written on it.
+ *
+ * The arch-panel plates are cut into three: the top (garland, oval), a plain
+ * band of the panel with straight sides, and the foot (curve, garland). The
+ * band repeats down the page as far as the content needs, and at least far
+ * enough to fill the screen — so there is no empty olive above and below on a
+ * tall phone, and a long RSVP form or five events never run out of room.
+ */
+export type Slices = {
+  top: string;
+  mid: string;
+  bot: string;
+  /** each slice's height in art pixels (they are all ART_W wide) */
+  topH: number;
+  midH: number;
+  botH: number;
+};
+
+export function FlowPlate({
+  id,
+  slices,
+  pad,
+  field = "var(--g-olive)",
+  head,
+  children,
+}: {
+  id?: string;
+  slices: Slices;
+  /** side padding in art px, so the words stay inside the panel */
+  pad: number;
+  field?: string;
+  /** zones laid over the top slice (boxes are fractions of that slice) */
+  head?: ReactNode;
+  children: ReactNode;
+}) {
+  const { compact } = usePreview();
+  const slice = (src: string, h: number, extra?: CSSProperties) => ({
+    backgroundImage: `url(${src})`,
+    backgroundSize: "100% 100%",
+    aspectRatio: `${ART_W} / ${h}`,
+    ...extra,
+  });
+  return (
+    <section id={id} className="relative flex snap-start justify-center" style={{ background: field }}>
+      <div
+        className="flex flex-col"
+        style={{
+          width: compact ? "100%" : `min(100%, calc(100svh * ${ART_W} / ${ART_H}))`,
+          minHeight: compact ? undefined : "100svh",
+          containerType: "inline-size",
+        }}
+      >
+        {/* the slices overlap by a pixel so no hairline of olive shows at a join */}
+        <div className="relative z-[1] -mb-px" style={slice(slices.top, slices.topH)}>
+          {head}
+        </div>
+        <div
+          className="relative flex flex-1 flex-col items-center justify-center text-center"
+          style={{
+            backgroundImage: `url(${slices.mid})`,
+            backgroundSize: "100% auto",
+            backgroundRepeat: "repeat-y",
+            minHeight: u(slices.midH),
+            padding: `${u(10)} ${u(pad)}`,
+          }}
+        >
+          {children}
+        </div>
+        <div className="relative z-[1] -mt-px" style={slice(slices.bot, slices.botH)} />
+      </div>
+    </section>
   );
 }

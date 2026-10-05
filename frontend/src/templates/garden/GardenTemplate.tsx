@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import type { InvitationContent, RenderProps } from "@/engine/types";
+import type { EventItem, InvitationContent, Person, RenderProps } from "@/engine/types";
 import { PreviewContext, usePreview } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -15,46 +14,59 @@ import { DirectionsLink } from "@/components/DirectionsLink";
 import { hasDressCode } from "@/blocks/DressCode";
 import { MEALS, useRsvp } from "@/blocks/useRsvp";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
-import { Plate, Zone, u } from "./stage";
+import { calendarEvent, downloadIcs } from "@/lib/calendar";
+import { initialOf } from "@/lib/initials";
+import { FlowPlate, Plate, Zone, u } from "./stage";
+import type { Slices } from "./stage";
 import { Cover } from "./cover";
 import {
+  ActionButton,
   Body,
   Caps,
+  CountdownTiles,
   DateCartouche,
   Flourish,
   Heading,
+  Icon,
   OvalSwatch,
-  Pill,
+  PhotoOval,
   Pip,
-  SCRIPT,
+  Rise,
   SERIF,
   Script,
-  TimelineStop,
-  pillStyle,
+  actionStyle,
 } from "./kit";
 
 /**
  * "Secret Garden" — an old-master garden at dusk and engraved magnolias on olive.
  *
  * Seven painted and engraved plates carry the look; this file composes the
- * Garden kit (`kit.tsx`) onto them. Every box below was measured off the
- * plates — the heart's sage face, the lace oval, the empty arch under each
- * garland, the blank wax seal — so the words sit inside the drawing rather
- * than beside it.
+ * Garden kit onto them. Written for every guest, including the ones who have
+ * never opened a web invitation: large type, one obvious thing to tap on each
+ * page, plain words on the buttons, and the reply form right there on the page
+ * rather than behind a button.
  *
- * The timeline icons were lifted off their plate and are laid out here, which
- * is why any number of events fits.
+ * Two kinds of page. The paintings and the venue engraving fill the screen
+ * (`Plate fill`). The three arch panels — welcome, timing, RSVP — are cut into
+ * slices whose plain middle grows with their content (`FlowPlate`), so a phone
+ * taller than the art shows no empty bands and a long form always fits.
  */
 
 const A = (f: string) => `/assets/templates/garden/${f}`;
 const ICONS = ["icon-guests.png", "icon-swans.png", "icon-cake.png", "icon-glasses.png"];
+
+// slice heights in art pixels. Cut where each panel's sides run straight and
+// its face is plain: welcome .38/.56, timing .285/.715, details .29/.575.
+const WELCOME: Slices = { top: A("02-welcome-top.jpg"), mid: A("02-welcome-mid.jpg"), bot: A("02-welcome-bot.jpg"), topH: 760, midH: 360, botH: 540 };
+const TIMING: Slices = { top: A("04-timing-top.jpg"), mid: A("04-timing-mid.jpg"), bot: A("04-timing-bot.jpg"), topH: 510, midH: 860, botH: 480 };
+const DETAILS: Slices = { top: A("06-details-top.jpg"), mid: A("06-details-mid.jpg"), bot: A("06-details-bot.jpg"), topH: 520, midH: 570, botH: 530 };
 
 const PALETTE = {
   "--g-olive": "#545738",
   "--g-dusk": "#2a2316", // the paintings' own edge colour
   "--g-cream": "#f1eada",
   "--g-ink": "#4f5337",
-  "--g-soft": "#6f7156",
+  "--g-soft": "#5f6147", // body text on cream: darker than the art's grey, for older eyes
   "--g-paper": "#efe9d6", // type on the olive and on the paintings
   // the floating music / scroll buttons: the antique gold of the cover's
   // sunlit sky — olive would vanish into the olive pages
@@ -63,269 +75,310 @@ const PALETTE = {
   "--chrome-ring": "rgba(248,243,230,0.6)",
 } as CSSProperties;
 
-const PAPER_SOFT = "color-mix(in srgb, var(--g-paper) 84%, transparent)";
+const PAPER_SOFT = "color-mix(in srgb, var(--g-paper) 88%, transparent)";
 
-/** "Rejin", "Jessin" → ["R", "J"]. From the names rather than
- *  `couple.monogram`, which new invitations inherit from the sample couple. */
-function initialsOf(...names: (string | undefined)[]) {
-  return names.map((n) => n?.trim().charAt(0).toUpperCase()).filter((c): c is string => Boolean(c));
+const longDate = (iso?: string) => {
+  const d = new Date(iso ?? "");
+  return Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+};
+const titleCase = (s?: string) => (s ?? "").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+
+/* ------------------------------ welcome ------------------------------ */
+
+/** A partner and their parents, the way a printed card sets it. */
+function FamilyBlock({ person }: { person?: Person }) {
+  if (!person?.name) return null;
+  const parents = [person.father, person.mother].filter((p) => p?.trim()).join(" & ");
+  return (
+    <div className="flex flex-col items-center">
+      <Script size={100}>{person.name}</Script>
+      {parents ? (
+        <>
+          {person.parentsPrefix?.trim() ? (
+            <Body size={42} italic className="mt-[1%]">
+              {person.parentsPrefix}
+            </Body>
+          ) : null}
+          <Caps size={34} track={0.08} className="max-w-[96%] leading-snug">
+            {parents}
+          </Caps>
+        </>
+      ) : null}
+    </div>
+  );
 }
 
-function useCountdown(target?: string) {
-  const [left, setLeft] = useState<{ d: number; h: number; m: number } | null>(null);
-  useEffect(() => {
-    if (!target) return;
-    const tick = () => {
-      const ms = new Date(target).getTime() - Date.now();
-      if (Number.isNaN(ms) || ms <= 0) return setLeft(null);
-      setLeft({ d: Math.floor(ms / 864e5), h: Math.floor((ms % 864e5) / 36e5), m: Math.floor((ms % 36e5) / 6e4) });
-    };
-    tick();
-    const id = window.setInterval(tick, 30_000);
-    return () => window.clearInterval(id);
-  }, [target]);
-  return left;
+/* ------------------------------ timing ------------------------------ */
+
+/** One stop of the day. A day with a single event gets it large, with the
+ *  full date; several share the panel and step down in size. */
+function Stop({ ev, icon, scale, dateLine }: { ev: EventItem; icon: string; scale: number; dateLine?: string }) {
+  const target = targetFromEvent(ev);
+  return (
+    <div className="flex w-full flex-col items-center text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={icon} alt="" style={{ height: u(150 * scale) }} />
+      {dateLine ? (
+        <Caps size={32} track={0.12} className="mt-[3%]">
+          {dateLine}
+        </Caps>
+      ) : null}
+      <div className="flex items-center" style={{ gap: u(16), marginTop: u(10) }}>
+        <span aria-hidden style={{ width: u(60), height: 1, background: "linear-gradient(90deg, transparent, var(--g-ink))", opacity: 0.5 }} />
+        <span style={{ fontFamily: SERIF, fontSize: u(72 * scale), lineHeight: 1.05, color: "var(--g-ink)", fontWeight: 600 }}>{ev.time}</span>
+        <span aria-hidden style={{ width: u(60), height: 1, background: "linear-gradient(270deg, transparent, var(--g-ink))", opacity: 0.5 }} />
+      </div>
+      <Caps size={44 * Math.max(scale, 0.85)} track={0.14} className="mt-[1%]">
+        {ev.name}
+      </Caps>
+      {ev.venue ? (
+        <Body size={44 * Math.max(scale, 0.85)} italic className="leading-snug">
+          {ev.venue}
+        </Body>
+      ) : null}
+      {ev.address && scale >= 1 ? (
+        <Body size={38} className="leading-snug">
+          {ev.address}
+        </Body>
+      ) : null}
+      {hasMapTarget(target) ? (
+        <div style={{ marginTop: u(16) }}>
+          <DirectionsLink target={target} style={{ ...actionStyle("olive"), minHeight: 44, fontSize: 16, padding: "0 18px" }}>
+            <Icon name="pin" size={18} />
+            Directions
+          </DirectionsLink>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
-/* ----------------------------- RSVP ----------------------------- */
+/* ------------------------------ the reply ------------------------------ */
+
+const label: CSSProperties = {
+  fontFamily: SERIF,
+  fontSize: 19,
+  fontWeight: 700,
+  color: "var(--g-ink)",
+  lineHeight: 1.25,
+  display: "block",
+  marginBottom: 8,
+};
+const field: CSSProperties = {
+  width: "100%",
+  minHeight: 52,
+  padding: "10px 16px",
+  fontFamily: SERIF,
+  fontSize: 19,
+  fontWeight: 500,
+  color: "var(--g-ink)",
+  background: "rgba(255,255,255,0.65)",
+  border: "1.5px solid color-mix(in srgb, var(--g-ink) 40%, transparent)",
+  borderRadius: 14,
+  outline: "none",
+};
+
+/** A big either/or choice: a full-width button that fills when chosen. */
+function Choice({ on, onClick, icon, children }: { on: boolean; onClick: () => void; icon: "check" | "x"; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className="flex w-full items-center justify-center"
+      style={{
+        gap: 10,
+        minHeight: 56,
+        padding: "0 18px",
+        borderRadius: 999,
+        fontFamily: SERIF,
+        fontSize: 19,
+        fontWeight: 600,
+        background: on ? "var(--g-ink)" : "rgba(255,255,255,0.55)",
+        color: on ? "var(--g-cream)" : "var(--g-ink)",
+        border: "1.5px solid var(--g-ink)",
+        boxShadow: on ? "inset 0 0 0 3px var(--g-ink), inset 0 0 0 4px rgba(241,234,218,0.5)" : undefined,
+        transition: "background 200ms, color 200ms",
+      }}
+    >
+      {icon === "check" ? (
+        <Icon name="check" size={22} />
+      ) : (
+        <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden>
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      )}
+      {children}
+    </button>
+  );
+}
 
 /**
- * The guest questionnaire, opened from the details page (and the cover's
- * RSVP link) the way the reference's "fill in the form" button does. It
- * slides up as a cream sheet wearing the set's own garlands; behaviour is the
- * shared `useRsvp`, so the meal keys and decline rules match every design.
+ * The RSVP, right on the page: will you come, your name, how many, food, a
+ * note, send. Everything is a large, labelled target; nothing is hidden behind
+ * a link. Behaviour is the shared `useRsvp`, so it records exactly what every
+ * other design records.
  */
-function RsvpSheet({
-  content,
-  live,
-  onClose,
-}: {
-  content: InvitationContent;
-  live: boolean;
-  onClose: () => void;
-}) {
+function ReplyForm({ content, live }: { content: InvitationContent; live: boolean }) {
   const { editing } = usePreview();
   const form = useRsvp({ content, live, editing });
   const rsvp = content.rsvp;
   const askGuests = rsvp?.askGuests !== false;
   const askMeal = rsvp?.askMeal !== false;
+  const cal = calendarEvent(content);
 
-  // the sheet uses real units, not cqw: it's a form a guest types into
-  const label: CSSProperties = { fontFamily: SCRIPT, fontSize: 23, color: "var(--g-ink)", lineHeight: 1.2 };
-  const field: CSSProperties = {
-    fontFamily: SERIF,
-    fontSize: 17,
-    color: "var(--g-ink)",
-    background: "transparent",
-    border: "none",
-    borderBottom: "1px solid color-mix(in srgb, var(--g-ink) 35%, transparent)",
-    outline: "none",
-    width: "100%",
-    padding: "6px 0",
-  };
-  const choice = (on: boolean): CSSProperties => ({
-    fontFamily: SERIF,
-    fontSize: 13,
-    fontWeight: 600,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
-    padding: "10px 16px",
-    borderRadius: 999,
-    background: on ? "var(--g-ink)" : "transparent",
-    color: on ? "var(--g-cream)" : "var(--g-ink)",
-    border: "1px solid color-mix(in srgb, var(--g-ink) 45%, transparent)",
-    // the same engraved inner line as the plates' buttons, once chosen
-    boxShadow: on ? "inset 0 0 0 2px var(--g-ink), inset 0 0 0 3px rgba(241,234,218,0.5)" : undefined,
-  });
-  const rule = (
-    <svg viewBox="0 0 240 24" className="mx-auto mt-1 block w-40" aria-hidden style={{ color: "var(--g-ink)" }}>
-      <path d="M20 12 H 220" stroke="currentColor" strokeWidth="0.6" opacity="0.45" />
-      <path d="M120 5.5 L 126.5 12 L 120 18.5 L 113.5 12 Z" fill="var(--g-cream)" stroke="currentColor" strokeWidth="0.9" />
-      <path d="M120 9 L 123 12 L 120 15 L 117 12 Z" fill="currentColor" fillOpacity="0.55" />
-    </svg>
-  );
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[80] overflow-y-auto"
-      style={{ background: "color-mix(in srgb, var(--g-olive) 94%, transparent)" }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
-      <motion.div
-        className="relative mx-auto my-8 w-[92%] max-w-md px-7 pb-10 pt-6 text-center"
-        style={{
-          background: "var(--g-cream)",
-          borderRadius: "220px 220px 220px 220px / 140px 140px 140px 140px",
-          boxShadow: "0 24px 60px rgba(20,22,10,0.35)",
-        }}
-        initial={{ y: 40 }}
-        animate={{ y: 0 }}
-        exit={{ y: 40 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+  if (form.submitted) {
+    const yes = form.attending === "accept";
+    return (
+      <Rise className="flex w-full flex-col items-center" style={{ gap: 14, maxWidth: 420 }}>
+        <span
+          className="flex items-center justify-center rounded-full"
+          style={{ width: 64, height: 64, background: "var(--g-ink)", color: "var(--g-cream)" }}
+        >
+          <Icon name={yes ? "check" : "send"} size={30} />
+        </span>
+        <p style={{ fontFamily: "var(--font-greatvibes)", fontSize: 44, color: "var(--g-ink)", lineHeight: 1.1 }}>
+          {yes ? "Thank you!" : "We will miss you"}
+        </p>
+        <p style={{ fontFamily: SERIF, fontSize: 20, color: "var(--g-soft)", lineHeight: 1.45 }}>
+          {yes
+            ? `Your reply has been sent. ${form.guests > 1 ? `${form.guests} seats are` : "A seat is"} saved for you.`
+            : "Your reply has been sent. Thank you for letting us know."}
+        </p>
+        {yes && cal ? (
+          <ActionButton icon="calendar" onClick={() => downloadIcs(cal, "invitation.ics")}>
+            Add to my calendar
+          </ActionButton>
+        ) : null}
         <button
           type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-7 top-6"
-          style={{ fontFamily: SERIF, fontSize: 22, color: "var(--g-soft)" }}
+          onClick={form.reopen}
+          style={{ fontFamily: SERIF, fontSize: 18, color: "var(--g-ink)", textDecoration: "underline", minHeight: 44 }}
         >
-          ✕
+          Change my reply
         </button>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={A("garland-top.png")} alt="" className="mx-auto w-[86%]" />
+      </Rise>
+    );
+  }
 
-        {form.submitted ? (
-          <div className="py-8">
-            <p style={{ fontFamily: SCRIPT, fontSize: 42, color: "var(--g-ink)" }}>
-              {form.attending === "accept" ? "Thank you!" : "We will miss you"}
-            </p>
-            {rule}
-            <p className="mx-auto mt-3 max-w-[30ch]" style={{ fontFamily: SERIF, fontSize: 17, color: "var(--g-soft)" }}>
-              {form.attending === "accept"
-                ? `${form.guests > 1 ? `${form.guests} seats are` : "Your seat is"} saved — we cannot wait to see you.`
-                : "Thank you for letting us know."}
-            </p>
-            <button type="button" onClick={form.reopen} className="mt-6" style={choice(false)}>
-              Change my answer
+  return (
+    <form onSubmit={editing ? (e) => e.preventDefault() : form.submit} className="w-full text-left" style={{ maxWidth: 420 }}>
+      <Rise>
+        <span style={{ ...label, textAlign: "center", fontSize: 21 }}>{rsvp?.prompt || "Will you be attending?"}</span>
+        <div className="flex flex-col" style={{ gap: 10 }}>
+          <Choice on={form.attending === "accept"} onClick={() => form.setAttending("accept")} icon="check">
+            {rsvp?.acceptLabel || "Yes, I will come"}
+          </Choice>
+          <Choice on={form.attending === "decline"} onClick={() => form.setAttending("decline")} icon="x">
+            {rsvp?.declineLabel || "Sorry, I can't come"}
+          </Choice>
+        </div>
+      </Rise>
+
+      <Rise delay={0.1}>
+        <label className="mt-6 block">
+          <span style={label}>Your name</span>
+          <input
+            style={field}
+            value={form.name}
+            onChange={(e) => form.setName(e.target.value)}
+            autoComplete="name"
+            placeholder="Type your name"
+          />
+        </label>
+      </Rise>
+
+      {form.showExtras && askGuests ? (
+        <div className="mt-6">
+          <span style={label}>How many people are coming, including you?</span>
+          <div className="flex items-center justify-center" style={{ gap: 18 }}>
+            <button
+              type="button"
+              aria-label="One fewer"
+              disabled={form.guests <= 1}
+              onClick={() => form.stepGuests(-1)}
+              className="flex items-center justify-center rounded-full disabled:opacity-40"
+              style={{ width: 52, height: 52, border: "1.5px solid var(--g-ink)", color: "var(--g-ink)", fontSize: 28, fontFamily: SERIF }}
+            >
+              −
+            </button>
+            <span style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, color: "var(--g-ink)", minWidth: 40, textAlign: "center" }}>
+              {form.guests}
+            </span>
+            <button
+              type="button"
+              aria-label="One more"
+              disabled={form.guests >= 50}
+              onClick={() => form.stepGuests(1)}
+              className="flex items-center justify-center rounded-full disabled:opacity-40"
+              style={{ width: 52, height: 52, background: "var(--g-ink)", color: "var(--g-cream)", fontSize: 28, fontFamily: SERIF }}
+            >
+              +
             </button>
           </div>
-        ) : (
-          <form onSubmit={editing ? (e) => e.preventDefault() : form.submit} className="text-left">
-            <p className="text-center" style={{ fontFamily: SCRIPT, fontSize: 44, color: "var(--g-ink)", lineHeight: 1.1 }}>
-              {rsvp?.heading}
-            </p>
-            {rule}
-            <p
-              className="mx-auto mt-2 max-w-[28ch] text-center"
-              style={{ fontFamily: SERIF, fontSize: 15, fontStyle: "italic", color: "var(--g-soft)" }}
-            >
-              Please reply so we can prepare for your arrival with care.
-            </p>
+        </div>
+      ) : null}
 
-            <label className="mt-6 block">
-              <span style={label}>Your name</span>
-              <input style={field} value={form.name} onChange={(e) => form.setName(e.target.value)} autoComplete="name" />
-            </label>
-            <label className="mt-5 block">
-              <span style={label}>Email (optional)</span>
-              <input
-                style={field}
-                type="email"
-                value={form.email}
-                onChange={(e) => form.setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </label>
+      {form.showExtras && askMeal ? (
+        <div className="mt-6">
+          <span style={label}>Food preference</span>
+          <div className="flex flex-wrap justify-center" style={{ gap: 10 }}>
+            {MEALS.map((m) => {
+              const on = form.meal === m.key;
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => form.pickMeal(m.key)}
+                  style={{
+                    minHeight: 50,
+                    minWidth: 120,
+                    padding: "0 22px",
+                    borderRadius: 999,
+                    fontFamily: SERIF,
+                    fontSize: 18,
+                    fontWeight: 600,
+                    background: on ? "var(--g-ink)" : "rgba(255,255,255,0.55)",
+                    color: on ? "var(--g-cream)" : "var(--g-ink)",
+                    border: "1.5px solid color-mix(in srgb, var(--g-ink) 60%, transparent)",
+                  }}
+                >
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
-            <p className="mt-6" style={label}>
-              {rsvp?.prompt}
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" style={choice(form.attending === "accept")} onClick={() => form.setAttending("accept")}>
-                {rsvp?.acceptLabel}
-              </button>
-              <button type="button" style={choice(form.attending === "decline")} onClick={() => form.setAttending("decline")}>
-                {rsvp?.declineLabel}
-              </button>
-            </div>
+      <label className="mt-6 block">
+        <span style={label}>
+          A message for the couple <span style={{ fontWeight: 500, color: "var(--g-soft)" }}>(optional)</span>
+        </span>
+        <textarea
+          style={{ ...field, resize: "none", minHeight: 88 }}
+          rows={3}
+          maxLength={500}
+          value={form.note}
+          onChange={(e) => form.setNote(e.target.value)}
+        />
+      </label>
 
-            {form.showExtras && askGuests ? (
-              <div className="mt-6">
-                <p style={label}>How many of you</p>
-                <div className="mt-2 flex items-center gap-4">
-                  <button type="button" style={choice(false)} disabled={form.guests <= 1} onClick={() => form.stepGuests(-1)}>
-                    −
-                  </button>
-                  <span style={{ fontFamily: SERIF, fontSize: 22, color: "var(--g-ink)", minWidth: 18, textAlign: "center" }}>
-                    {form.guests}
-                  </span>
-                  <button type="button" style={choice(false)} disabled={form.guests >= 50} onClick={() => form.stepGuests(1)}>
-                    +
-                  </button>
-                </div>
-              </div>
-            ) : null}
+      {form.error ? (
+        <p className="mt-4 text-center" role="alert" style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: "#9b2c22" }}>
+          {form.error}
+        </p>
+      ) : null}
 
-            {form.showExtras && askMeal ? (
-              <div className="mt-6">
-                <p style={label}>At the table</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {MEALS.map((m) => (
-                    <button key={m.key} type="button" style={choice(form.meal === m.key)} onClick={() => form.pickMeal(m.key)}>
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <label className="mt-6 block">
-              <span style={label}>A note for the couple</span>
-              <textarea
-                style={{ ...field, resize: "none", minHeight: 52 }}
-                rows={2}
-                maxLength={500}
-                value={form.note}
-                onChange={(e) => form.setNote(e.target.value)}
-              />
-            </label>
-
-            {form.error ? (
-              <p className="mt-3" style={{ fontFamily: SERIF, fontSize: 15, color: "#9b2c22" }}>
-                {form.error}
-              </p>
-            ) : null}
-
-            <div className="mt-8 text-center">
-              <button
-                type="submit"
-                disabled={form.busy}
-                className="disabled:opacity-60"
-                style={{
-                  fontFamily: SERIF,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  padding: "14px 38px",
-                  borderRadius: 999,
-                  background: "var(--g-ink)",
-                  color: "var(--g-cream)",
-                  boxShadow:
-                    "inset 0 0 0 3px var(--g-ink), inset 0 0 0 4px rgba(241,234,218,0.55), 0 6px 18px rgba(30,32,18,0.2)",
-                }}
-              >
-                {form.busy ? "Sending…" : rsvp?.submitLabel}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={A("garland-bottom.png")} alt="" className="mx-auto mt-6 w-[86%]" />
-      </motion.div>
-    </motion.div>
-  );
-}
-
-/* ---------------------------- details ---------------------------- */
-
-/** One of the small cards under the RSVP: a script title, a line, a button.
- *  Two sit side by side, so the line is clamped rather than left to run. */
-function ContactCard({ title, line, action }: { title: string; line: ReactNode; action: ReactNode }) {
-  return (
-    <div className="flex min-w-0 flex-1 flex-col items-center text-center">
-      <Script size={54}>{title}</Script>
-      <Body size={27} className="line-clamp-2 max-w-[94%] leading-snug">
-        {line}
-      </Body>
-      {/* pinned to the foot so both buttons line up whatever the line above */}
-      <div style={{ marginTop: "auto", paddingTop: u(18) }}>{action}</div>
-    </div>
+      <div className="mt-7">
+        <ActionButton icon="send" type="submit" wide disabled={form.busy}>
+          {form.busy ? "Sending…" : rsvp?.submitLabel || "Send my reply"}
+        </ActionButton>
+      </div>
+    </form>
   );
 }
 
@@ -346,33 +399,32 @@ export function GardenTemplate({
   compact?: boolean;
   editing?: boolean;
 }) {
-  const [sheet, setSheet] = useState(false);
   // guests open the envelope; the Studio, gallery and thumbnails don't
   const gated = intro && !editing && !compact;
   const [opened, setOpened] = useState(!gated);
-  // the scroll arrow (and its one-time nudge onwards) waits until the card
-  // has been written, so the guest has a moment with their names first
+  // the scroll arrow waits until the card has been written
   const [guide, setGuide] = useState(!gated);
   useEffect(() => {
     if (!opened || guide) return;
     const t = window.setTimeout(() => setGuide(true), 4500);
     return () => window.clearTimeout(t);
   }, [opened, guide]);
+  const pages = useRef<HTMLDivElement | null>(null);
+
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
-  const letters = initialsOf(couple.partner1?.name, couple.partner2?.name);
+  const letters = [initialOf(couple.partner1?.name), initialOf(couple.partner2?.name)].filter(Boolean);
   const firstEv = schedule?.events?.[0];
-  const photo = story?.items?.find((s) => s.photo)?.photo;
+  const photos = (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
   const hidden = content.hiddenSections ?? [];
   const dress = content.dressCode;
   const wishes = content.wishes ?? [];
   const contacts = content.contacts ?? {};
-  const left = useCountdown(countdown?.targetDate);
-  // the plate leaves room for five rows at most before they crowd the garland
   const events = (schedule?.events ?? []).slice(0, 5);
   const showDress = !hidden.includes("dresscode") && (hasDressCode(content) || wishes.length > 0);
   const showRsvp = !hidden.includes("rsvp");
   const date = { iso: countdown?.targetDate, fallback: dateReveal?.eventDate };
+  const cal = calendarEvent(content);
 
   const target = firstEv ? targetFromEvent(firstEv) : {};
   if (map?.directionsQuery?.trim()) {
@@ -382,37 +434,20 @@ export function GardenTemplate({
   if (map?.directionsUrl?.trim()) target.url = map.directionsUrl.trim();
 
   const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const openSheet = () => {
-    if (!editing) setSheet(true);
+  // after the card is written, take the guest on to the first page — unless
+  // they have already scrolled away from the cover themselves
+  const onward = () => {
+    const cover = document.getElementById("frame-couple");
+    if (cover && Math.abs(cover.getBoundingClientRect().top) > 40) return;
+    pages.current?.querySelector("section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // under the RSVP on the details plate: the group chat and a day-of
-  // contact, side by side, each only when the couple has set it
-  const cards: { key: string; title: string; line: ReactNode; action: ReactNode }[] = [];
-  if (contacts.chatUrl?.trim()) {
-    cards.push({
-      key: "chat",
-      title: "Our chat",
-      line: contacts.chatNote?.trim() || "Photos and wishes, all in one place",
-      action: (
-        <Pill href={contacts.chatUrl.trim()} size={19}>
-          Join
-        </Pill>
-      ),
-    });
-  }
-  if (contacts.phone?.trim()) {
-    cards.push({
-      key: "day",
-      title: "On the day",
-      line: contacts.contactName?.trim() ? `Ask for ${contacts.contactName.trim()}` : contacts.phone.trim(),
-      action: (
-        <Pill href={`tel:${contacts.phone.replace(/[^\d+]/g, "")}`} size={19}>
-          Call
-        </Pill>
-      ),
-    });
-  }
+  const nav: [string, () => void][] = [
+    ["Venue", () => goTo("frame-venue")],
+    ...(events.length && !hidden.includes("schedule") ? ([["Timing", () => goTo("frame-schedule")]] as [string, () => void][]) : []),
+    ...(showDress ? ([["Details", () => goTo("frame-dresscode")]] as [string, () => void][]) : []),
+    ...(showRsvp ? ([["RSVP", () => goTo("frame-rsvp")]] as [string, () => void][]) : []),
+  ];
 
   const attireCols = (
     [
@@ -441,292 +476,317 @@ export function GardenTemplate({
               letters={letters}
               seal={content.envelope?.seal?.trim() || letters.join("·")}
               date={date}
-              nav={[
-                ["Venue", () => goTo("frame-venue")],
-                ["Timing", () => goTo("frame-schedule")],
-                ["Details", () => goTo(showDress ? "frame-dresscode" : "frame-rsvp")],
-                ...(showRsvp ? ([["RSVP", openSheet]] as [string, () => void][]) : []),
-              ]}
+              nav={nav}
               onOpen={() => setOpened(true)}
+              onDone={onward}
             />
 
             {/* the rest waits until the envelope has been opened */}
-            <div hidden={!opened}>
-            {/* ----------------------------- 2 · welcome ----------------------------- */}
-            {hidden.includes("families") ? null : (
-              <Plate id="frame-families" art={A("02-welcome.jpg")}>
-                {photo ? (
-                  <Zone box={{ x0: 0.383, y0: 0.174, x1: 0.616, y1: 0.348 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo} alt="" className="h-full w-full object-cover" style={{ borderRadius: "50%" }} />
+            <div hidden={!opened} ref={pages}>
+              {/* ----------------------------- 2 · welcome ----------------------------- */}
+              {hidden.includes("families") ? null : (
+                <FlowPlate
+                  id="frame-families"
+                  slices={WELCOME}
+                  pad={150}
+                  head={
+                    photos.length ? (
+                      // the lace oval: art .383–.616 × .174–.348, here as fractions of the top slice
+                      <Zone box={{ x0: 0.383, y0: 0.458, x1: 0.616, y1: 0.916 }}>
+                        <PhotoOval photos={photos} />
+                      </Zone>
+                    ) : null
+                  }
+                >
+                  <Rise>
+                    <Heading size={100} flourish={300} edit="families.heading">
+                      {families?.heading}
+                    </Heading>
+                  </Rise>
+                  <Rise delay={0.1} className="w-full" style={{ marginTop: u(40) }}>
+                    <FamilyBlock person={couple.partner1} />
+                  </Rise>
+                  <Rise delay={0.2}>
+                    <Script size={80} color="var(--g-soft)" className="my-[5%]">
+                      &amp;
+                    </Script>
+                  </Rise>
+                  <Rise delay={0.3} className="w-full">
+                    <FamilyBlock person={couple.partner2} />
+                  </Rise>
+                  {families?.footer || hero?.tagline ? (
+                    <Rise delay={0.1} style={{ marginTop: u(44) }}>
+                      <Body size={46} italic edit="families.footer">
+                        {families?.footer || hero?.tagline}
+                      </Body>
+                    </Rise>
+                  ) : null}
+                  <Rise className="w-full" style={{ marginTop: u(50) }}>
+                    <Pip width={180} color="var(--g-ink)" />
+                  </Rise>
+                  <Rise className="flex flex-col items-center" style={{ marginTop: u(30) }}>
+                    {hero?.marriageText ? (
+                      <Caps size={30} track={0.2} color="var(--g-soft)">
+                        {hero.marriageText}
+                      </Caps>
+                    ) : null}
+                    <Script size={96} className="mt-[1%]">
+                      Save the Date
+                    </Script>
+                    <div style={{ marginTop: u(18) }}>
+                      <DateCartouche {...date} size={40} />
+                    </div>
+                    {longDate(countdown?.targetDate) ? (
+                      <Body size={42} className="mt-[3%]">
+                        {longDate(countdown?.targetDate)}
+                        {firstEv?.time ? ` · ${firstEv.time}` : ""}
+                      </Body>
+                    ) : null}
+                    {cal ? (
+                      <div style={{ marginTop: u(40), marginBottom: u(20) }}>
+                        <ActionButton icon="calendar" onClick={() => downloadIcs(cal, "invitation.ics")}>
+                          Add to my calendar
+                        </ActionButton>
+                      </div>
+                    ) : null}
+                  </Rise>
+                </FlowPlate>
+              )}
+
+              {/* ------------------------------ 3 · venue ------------------------------ */}
+              <Plate id="frame-venue" art={A("03-venue.jpg")} fill>
+                {/* the flat olive above the engraving; inside what a phone keeps */}
+                <Zone box={{ x0: 0.12, y0: 0.05, x1: 0.88, y1: 0.475 }} className="items-center justify-center text-center">
+                  <Rise className="flex flex-col items-center">
+                    <Heading size={104} color="var(--g-paper)" flourish={300}>
+                      Venue
+                    </Heading>
+                  </Rise>
+                  <Rise delay={0.1} className="flex flex-col items-center" style={{ marginTop: u(40) }}>
+                    <DateCartouche {...date} color="var(--g-paper)" size={34} />
+                    {firstEv?.time ? (
+                      <Body size={44} color={PAPER_SOFT} className="mt-[4%]">
+                        at {firstEv.time}
+                      </Body>
+                    ) : null}
+                  </Rise>
+                  {firstEv?.venue ? (
+                    <Rise delay={0.2} style={{ marginTop: u(50) }}>
+                      <Caps size={46} color="var(--g-paper)" track={0.1} className="leading-snug">
+                        {firstEv.venue}
+                      </Caps>
+                      {firstEv.address ? (
+                        <Body size={44} color={PAPER_SOFT} className="mt-[2%] leading-snug">
+                          {firstEv.address}
+                        </Body>
+                      ) : null}
+                    </Rise>
+                  ) : null}
+                </Zone>
+                {hasMapTarget(target) ? (
+                  <Zone box={{ x0: 0.1, y0: 0.83, x1: 0.9, y1: 0.95 }} className="items-center justify-center">
+                    <DirectionsLink target={target} style={actionStyle("cream")}>
+                      <Icon name="pin" />
+                      {map?.directionsLabel?.trim() || "Get directions"}
+                    </DirectionsLink>
                   </Zone>
                 ) : null}
-                <Zone box={{ x0: 0.11, y0: 0.376, x1: 0.89, y1: 0.608 }} className="items-center justify-center text-center">
-                  <Heading size={76} flourish={250} edit="families.heading">
-                    {families?.heading}
-                  </Heading>
-                  <Body className="mt-[3%] max-w-[88%]" edit="families.footer">
-                    {families?.footer || hero?.tagline}
-                  </Body>
-                  <Script size={66} className="mt-[5%]">
-                    Save the Date
-                  </Script>
-                  {countdown?.subtext ? (
-                    <Caps size={20} color="var(--g-soft)" track={0.26} edit="countdown.subtext">
-                      {countdown.subtext}
-                    </Caps>
-                  ) : null}
-                  <div className="mt-[3%]">
-                    <DateCartouche {...date} size={26} />
-                  </div>
-                </Zone>
               </Plate>
-            )}
 
-            {/* ------------------------------ 3 · venue ------------------------------ */}
-            <Plate id="frame-venue" art={A("03-venue.jpg")}>
-              <Zone box={{ x0: 0.08, y0: 0.07, x1: 0.92, y1: 0.465 }} className="items-center justify-center text-center">
-                <Heading size={92} color="var(--g-paper)" flourish={300}>
-                  Venue
-                </Heading>
-                <div className="mt-[5%]">
-                  <DateCartouche {...date} color="var(--g-paper)" size={28} />
-                </div>
-                {firstEv?.venue ? (
-                  <Caps size={36} color="var(--g-paper)" track={0.18} className="mt-[7%]">
-                    “{firstEv.venue}”
-                  </Caps>
-                ) : null}
-                {firstEv?.address ? (
-                  <Body color={PAPER_SOFT} className="mt-[1.5%] max-w-[86%]">
-                    {firstEv.address}
-                  </Body>
-                ) : null}
-              </Zone>
-              {hasMapTarget(target) ? (
-                <Zone box={{ x0: 0.1, y0: 0.83, x1: 0.9, y1: 0.94 }} className="items-center justify-center">
-                  <DirectionsLink target={target} style={pillStyle("cream")}>
-                    {map?.directionsLabel ?? "View on map"}
-                  </DirectionsLink>
-                </Zone>
-              ) : null}
-            </Plate>
-
-            {/* ------------------------------ 4 · timing ----------------------------- */}
-            {hidden.includes("schedule") || !events.length ? null : (
-              <Plate id="frame-schedule" art={A("04-timing.jpg")}>
-                {/* the empty arch under the garland's crown */}
-                <Zone box={{ x0: 0.3, y0: 0.224, x1: 0.7, y1: 0.28 }} className="items-center justify-center">
-                  <Script size={64} edit="schedule.heading">
-                    {schedule.heading}
-                  </Script>
-                </Zone>
-                <Zone box={{ x0: 0.17, y0: 0.288, x1: 0.83, y1: 0.724 }} className="items-center justify-around text-center">
-                  {events.map((ev, i) => (
-                    <div key={ev.id} className="flex w-full flex-col items-center">
-                      {i > 0 ? (
-                        <div className="w-full" style={{ marginBottom: u(events.length > 3 ? 6 : 14) }}>
-                          <Pip width={140} color="var(--g-ink)" />
-                        </div>
-                      ) : null}
-                      <TimelineStop
-                        icon={A(ICONS[i % ICONS.length])}
-                        time={ev.time}
-                        name={ev.name}
-                        note={ev.venue}
-                        iconSize={events.length > 4 ? 62 : events.length > 3 ? 80 : 100}
-                        compact={events.length > 3}
-                      />
-                    </div>
-                  ))}
-                </Zone>
-              </Plate>
-            )}
-
-            {/* --------------------------- 5 · dress code ---------------------------- */}
-            {showDress ? (
-              <Plate id="frame-dresscode" art={A("05-dresscode.jpg")}>
-                {/* the column the calla lilies leave free, top to bottom */}
-                <Zone box={{ x0: 0.215, y0: 0.05, x1: 0.715, y1: 0.955 }} className="items-center justify-center text-center">
-                  {hasDressCode(content) ? (
-                    <>
-                      <Heading size={94} color="var(--g-paper)" flourish={260} edit="dressCode.heading">
-                        {dress?.heading?.trim() || "Dress Code"}
-                      </Heading>
-                      {dress?.attire?.trim() ? (
-                        <span
-                          className="mt-[6%] inline-block uppercase"
-                          style={{
-                            fontFamily: SERIF,
-                            fontSize: u(20),
-                            fontWeight: 600,
-                            letterSpacing: "0.26em",
-                            color: "var(--g-paper)",
-                            padding: `${u(10)} ${u(30)}`,
-                            borderRadius: 999,
-                            border: "1px solid color-mix(in srgb, var(--g-paper) 55%, transparent)",
-                            boxShadow: `inset 0 0 0 ${u(4)} var(--g-olive), inset 0 0 0 ${u(5)} color-mix(in srgb, var(--g-paper) 30%, transparent)`,
-                          }}
-                        >
-                          {dress.attire}
-                        </span>
-                      ) : null}
-                      {dress?.note?.trim() ? (
-                        <Body size={40} color={PAPER_SOFT} className="mt-[5%]" edit="dressCode.note">
-                          {dress.note}
-                        </Body>
-                      ) : null}
-                      {dress?.swatches?.length ? (
-                        <div className="mt-[7%] flex flex-wrap justify-center" style={{ gap: `${u(30)} ${u(26)}` }}>
-                          {dress.swatches.slice(0, 6).map((s, i) => (
-                            <OvalSwatch
-                              key={`${s.hex}-${i}`}
-                              hex={s.hex}
-                              label={dress.swatchLabels === false ? undefined : s.label}
-                            />
-                          ))}
-                        </div>
-                      ) : null}
-                      {attireCols.length ? (
-                        <div
-                          className="mt-[8%] grid w-full"
-                          style={{ gridTemplateColumns: `repeat(${Math.min(attireCols.length, 2)}, 1fr)`, gap: u(30) }}
-                        >
-                          {attireCols.map(([k, v]) => (
-                            <div key={k} className="flex flex-col items-center">
-                              <Caps size={22} color="var(--g-paper)" track={0.26}>
-                                {k}
-                              </Caps>
-                              <span
-                                aria-hidden
-                                className="my-[4%] block"
-                                style={{ width: u(46), height: 1, background: "var(--g-paper)", opacity: 0.4 }}
-                              />
-                              <Body size={33} color={PAPER_SOFT} className="leading-snug">
-                                {v}
-                              </Body>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-                      {dress?.avoid?.trim() ? (
-                        <Body size={32} italic color="color-mix(in srgb, var(--g-paper) 70%, transparent)" className="mt-[7%]">
-                          Kindly avoid {dress.avoid}
-                        </Body>
-                      ) : null}
-                    </>
-                  ) : null}
-
-                  {wishes.length ? (
-                    <div className={`flex flex-col items-center ${hasDressCode(content) ? "mt-[10%]" : ""}`}>
-                      <Heading size={72} color="var(--g-paper)" flourish={220}>
-                        Our wishes
-                      </Heading>
-                      {wishes.slice(0, 3).map((w, i) => (
-                        <div key={i} className="mt-[6%] flex flex-col items-center">
-                          <Caps size={22} color="var(--g-paper)" track={0.24}>
-                            {w.title}
-                          </Caps>
-                          <Body size={30} color={PAPER_SOFT}>
-                            {w.body}
-                          </Body>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                </Zone>
-              </Plate>
-            ) : null}
-
-            {/* ----------------------------- 6 · details ----------------------------- */}
-            {showRsvp ? (
-              <Plate id="frame-rsvp" art={A("06-details.jpg")}>
-                <Zone box={{ x0: 0.3, y0: 0.232, x1: 0.7, y1: 0.285 }} className="items-center justify-center">
-                  <Script size={76} edit="rsvp.heading">
-                    {rsvp?.heading}
-                  </Script>
-                </Zone>
-                {/* the plate's wide band: .29–.587 */}
-                <Zone box={{ x0: 0.16, y0: 0.29, x1: 0.84, y1: 0.587 }} className="items-center justify-center text-center">
-                  <Body size={cards.length ? 32 : 36} className="max-w-[90%]" edit="rsvp.footer">
-                    {rsvp?.footer?.trim() || "Please let us know whether you can join us, so we can prepare for your arrival with care."}
-                  </Body>
-                  <div style={{ marginTop: u(cards.length ? 26 : 40) }}>
-                    <Pill onClick={openSheet} size={cards.length ? 23 : 26}>
-                      Fill in the RSVP
-                    </Pill>
-                  </div>
-                  {cards.length ? (
-                    <>
-                      <div className="w-full" style={{ margin: `${u(34)} 0 ${u(16)}` }}>
-                        <Flourish width={200} color="var(--g-ink)" className="opacity-60" />
-                      </div>
-                      <div className="flex w-full items-stretch justify-center" style={{ gap: u(24) }}>
-                        {cards.map((c, i) => (
-                          <div key={c.key} className="flex min-w-0 flex-1 items-stretch" style={{ gap: u(24) }}>
-                            {i > 0 ? (
-                              <span
-                                aria-hidden
-                                style={{ width: 1, background: "linear-gradient(transparent, var(--g-ink), transparent)", opacity: 0.35 }}
-                              />
-                            ) : null}
-                            <ContactCard title={c.title} line={c.line} action={c.action} />
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-                </Zone>
-              </Plate>
-            ) : null}
-
-            {/* ----------------------------- 7 · closing ----------------------------- */}
-            <Plate art={A("07-closing.jpg")} field="var(--g-dusk)">
-              <Zone box={{ x0: 0.09, y0: 0.625, x1: 0.91, y1: 0.955 }} className="items-center justify-center text-center">
-                {left ? (
-                  <div className="flex items-start" style={{ gap: u(34), color: "var(--g-paper)" }}>
-                    {(
-                      [
-                        [left.d, "days"],
-                        [left.h, "hours"],
-                        [left.m, "minutes"],
-                      ] as [number, string][]
-                    ).map(([n, l], i) => (
-                      <div key={l} className="flex items-start" style={{ gap: u(34) }}>
+              {/* ------------------------------ 4 · timing ----------------------------- */}
+              {hidden.includes("schedule") || !events.length ? null : (
+                <FlowPlate id="frame-schedule" slices={TIMING} pad={200}>
+                  <Rise className="flex flex-col items-center">
+                    <Script size={96} edit="schedule.heading">
+                      {schedule.heading}
+                    </Script>
+                    {schedule.subtext ? (
+                      <Body size={42} italic className="mt-[2%]" edit="schedule.subtext">
+                        {schedule.subtext}
+                      </Body>
+                    ) : null}
+                    <Flourish width={260} color="var(--g-ink)" className="mt-[4%] opacity-70" />
+                  </Rise>
+                  <div className="flex w-full flex-col items-center" style={{ marginTop: u(50), gap: u(events.length > 1 ? 30 : 0) }}>
+                    {events.map((ev, i) => (
+                      <Rise key={ev.id} delay={0.12 * i} className="flex w-full flex-col items-center">
                         {i > 0 ? (
-                          <span aria-hidden className="self-stretch" style={{ width: 1, background: "var(--g-paper)", opacity: 0.3 }} />
+                          <div className="w-full" style={{ marginBottom: u(30) }}>
+                            <Pip width={160} color="var(--g-ink)" />
+                          </div>
                         ) : null}
-                        <div className="flex flex-col items-center">
-                          <span style={{ fontFamily: SERIF, fontSize: u(60), lineHeight: 1 }}>{String(n).padStart(2, "0")}</span>
-                          <span
-                            className="uppercase"
-                            style={{ fontFamily: SERIF, fontSize: u(17), letterSpacing: "0.26em", opacity: 0.75, marginTop: u(10) }}
-                          >
-                            {l}
-                          </span>
-                        </div>
-                      </div>
+                        <Stop
+                          ev={ev}
+                          icon={A(ICONS[i % ICONS.length])}
+                          scale={events.length === 1 ? 1.4 : events.length > 3 ? 0.75 : 0.9}
+                          dateLine={events.length === 1 ? longDate(countdown?.targetDate) || titleCase(ev.date) : titleCase(ev.date)}
+                        />
+                      </Rise>
                     ))}
                   </div>
-                ) : null}
-                <Flourish width={260} color="var(--g-paper)" className="mt-[5%] opacity-70" />
-                <Body color={PAPER_SOFT} className="mt-[4%] max-w-[86%]" edit="hero.closingLine">
-                  {hero?.closingLine}
-                </Body>
-                <Script size={98} color="var(--g-paper)" className="mt-[4%]">
-                  We await you!
-                </Script>
-                <Caps size={26} color="color-mix(in srgb, var(--g-paper) 75%, transparent)" track={0.24} className="mt-[2%]">
-                  {names.join(" & ")}
-                </Caps>
-              </Zone>
-            </Plate>
+                </FlowPlate>
+              )}
+
+              {/* --------------------------- 5 · dress code ---------------------------- */}
+              {showDress ? (
+                <Plate id="frame-dresscode" art={A("05-dresscode.jpg")} fill>
+                  {/* the column the calla lilies leave free, top to bottom */}
+                  <Zone box={{ x0: 0.215, y0: 0.05, x1: 0.715, y1: 0.955 }} className="items-center justify-center text-center">
+                    {hasDressCode(content) ? (
+                      <Rise className="flex flex-col items-center">
+                        <Heading size={96} color="var(--g-paper)" flourish={260} edit="dressCode.heading">
+                          {dress?.heading?.trim() || "Dress Code"}
+                        </Heading>
+                        {dress?.attire?.trim() ? (
+                          <span
+                            className="mt-[6%] inline-block"
+                            style={{
+                              fontFamily: SERIF,
+                              fontSize: u(34),
+                              fontWeight: 600,
+                              letterSpacing: "0.08em",
+                              color: "var(--g-paper)",
+                              padding: `${u(12)} ${u(34)}`,
+                              borderRadius: 999,
+                              border: "1px solid color-mix(in srgb, var(--g-paper) 60%, transparent)",
+                            }}
+                          >
+                            {dress.attire}
+                          </span>
+                        ) : null}
+                        {dress?.note?.trim() ? (
+                          <Body size={44} color={PAPER_SOFT} className="mt-[5%]" edit="dressCode.note">
+                            {dress.note}
+                          </Body>
+                        ) : null}
+                        {dress?.swatches?.length ? (
+                          <div className="mt-[7%] flex flex-wrap justify-center" style={{ gap: `${u(30)} ${u(26)}` }}>
+                            {dress.swatches.slice(0, 6).map((s, i) => (
+                              <OvalSwatch key={`${s.hex}-${i}`} hex={s.hex} label={dress.swatchLabels === false ? undefined : s.label} />
+                            ))}
+                          </div>
+                        ) : null}
+                        {attireCols.length ? (
+                          <div
+                            className="mt-[8%] grid w-full"
+                            style={{ gridTemplateColumns: `repeat(${Math.min(attireCols.length, 2)}, 1fr)`, gap: u(30) }}
+                          >
+                            {attireCols.map(([k, v]) => (
+                              <div key={k} className="flex flex-col items-center">
+                                <Caps size={28} color="var(--g-paper)" track={0.14}>
+                                  {k}
+                                </Caps>
+                                <Body size={38} color={PAPER_SOFT} className="leading-snug">
+                                  {v}
+                                </Body>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                        {dress?.avoid?.trim() ? (
+                          <Body size={38} italic color={PAPER_SOFT} className="mt-[7%]">
+                            Kindly avoid {dress.avoid}
+                          </Body>
+                        ) : null}
+                      </Rise>
+                    ) : null}
+
+                    {wishes.length ? (
+                      <Rise className={`flex flex-col items-center ${hasDressCode(content) ? "mt-[10%]" : ""}`}>
+                        <Heading size={84} color="var(--g-paper)" flourish={220}>
+                          Our wishes
+                        </Heading>
+                        {wishes.slice(0, 3).map((w, i) => (
+                          <div key={i} className="mt-[6%] flex flex-col items-center">
+                            <Caps size={30} color="var(--g-paper)" track={0.14}>
+                              {w.title}
+                            </Caps>
+                            <Body size={38} color={PAPER_SOFT}>
+                              {w.body}
+                            </Body>
+                          </div>
+                        ))}
+                      </Rise>
+                    ) : null}
+                  </Zone>
+                </Plate>
+              ) : null}
+
+              {/* ------------------------------ 6 · RSVP ------------------------------- */}
+              {showRsvp ? (
+                <FlowPlate id="frame-rsvp" slices={DETAILS} pad={170}>
+                  <Rise className="flex flex-col items-center">
+                    <Heading size={104} flourish={260} edit="rsvp.heading">
+                      {rsvp?.heading || "RSVP"}
+                    </Heading>
+                    {rsvp?.footer?.trim() ? (
+                      <Body size={44} italic className="mt-[3%]" edit="rsvp.footer">
+                        {rsvp.footer}
+                      </Body>
+                    ) : null}
+                  </Rise>
+                  <div className="flex w-full justify-center" style={{ marginTop: u(50), marginBottom: u(30) }}>
+                    <ReplyForm content={content} live={live} />
+                  </div>
+                  {contacts.chatUrl?.trim() || contacts.phone?.trim() ? (
+                    <Rise className="flex w-full flex-col items-center" style={{ marginBottom: u(30) }}>
+                      <div className="w-full" style={{ margin: `${u(20)} 0 ${u(36)}` }}>
+                        <Flourish width={200} color="var(--g-ink)" className="opacity-60" />
+                      </div>
+                      <p style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, color: "var(--g-ink)", marginBottom: 12 }}>
+                        Questions on the day?
+                      </p>
+                      <div className="flex w-full flex-col items-center" style={{ gap: 12, maxWidth: 420 }}>
+                        {contacts.phone?.trim() ? (
+                          <ActionButton icon="phone" wide href={`tel:${contacts.phone.replace(/[^\d+]/g, "")}`}>
+                            Call {contacts.contactName?.trim() || "us"}
+                          </ActionButton>
+                        ) : null}
+                        {contacts.chatUrl?.trim() ? (
+                          <ActionButton icon="chat" wide tone="cream" href={contacts.chatUrl.trim()}>
+                            Join our chat group
+                          </ActionButton>
+                        ) : null}
+                        {contacts.chatNote?.trim() ? (
+                          <Body size={38} italic>
+                            {contacts.chatNote}
+                          </Body>
+                        ) : null}
+                      </div>
+                    </Rise>
+                  ) : null}
+                </FlowPlate>
+              ) : null}
+
+              {/* ----------------------------- 7 · closing ----------------------------- */}
+              <Plate art={A("07-closing.jpg")} field="var(--g-dusk)" fill>
+                <Zone box={{ x0: 0.12, y0: 0.6, x1: 0.88, y1: 0.965 }} className="items-center justify-center text-center">
+                  <Rise className="flex flex-col items-center">
+                    {countdown?.headline ? (
+                      <Caps size={30} color={PAPER_SOFT} track={0.18} className="mb-[4%]">
+                        {countdown.headline}
+                      </Caps>
+                    ) : null}
+                    <CountdownTiles target={countdown?.targetDate} size={60} />
+                  </Rise>
+                  <Rise delay={0.15} className="flex flex-col items-center" style={{ marginTop: u(40) }}>
+                    <Flourish width={260} color="var(--g-paper)" className="opacity-70" />
+                    {hero?.closingLine ? (
+                      <Body size={46} color={PAPER_SOFT} className="mt-[4%]" edit="hero.closingLine">
+                        {hero.closingLine}
+                      </Body>
+                    ) : null}
+                    <Script size={110} color="var(--g-paper)" className="mt-[3%]">
+                      We await you!
+                    </Script>
+                    <Caps size={32} color={PAPER_SOFT} track={0.16} className="mt-[1%]">
+                      {names.join(" & ")}
+                    </Caps>
+                  </Rise>
+                </Zone>
+              </Plate>
             </div>
           </main>
-
-          <AnimatePresence>
-            {sheet ? <RsvpSheet key="rsvp" content={content} live={live} onClose={() => setSheet(false)} /> : null}
-          </AnimatePresence>
 
           <MusicToggle trackUrl={content.music?.trackUrl} />
           {guide ? <ScrollGuide active hasMusic={!!content.music?.trackUrl} /> : null}

@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Plate, Zone, u } from "./stage";
-import { Caps, DateCartouche, SCRIPT, SERIF, SealMonogram } from "./kit";
+import { Caps, DateCartouche, Icon, SCRIPT, SERIF, SealMonogram } from "./kit";
 
 /**
  * The Garden cover, and the opening of the invitation.
@@ -89,6 +89,7 @@ export function Cover({
   date,
   nav,
   onOpen,
+  onDone,
 }: {
   gated: boolean;
   names: string;
@@ -99,6 +100,8 @@ export function Cover({
   date: { iso?: string; fallback?: string };
   nav: [string, () => void][];
   onOpen: () => void;
+  /** the card has been written: time to take the guest onwards */
+  onDone?: () => void;
 }) {
   const reduce = useReducedMotion();
   const [stage, setStage] = useState<Stage>(gated ? "sealed" : "written");
@@ -111,6 +114,8 @@ export function Cover({
   const write = () => {
     setStage("written");
     onOpen();
+    // the writing takes about four seconds; give them a moment with it
+    if (onDone) window.setTimeout(onDone, 5600);
   };
 
   const open = () => {
@@ -139,10 +144,8 @@ export function Cover({
     };
   }, [written]);
 
-  const shadow: CSSProperties = { textShadow: "0 0 2px rgba(0,0,0,0.55), 0 1px 12px rgba(0,0,0,0.85)" };
-
   return (
-    <Plate id="frame-couple" art={A("01-cover.jpg")} video={A("01-cover.mp4")} field="var(--g-dusk)">
+    <Plate id="frame-couple" art={A("01-cover.jpg")} video={A("01-cover.mp4")} field="var(--g-dusk)" fill>
       {/* the sealed envelope and its opening, laid over the living cover and
           dissolved away once the film reaches the cover's own frame */}
       <AnimatePresence>
@@ -165,11 +168,12 @@ export function Cover({
       </AnimatePresence>
 
       <motion.div initial={from} animate={to} variants={arrive} className="contents">
-        <Zone box={{ x0: 0.04, y0: 0.016, x1: 0.96, y1: 0.052 }} className="flex-row items-center justify-center">
+        {/* (a filled plate loses up to ~9% each side on a tall phone) */}
+        <Zone box={{ x0: 0.12, y0: 0.018, x1: 0.88, y1: 0.056 }} className="flex-row items-center justify-center">
           {nav.map(([label, act], i) => (
             <motion.span key={label} className="flex items-center" initial={from} animate={to} variants={arrive}>
               {i > 0 ? (
-                <span aria-hidden style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(24)}` }}>
+                <span aria-hidden style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(18)}` }}>
                   ◆
                 </span>
               ) : null}
@@ -180,9 +184,9 @@ export function Cover({
                 className="uppercase"
                 style={{
                   fontFamily: SERIF,
-                  fontSize: u(25),
+                  fontSize: u(28),
                   fontWeight: 600,
-                  letterSpacing: "0.2em",
+                  letterSpacing: "0.14em",
                   color: "var(--g-paper)",
                   textShadow: "0 1px 8px rgba(0,0,0,0.6)",
                 }}
@@ -218,14 +222,14 @@ export function Cover({
       </Zone>
       <Zone box={{ x0: 0.33, y0: 0.697, x1: 0.67, y1: 0.72 }} className="items-center justify-center text-center">
         <motion.div initial={from} animate={to} variants={surface}>
-          <Caps size={names.length > 18 ? 20 : 24} color="#fbf8f0" track={0.2} className="leading-tight">
+          <Caps size={names.length > 18 ? 22 : 27} color="#fbf8f0" track={0.16} className="leading-tight">
             {names}
           </Caps>
         </motion.div>
       </Zone>
       <Zone box={{ x0: 0.35, y0: 0.721, x1: 0.65, y1: 0.748 }} className="items-center justify-center">
         <motion.div initial={from} animate={to} variants={unfold}>
-          <DateCartouche {...date} color="#f6f2e6" size={18} />
+          <DateCartouche {...date} color="#f6f2e6" size={20} />
         </motion.div>
       </Zone>
 
@@ -239,7 +243,8 @@ export function Cover({
         </Zone>
       )}
 
-      {/* the invitation to open it */}
+      {/* the invitation to open it: the envelope breathes with a soft light,
+          and a plain, large "Tap here to open" sits right under it */}
       <AnimatePresence>
         {stage === "sealed" ? (
           <motion.div
@@ -248,19 +253,37 @@ export function Cover({
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.5 } }}
           >
-            <Zone box={{ x0: 0.2, y0: 0.9, x1: 0.8, y1: 0.955 }} className="items-center justify-center" style={shadow}>
-              <motion.div
-                className="flex flex-col items-center"
-                animate={{ opacity: [0.55, 1, 0.55] }}
-                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            <Zone box={{ x0: 0.2, y0: 0.55, x1: 0.8, y1: 0.87 }} className="pointer-events-none">
+              <motion.span
+                aria-hidden
+                className="absolute inset-0"
+                style={{ background: "radial-gradient(closest-side, rgba(255,246,214,0.42), transparent)" }}
+                animate={{ opacity: [0.25, 0.85, 0.25], scale: [0.96, 1.04, 0.96] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </Zone>
+            <Zone box={{ x0: 0.14, y0: 0.888, x1: 0.86, y1: 0.962 }} className="items-center justify-center">
+              <motion.span
+                className="inline-flex items-center"
+                style={{
+                  gap: 10,
+                  padding: "12px 22px",
+                  borderRadius: 999,
+                  background: "rgba(30,26,14,0.55)",
+                  border: "1px solid rgba(248,243,230,0.55)",
+                  color: "#fbf8f0",
+                  fontFamily: SERIF,
+                  fontSize: 19,
+                  fontWeight: 600,
+                  backdropFilter: "blur(3px)",
+                  WebkitBackdropFilter: "blur(3px)",
+                }}
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span aria-hidden style={{ color: "var(--g-paper)", fontSize: u(15) }}>
-                  ◆
-                </span>
-                <Caps size={27} color="var(--g-paper)" track={0.34} className="mt-[2%]">
-                  Tap to open
-                </Caps>
-              </motion.div>
+                <Icon name="hand" size={22} />
+                Tap here to open
+              </motion.span>
             </Zone>
           </motion.div>
         ) : null}
