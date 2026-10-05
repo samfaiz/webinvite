@@ -643,6 +643,7 @@ export function CountdownTiles({
   ];
   return (
     <div className="flex justify-center" style={{ gap: u(16), color: solid ?? ink }}>
+      <style>{"@keyframes gk-roll{from{transform:translateY(-45%);opacity:.25}to{transform:none;opacity:1}}"}</style>
       {tiles.map(([n, label]) => (
         <div
           key={label}
@@ -656,24 +657,28 @@ export function CountdownTiles({
             boxShadow: solid ? `inset 0 0 0 ${u(5)} ${ink}, inset 0 0 0 ${u(6.5)} color-mix(in srgb, ${solid} 45%, transparent)` : undefined,
           }}
         >
-          {/* each change rolls the new number in from above */}
+          {/* each change drops the new number in from above. A plain CSS
+              animation on a freshly keyed span: the old number is simply
+              replaced, so nothing waits on an exit animation — a phone that
+              pauses drawing in the background can't pile numbers up. */}
           <span
             className="relative block overflow-hidden"
             style={{ height: `calc(${u(size)} * 1.08)`, width: "100%", textAlign: "center" }}
           >
-            <AnimatePresence initial={false} mode="popLayout">
-              <motion.span
-                key={n}
-                className="block"
-                style={{ fontFamily: SERIF, fontSize: u(size), lineHeight: 1.08, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}
-                initial={{ y: "-100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "100%", opacity: 0 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-              >
-                {String(n).padStart(2, "0")}
-              </motion.span>
-            </AnimatePresence>
+            <span
+              key={n}
+              className="block"
+              style={{
+                fontFamily: SERIF,
+                fontSize: u(size),
+                lineHeight: 1.08,
+                fontWeight: 500,
+                fontVariantNumeric: "tabular-nums",
+                animation: "gk-roll 0.4s ease-out",
+              }}
+            >
+              {String(n).padStart(2, "0")}
+            </span>
           </span>
           <span style={{ fontFamily: SERIF, fontSize: `max(11px, ${u(size * 0.4)})`, fontWeight: 600, letterSpacing: "0.04em", marginTop: u(8), opacity: 0.9 }}>
             {label}
