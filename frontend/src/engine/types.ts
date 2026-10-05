@@ -279,8 +279,13 @@ export interface InvitationContent {
   /** a photo of the venue, for designs that show one (Blue Hydrangea) */
   venuePhoto?: string;
   /** Blue Hydrangea: what fills the carved frame on the cover. Unset means
-   *  the couple's photos when there are any, else flowers. */
-  frameFill?: "photos" | "flowers" | "date";
+   *  the couple's photos when there are any, else flowers. "venue" is the
+   *  venue photo, or a drawing of a Kerala church / tharavad / backwaters
+   *  (see venueArt); "blessing" is frameText, else the event's verse, else
+   *  the community's blessing. */
+  frameFill?: "photos" | "flowers" | "date" | "venue" | "blessing";
+  /** the couple's own blessing or wish for the frame */
+  frameText?: string;
   contacts?: {
     /** WhatsApp / Telegram group invite link */
     chatUrl?: string;

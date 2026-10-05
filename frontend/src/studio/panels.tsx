@@ -105,11 +105,23 @@ export function DesignPanel({ draft, update }: PanelProps) {
               { value: "photos", label: "Our photos" },
               { value: "flowers", label: "Blue flowers (no photos)" },
               { value: "date", label: "The wedding date (no photos)" },
+              { value: "venue", label: "The venue — photo or Kerala drawing" },
+              { value: "blessing", label: "A blessing or wish" },
             ]}
           />
         </Field>
       ) : null}
-      {draft.templateId === "garden-kerala" ? (
+      {draft.templateId === "hydrangea-blush" && draft.content.frameFill === "blessing" ? (
+        <Field label="Blessing or wish (optional)" hint="Leave empty to use the verse on your first event, or your community's blessing.">
+          <TextArea
+            rows={3}
+            value={draft.content.frameText ?? ""}
+            placeholder="e.g. Two hearts, one love — blessed by God"
+            onChange={(e) => update((d) => { d.content.frameText = e.target.value; })}
+          />
+        </Field>
+      ) : null}
+      {draft.templateId === "garden-kerala" || (draft.templateId === "hydrangea-blush" && draft.content.frameFill === "venue") ? (
         <Field label="Venue picture">
           <Select
             value={draft.content.venueArt ?? "auto"}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { RenderProps } from "@/engine/types";
+import type { InvitationContent, MotifPack, RenderProps } from "@/engine/types";
 import { PreviewContext } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MusicToggle } from "@/components/MusicToggle";
@@ -137,11 +137,60 @@ function FrameDate({ iso }: { iso?: string }) {
   );
 }
 
+/** The place they're marrying: their own photo of it, else a drawing of a
+ *  Kerala church, tharavad or the backwaters in the design's blue (chosen in
+ *  the Studio, or by the couple's community). */
+function FrameVenue({ content, community }: { content: InvitationContent; community?: string }) {
+  if (content.venuePhoto) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={content.venuePhoto} alt="" className="h-full w-full object-cover" />;
+  }
+  const pick = content.venueArt && content.venueArt !== "auto" ? content.venueArt : community === "kerala-christian" ? "church" : community === "hindu" ? "tharavad" : "backwaters";
+  return (
+    <div className="h-full w-full" style={{ background: "#fdf1f6" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/assets/templates/hydrangea/venue-${pick}.webp`} alt="" className="h-full w-full object-cover" style={{ objectPosition: "50% 70%" }} />
+    </div>
+  );
+}
+
+/** A blessing or a wish on the lace: the couple's own words, else the verse
+ *  on their first event, else their community's blessing. Short wishes are
+ *  set in script, longer verses in italic. */
+function FrameBlessing({ content, motif }: { content: InvitationContent; motif?: MotifPack }) {
+  const own = content.frameText?.trim();
+  const ev = content.schedule?.events?.[0];
+  const text = own || ev?.verse?.trim() || motif?.defaultBlessing || "Two hearts, one journey.";
+  const ref = own ? "" : ev?.verse?.trim() ? ev.verseRef ?? "" : motif?.defaultBlessingRef ?? "";
+  const short = text.length <= 40;
+  return (
+    <div className="relative flex h-full w-full flex-col items-center justify-center text-center" style={laceStyle()}>
+      <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(36,52,84,0.2), rgba(36,52,84,0.5))" }} />
+      <div className="relative flex flex-col items-center" style={{ color: BLUSH, padding: `0 ${v(20)}` }}>
+        <Flower size={v(34)} rotate={-10} />
+        {short ? (
+          <span style={{ fontFamily: SCRIPT, fontSize: v(text.length <= 24 ? 28 : 23), lineHeight: 1.2, marginTop: v(8) }}>{text}</span>
+        ) : (
+          <span style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 500, fontSize: v(text.length > 80 ? 13.5 : 15.5), lineHeight: 1.4, marginTop: v(8) }}>
+            “{text}”
+          </span>
+        )}
+        {ref ? (
+          <span style={{ fontFamily: SERIF, fontWeight: 600, fontSize: v(11.5), letterSpacing: "0.16em", textTransform: "uppercase", marginTop: v(8), opacity: 0.9 }}>
+            {ref}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /* ----------------------------- the template ----------------------------- */
 
 export function HydrangeaTemplate({
   content,
   theme,
+  motif,
   intro = true,
   live = false,
   snap = false,
@@ -168,7 +217,8 @@ export function HydrangeaTemplate({
   const photos = hidden.includes("story")
     ? []
     : (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
-  const fill = content.frameFill === "date" ? "date" : content.frameFill === "flowers" || !photos.length ? "flowers" : "photos";
+  const chosen = content.frameFill;
+  const fill = chosen === "date" || chosen === "venue" || chosen === "blessing" ? chosen : chosen === "flowers" || !photos.length ? "flowers" : "photos";
   const events = (schedule?.events ?? []).slice(0, 6);
   const firstEv = events[0];
   const dress = content.dressCode;
@@ -311,6 +361,10 @@ export function HydrangeaTemplate({
                       <PhotoOval photos={photos} onOpen={compact || editing ? undefined : setViewer} />
                     ) : fill === "date" ? (
                       <FrameDate iso={countdown?.targetDate} />
+                    ) : fill === "venue" ? (
+                      <FrameVenue content={content} community={motif?.id ?? content.meta?.community} />
+                    ) : fill === "blessing" ? (
+                      <FrameBlessing content={content} motif={motif} />
                     ) : (
                       <FrameFlowers />
                     )}
