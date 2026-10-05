@@ -6,17 +6,19 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Plate, Zone, u } from "./stage";
 import { Caps, DateCartouche, Icon, SCRIPT, SERIF, SealMonogram } from "./kit";
+import { COVER_HEART, heartAt } from "./opening";
 
 /**
  * The Garden cover, and the opening of the invitation.
  *
  * A guest arrives at the envelope still sealed in the garden. Tapping it
- * plays the envelope opening — a video framed exactly like the cover plate,
- * which ends on it — and then the card is written in: their initials drawn
- * left to right as if by pen, the names surfacing out of a soft blur, the date
- * opening out from the centre. The seal carries their initials throughout.
- * Names can't be in the video — every couple's are different — so that
- * part is done here, on top of it.
+ * plays the envelope opening, and as the heart rises out of the envelope
+ * their initials are written onto it as if by pen, the names surfacing and
+ * the date opening out — the writing rides on the heart, following its
+ * measured path through the film (opening.ts), and grows with it into the
+ * cover's own heart as the film dissolves. The seal carries their initials
+ * throughout. Names can't be in the video — every couple's are different —
+ * so that part is done here, on top of it.
  *
  * Until the opening video exists the cover opens straight into the writing.
  * The Studio, the gallery and thumbnails skip all of it (`gated` false).
@@ -32,7 +34,17 @@ const A = (f: string) => `/assets/templates/garden/${f}`;
 const OPENING: { still: string; video: string } | null = { still: A("00-sealed.jpg"), video: A("00-opening.mp4") };
 
 /** How long the film takes to dissolve into the cover, in seconds. */
-const HANDOFF = 1.3;
+const HANDOFF = 1.0;
+
+/** The film's first seconds are the envelope sitting still: start a little
+ *  in, and play it a little quicker, so something is happening at once. */
+const FILM_START = 1.8;
+const FILM_RATE = 1.35;
+/** film time at which the heart is out far enough to write on */
+const INK_AT = 5.25;
+/** film time at which the heart has settled: hand over to the cover then,
+ *  rather than sit through the film's still last seconds */
+const HANDOFF_AT = 7.6;
 
 /** If nobody taps, the envelope opens by itself after this long (ms), so a
  *  guest who doesn't think to tap still sees it. */
@@ -42,27 +54,24 @@ type Stage = "sealed" | "opening" | "written";
 
 const EASE = [0.45, 0, 0.25, 1] as const;
 
-// one set of variants per element, so the card is written in order
-// (each takes a lead-in as `custom`: the film's dissolve, when there was one)
+// one set of variants per element, so the card is written in order, timed
+// from the moment the writing starts ("ink")
 const pen: Variants = {
   // swashes overhang the line, so the clip reaches past the box on every side
   hidden: { clipPath: "inset(-40% 112% -40% -12%)" },
-  shown: (lead = 0) => ({
-    clipPath: "inset(-40% -12% -40% -12%)",
-    transition: { duration: 1.9, ease: EASE, delay: 0.7 + lead },
-  }),
+  shown: { clipPath: "inset(-40% -12% -40% -12%)", transition: { duration: 1.6, ease: EASE, delay: 0.1 } },
 };
 const surface: Variants = {
   hidden: { opacity: 0, filter: "blur(6px)" },
-  shown: (lead = 0) => ({ opacity: 1, filter: "blur(0px)", transition: { duration: 1.1, ease: "easeOut", delay: 1.9 + lead } }),
+  shown: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.9, ease: "easeOut", delay: 1.1 } },
 };
 const unfold: Variants = {
   hidden: { opacity: 0, scaleX: 0.55 },
-  shown: (lead = 0) => ({ opacity: 1, scaleX: 1, transition: { duration: 1, ease: EASE, delay: 2.6 + lead } }),
+  shown: { opacity: 1, scaleX: 1, transition: { duration: 0.8, ease: EASE, delay: 1.7 } },
 };
 const arrive: Variants = {
   hidden: { opacity: 0 },
-  shown: (lead = 0) => ({ opacity: 1, transition: { duration: 0.9, delay: 3.6 + lead } }),
+  shown: { opacity: 1, transition: { duration: 0.9, delay: 2.6 } },
 };
 
 /** Their initials as the card's title: two script capitals around a small
@@ -120,24 +129,32 @@ export function Cover({
   const reduce = useReducedMotion();
   const [stage, setStage] = useState<Stage>(gated ? "sealed" : "written");
   const film = useRef<HTMLVideoElement | null>(null);
+  // the writing on the heart: moved and scaled to follow the film's heart
+  const heart = useRef<HTMLDivElement | null>(null);
   const written = stage === "written";
+  // the writing starts as the heart comes out of the envelope, before the
+  // film is over; without a film, as soon as the envelope is opened
+  const [ink, setInk] = useState(!gated);
   // the Studio and thumbnails render the finished card with no animation
   const from = gated ? "hidden" : false;
-  const to = written ? "shown" : "hidden";
+  const to = ink ? "shown" : "hidden";
 
-  // the writing waits for the film to finish dissolving, when it played
-  const [lead, setLead] = useState(0);
-  const write = (afterFilm = false) => {
-    const wait = afterFilm ? HANDOFF : 0;
-    setLead(wait);
+  const write = () => {
+    setInk(true);
     setStage("written");
     onOpen();
-    // the writing takes about four seconds; give them a moment with it
-    if (onDone) window.setTimeout(onDone, 5600 + wait * 1000);
+    // the writing grows with the heart into the cover's own heart
+    const g = heart.current;
+    if (g) {
+      g.style.transition = `transform ${HANDOFF}s ease-in-out`;
+      g.style.transform = "none";
+    }
+    // give them a moment with the finished card before moving on
+    if (onDone) window.setTimeout(onDone, 4200);
   };
 
   const open = () => {
-    if (stage === "opening") return write(true); // a second tap skips the film
+    if (stage === "opening") return write(); // a second tap skips the film
     if (stage !== "sealed") return;
     // the invitation's music starts inside the guest's tap, so it is allowed to
     try {
@@ -148,8 +165,41 @@ export function Cover({
     const v = film.current;
     if (!OPENING || !v || reduce) return write();
     setStage("opening");
-    v.play().catch(() => write(true));
+    try {
+      v.currentTime = FILM_START;
+      v.playbackRate = FILM_RATE;
+    } catch {
+      /* not seekable yet: it plays from the start, which is fine */
+    }
+    v.play().catch(() => write());
   };
+
+  // while the film plays: keep the writing on the heart, start the pen when
+  // the heart is out, and hand over once it has settled
+  const writeRef = useRef(write);
+  useEffect(() => {
+    writeRef.current = write;
+  });
+  useEffect(() => {
+    if (stage !== "opening") return;
+    const v = film.current;
+    if (!v) return;
+    let raf = 0;
+    let inked = false;
+    const tick = () => {
+      const t = v.currentTime;
+      const { dy, s } = heartAt(t);
+      if (heart.current) heart.current.style.transform = `translateY(${(dy * 100).toFixed(3)}%) scale(${s.toFixed(4)})`;
+      if (!inked && t >= INK_AT) {
+        inked = true;
+        setInk(true);
+      }
+      if (t >= HANDOFF_AT) return writeRef.current();
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [stage]);
 
   // open by itself if nobody taps (the film is muted, so it may autoplay)
   const openRef = useRef(open);
@@ -194,7 +244,7 @@ export function Cover({
             playsInline
             preload="auto"
             aria-hidden
-            onEnded={() => write(true)}
+            onEnded={() => write()}
             className="absolute inset-0 h-full w-full"
             style={{ objectFit: "fill" }}
             exit={{ opacity: 0, transition: { duration: HANDOFF, ease: "easeInOut" } }}
@@ -202,11 +252,11 @@ export function Cover({
         ) : null}
       </AnimatePresence>
 
-      <motion.div custom={lead} initial={from} animate={to} variants={arrive} className="contents">
+      <motion.div initial={from} animate={to} variants={arrive} className="contents">
         {/* (a filled plate loses up to ~9% each side on a tall phone) */}
         <Zone box={{ x0: 0.12, y0: 0.018, x1: 0.88, y1: 0.056 }} className="flex-row items-center justify-center">
           {nav.map(([label, act], i) => (
-            <motion.span key={label} className="flex items-center" custom={lead} initial={from} animate={to} variants={arrive}>
+            <motion.span key={label} className="flex items-center" initial={from} animate={to} variants={arrive}>
               {i > 0 ? (
                 <span aria-hidden style={{ color: "var(--g-paper)", opacity: 0.6, fontSize: u(13), margin: `0 ${u(18)}` }}>
                   ◆
@@ -241,7 +291,7 @@ export function Cover({
             className="absolute inset-0"
             style={{ background: "radial-gradient(closest-side, rgba(255,250,232,0.55), transparent)" }}
             initial={{ opacity: 0 }}
-            animate={written ? { opacity: [0, 0.9, 0] } : { opacity: 0 }}
+            animate={ink ? { opacity: [0, 0.9, 0] } : { opacity: 0 }}
             transition={{ duration: 2.4, ease: "easeInOut" }}
           />
         </Zone>
@@ -249,24 +299,32 @@ export function Cover({
 
       {/* On the sage face of the heart, one line per band. Measured: the
           lobes join at .65 where it is .31–.69 wide (above that a cream flap
-          tip divides them); .70 → .32–.68; .74 → .37–.63; then it closes. */}
+          tip divides them); .70 → .32–.68; .74 → .37–.63; then it closes.
+          All three ride together on the film's heart while it plays,
+          scaled about the cover heart's centre. */}
+      <div
+        ref={heart}
+        className="pointer-events-none absolute inset-0"
+        style={{ transformOrigin: `50% ${(COVER_HEART.cy * 100).toFixed(2)}%` }}
+      >
       <Zone box={{ x0: 0.3, y0: 0.632, x1: 0.7, y1: 0.697 }} className="items-center justify-end">
-        <motion.div custom={lead} initial={from} animate={to} variants={pen}>
+        <motion.div initial={from} animate={to} variants={pen}>
           <Monogram letters={letters} size={104} />
         </motion.div>
       </Zone>
       <Zone box={{ x0: 0.33, y0: 0.697, x1: 0.67, y1: 0.72 }} className="items-center justify-center text-center">
-        <motion.div custom={lead} initial={from} animate={to} variants={surface}>
+        <motion.div initial={from} animate={to} variants={surface}>
           <Caps size={names.length > 18 ? 22 : 27} color="#fbf8f0" track={0.16} className="leading-tight">
             {names}
           </Caps>
         </motion.div>
       </Zone>
       <Zone box={{ x0: 0.35, y0: 0.721, x1: 0.65, y1: 0.748 }} className="items-center justify-center">
-        <motion.div custom={lead} initial={from} animate={to} variants={unfold}>
+        <motion.div initial={from} animate={to} variants={unfold}>
           <DateCartouche {...date} color="#f6f2e6" size={20} />
         </motion.div>
       </Zone>
+      </div>
 
       {/* the wax seal, pressed with their initials — there from the start, it
           is the first thing on the envelope that is theirs */}
