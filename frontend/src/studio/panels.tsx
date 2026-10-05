@@ -96,6 +96,19 @@ export function DesignPanel({ draft, update }: PanelProps) {
           ]}
         />
       </Field>
+      {draft.templateId === "hydrangea-blush" ? (
+        <Field label="Inside the cover frame" hint="Hiding “Our Story” below also keeps photos off the card.">
+          <Select
+            value={draft.content.frameFill ?? "photos"}
+            onChange={(v) => update((d) => { d.content.frameFill = v as typeof d.content.frameFill; })}
+            options={[
+              { value: "photos", label: "Our photos" },
+              { value: "flowers", label: "Blue flowers (no photos)" },
+              { value: "date", label: "The wedding date (no photos)" },
+            ]}
+          />
+        </Field>
+      ) : null}
       {draft.templateId === "garden-kerala" ? (
         <Field label="Venue picture">
           <Select

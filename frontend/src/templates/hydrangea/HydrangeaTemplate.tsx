@@ -73,6 +73,70 @@ const dotted = (iso?: string) => {
   return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`;
 };
 
+/* ------------------------- inside the frame ------------------------- */
+
+/** For couples who'd rather not show photos: a small posy of the blue
+ *  flowers on a soft blush-to-blue ground, swaying very gently. */
+function FrameFlowers() {
+  const posy: [number, number, number, number, number][] = [
+    // size (% of the oval's width), left %, top %, rotation, delay
+    [44, 6, 38, -24, 0.4],
+    [40, 52, 14, 18, 0.6],
+    [36, 50, 58, 40, 0.8],
+    [62, 19, 24, 6, 0.2],
+  ];
+  return (
+    <div
+      className="relative h-full w-full"
+      style={{ background: "radial-gradient(circle at 50% 42%, #fdf6f9 0%, #eef1f9 55%, #d7e0f0 100%)" }}
+    >
+      {posy.map(([s, l, t, r, d], i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ width: `${s}%`, left: `${l}%`, top: `${t}%` }}
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1, rotate: [r - 3, r + 3, r - 3] }}
+          transition={{
+            opacity: { duration: 0.8, delay: d },
+            scale: { duration: 0.8, delay: d },
+            rotate: { duration: 6 + i, repeat: Infinity, ease: "easeInOut" },
+          }}
+        >
+          <Flower size="100%" />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** The wedding date set inside the frame, on the lace. */
+function FrameDate({ iso }: { iso?: string }) {
+  const d = new Date(iso ?? "");
+  const ok = !Number.isNaN(d.getTime());
+  return (
+    <div className="relative flex h-full w-full flex-col items-center justify-center text-center" style={laceStyle()}>
+      {/* a veil over the lace so the frame's carving and the type both stand clear */}
+      <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(circle, rgba(36,52,84,0.15), rgba(36,52,84,0.45))" }} />
+      <div className="relative flex flex-col items-center" style={{ color: BLUSH }}>
+        {/* small enough to clear the oval's narrowing top */}
+        <span style={{ fontFamily: SCRIPT, fontSize: v(20), lineHeight: 1.1, whiteSpace: "nowrap" }}>Save the Date</span>
+        {ok ? (
+          <>
+            <span style={{ fontFamily: SERIF, fontWeight: 700, fontSize: v(58), lineHeight: 1, marginTop: v(6) }}>{d.getDate()}</span>
+            <span style={{ fontFamily: SERIF, fontWeight: 600, fontSize: v(15), letterSpacing: "0.22em", textTransform: "uppercase", marginTop: v(4) }}>
+              {MONTHS[d.getMonth()]}
+            </span>
+            <span style={{ fontFamily: SERIF, fontSize: v(22), marginTop: v(2) }}>{d.getFullYear()}</span>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /* ----------------------------- the template ----------------------------- */
 
 export function HydrangeaTemplate({
@@ -99,8 +163,12 @@ export function HydrangeaTemplate({
   const { couple, families, schedule, countdown, rsvp, story, map, hero } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);
   const letters = [initialOf(couple.partner1?.name), initialOf(couple.partner2?.name)].filter(Boolean);
-  const photos = (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
   const hidden = content.hiddenSections ?? [];
+  // hiding "Our Story" in the Studio keeps the couple's photos off the card
+  const photos = hidden.includes("story")
+    ? []
+    : (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
+  const fill = content.frameFill === "date" ? "date" : content.frameFill === "flowers" || !photos.length ? "flowers" : "photos";
   const events = (schedule?.events ?? []).slice(0, 6);
   const firstEv = events[0];
   const dress = content.dressCode;
@@ -239,10 +307,12 @@ export function HydrangeaTemplate({
                 </PenReveal>
                 <div style={{ width: "88%", marginTop: v(16) }}>
                   <OrnateFrame>
-                    {photos.length ? (
+                    {fill === "photos" ? (
                       <PhotoOval photos={photos} onOpen={compact || editing ? undefined : setViewer} />
+                    ) : fill === "date" ? (
+                      <FrameDate iso={countdown?.targetDate} />
                     ) : (
-                      <div className="h-full w-full" style={{ background: "#e7dbe6" }} />
+                      <FrameFlowers />
                     )}
                   </OrnateFrame>
                 </div>
@@ -290,7 +360,8 @@ export function HydrangeaTemplate({
 
             {/* ------------------------------- date ------------------------------- */}
             <section id="frame-date" className="relative overflow-hidden" style={{ background: BLUSH }}>
-              <div className="relative" style={{ height: v(470) }}>
+              {/* the box is as tall as the circle, so nothing below can slide under it */}
+              <div className="relative" style={{ height: v(500) }}>
                 {/* a circle wider than the page: round at top and foot, cut by the sides */}
                 <div className="absolute rounded-full" style={{ width: v(500), height: v(500), left: v(-55), top: 0, background: BLUE }} />
                 <motion.div
@@ -322,8 +393,8 @@ export function HydrangeaTemplate({
                   </Rise>
                 </div>
               </div>
-              <Rise className="flex flex-col items-center" style={{ padding: `${v(6)} ${v(20)} ${v(30)}`, gap: v(18) }}>
-                <CountdownTiles target={countdown?.targetDate} ink={BLUE} size={64} />
+              <Rise className="flex flex-col items-center" style={{ padding: `${v(22)} ${v(16)} ${v(30)}`, gap: v(18) }}>
+                <CountdownTiles target={countdown?.targetDate} ink={BLUE} solid={BLUSH} size={78} />
                 {cal ? (
                   <ActionButton icon="calendar" onClick={() => downloadIcs(cal, "invitation.ics")}>
                     Add to my calendar

@@ -278,6 +278,9 @@ export interface InvitationContent {
   venueArt?: "auto" | "tharavad" | "church" | "backwaters";
   /** a photo of the venue, for designs that show one (Blue Hydrangea) */
   venuePhoto?: string;
+  /** Blue Hydrangea: what fills the carved frame on the cover. Unset means
+   *  the couple's photos when there are any, else flowers. */
+  frameFill?: "photos" | "flowers" | "date";
   contacts?: {
     /** WhatsApp / Telegram group invite link */
     chatUrl?: string;

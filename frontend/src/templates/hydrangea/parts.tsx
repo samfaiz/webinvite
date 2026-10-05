@@ -213,7 +213,17 @@ export function WeekStrip({ iso, ink, ground }: { iso?: string; ink: string; gro
             </span>
             <span
               className="relative"
-              style={{ fontFamily: "var(--font-cormorant)", fontSize: v(12.5), fontWeight: 600, marginTop: v(5), color: on ? ground : ink, opacity: on ? 1 : 0.85 }}
+              style={{
+                fontFamily: "var(--font-cormorant)",
+                fontSize: v(12.5),
+                fontWeight: 600,
+                marginTop: v(5),
+                color: on ? ground : ink,
+                opacity: on ? 1 : 0.85,
+                // the heart narrows to its point right here, so the day's name
+                // carries a halo of the heart's colour and reads on either side
+                textShadow: on ? `0 0 3px ${ink}, 0 0 2px ${ink}, 0 0 1px ${ink}` : undefined,
+              }}
             >
               {name}
             </span>

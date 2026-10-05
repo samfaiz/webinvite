@@ -625,10 +625,13 @@ export function CountdownTiles({
   target,
   ink = "var(--g-paper)",
   size = 64,
+  solid,
 }: {
   target?: string;
   ink?: string;
   size?: number;
+  /** filled tiles in `ink` with the numbers in this colour, instead of outlines */
+  solid?: string;
 }) {
   const left = useTicking(target);
   if (!left) return null;
@@ -639,7 +642,7 @@ export function CountdownTiles({
     [left.seconds, "Seconds"],
   ];
   return (
-    <div className="flex justify-center" style={{ gap: u(16), color: ink }}>
+    <div className="flex justify-center" style={{ gap: u(16), color: solid ?? ink }}>
       {tiles.map(([n, label]) => (
         <div
           key={label}
@@ -649,7 +652,8 @@ export function CountdownTiles({
             padding: `${u(size * 0.32)} ${u(8)} ${u(size * 0.26)}`,
             border: `1px solid color-mix(in srgb, ${ink} 45%, transparent)`,
             borderRadius: u(18),
-            background: `color-mix(in srgb, ${ink} 6%, transparent)`,
+            background: solid ? ink : `color-mix(in srgb, ${ink} 6%, transparent)`,
+            boxShadow: solid ? `inset 0 0 0 ${u(5)} ${ink}, inset 0 0 0 ${u(6.5)} color-mix(in srgb, ${solid} 45%, transparent)` : undefined,
           }}
         >
           {/* each change rolls the new number in from above */}
@@ -671,7 +675,7 @@ export function CountdownTiles({
               </motion.span>
             </AnimatePresence>
           </span>
-          <span style={{ fontFamily: SERIF, fontSize: u(size * 0.38), letterSpacing: "0.06em", marginTop: u(8), opacity: 0.85 }}>
+          <span style={{ fontFamily: SERIF, fontSize: `max(11px, ${u(size * 0.4)})`, fontWeight: 600, letterSpacing: "0.04em", marginTop: u(8), opacity: 0.9 }}>
             {label}
           </span>
         </div>
