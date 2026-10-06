@@ -99,10 +99,8 @@ export const templates: TemplateMeta[] = [
     supportedCommunities: ALL_COMMUNITIES,
     defaultThemeId: "emerald-stone",
     defaultMotifId: "secular",
-    preview: "/assets/templates/garden/01-cover.jpg",
+    preview: "/assets/templates/emerald/preview.jpg",
     themeIds: ["emerald-stone"],
-    // until its generated roses and photographs are in
-    draft: true,
   },
   {
     id: "garden-kerala",

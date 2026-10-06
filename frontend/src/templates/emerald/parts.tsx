@@ -21,10 +21,10 @@ export const ART: {
   dressBg: string | null;
   cover: string | null;
 } = {
-  band: null,
-  cascade: null,
-  dressBg: null,
-  cover: null,
+  band: A("band.webp"),
+  cascade: A("cascade.webp"),
+  dressBg: A("dress.webp"),
+  cover: A("cover.webp"),
 };
 export const artPath = A;
 
@@ -163,7 +163,7 @@ export function RoseCascade({ side, top, height }: { side: "left" | "right"; top
     top,
     [side]: 0,
     height,
-    transform: `translateX(${side === "left" ? "-38%" : "38%"})`,
+    transform: `translateX(${side === "left" ? "-42%" : "42%"})`,
     pointerEvents: "none",
   };
   if (ART.cascade) {

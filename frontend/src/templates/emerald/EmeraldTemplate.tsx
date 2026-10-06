@@ -183,7 +183,7 @@ export function EmeraldTemplate({
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(14,24,23,0) 40%, rgba(14,24,23,0.65) 72%, ${DARK} 100%)` }} />
                 <motion.div
                   className="absolute inset-x-0 flex flex-col items-center text-center"
-                  style={{ bottom: v(30), color: "#f4f1ea" }}
+                  style={{ bottom: v(30), color: "#f4f1ea", textShadow: "0 2px 16px rgba(6,13,12,0.85), 0 0 4px rgba(6,13,12,0.6)" }}
                   initial={compact || editing ? false : { opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1.4, delay: 0.6, ease: "easeOut" }}
@@ -269,7 +269,7 @@ export function EmeraldTemplate({
                       <p style={{ fontFamily: DISPLAY, fontWeight: 400, fontSize: v(46), lineHeight: 1, color: SAGE }}>{ev.time}</p>
                       <p style={{ fontFamily: DISPLAY, fontWeight: 500, fontSize: v(27), lineHeight: 1.15, color: INK, marginTop: v(4) }}>{ev.name}</p>
                       {[ev.venue, ev.address].filter((x) => x?.trim()).length ? (
-                        <P color="#4d4b43" style={{ marginTop: v(6), maxWidth: "30ch" }}>
+                        <P color="#4d4b43" style={{ marginTop: v(6), maxWidth: "26ch" }}>
                           {[ev.venue, ev.address].filter((x) => x?.trim()).join(", ")}
                         </P>
                       ) : null}
