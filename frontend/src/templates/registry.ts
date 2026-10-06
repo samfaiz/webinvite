@@ -99,10 +99,8 @@ export const templates: TemplateMeta[] = [
     supportedCommunities: ALL_COMMUNITIES,
     defaultThemeId: "velvet-burgundy",
     defaultMotifId: "secular",
-    preview: "/assets/templates/garden/01-cover.jpg",
+    preview: "/assets/templates/velvet/preview.jpg",
     themeIds: ["velvet-burgundy"],
-    // until its generated line art and photographs are in
-    draft: true,
   },
   {
     id: "emerald-rose",

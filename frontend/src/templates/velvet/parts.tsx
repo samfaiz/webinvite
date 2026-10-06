@@ -29,15 +29,22 @@ export const ART: {
   bouquet: string | null;
   icons: Record<IconKey, string | null>;
 } = {
-  lilyCorner: null,
-  lilyStem: null,
-  palace: null,
-  scroll: null,
-  seal: null,
-  hall: null,
-  polaroids: [null, null],
-  bouquet: null,
-  icons: { envelope: null, rings: null, arch: null, glasses: null, dinner: null, car: null },
+  lilyCorner: A("lily-corner.webp"),
+  lilyStem: A("lily-stem.webp"),
+  palace: A("palace.webp"),
+  scroll: A("scroll.webp"),
+  seal: A("seal.webp"),
+  hall: A("hall.webp"),
+  polaroids: [A("polaroid-1.webp"), A("polaroid-2.webp")],
+  bouquet: A("bouquet.webp"),
+  icons: {
+    envelope: A("icon-envelope.webp"),
+    rings: A("icon-rings.webp"),
+    arch: A("icon-arch.webp"),
+    glasses: A("icon-glasses.webp"),
+    dinner: A("icon-dinner.webp"),
+    car: A("icon-car.webp"),
+  },
 };
 
 export const WINE = "#3a0d16"; // the velvet, at its edges
