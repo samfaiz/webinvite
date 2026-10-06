@@ -1,7 +1,8 @@
 /**
  * Curated theme catalog — the set of options the admin can pick from in
  * Site Settings → Theme. Extending the catalog just means:
- *   1) load the font in `app/layout.tsx` with next/font (assigning a variable)
+ *   1) add the font's files to `src/fonts/files` and declare it in
+ *      `src/fonts/index.ts` with next/font/local (assigning a variable)
  *   2) add an entry here with the same variable name
  * Everything else — the admin picker, CSS-var injection, live re-skinning —
  * picks it up automatically.
