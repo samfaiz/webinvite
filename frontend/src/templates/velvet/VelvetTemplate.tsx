@@ -78,14 +78,14 @@ function Caps({ children, color = INK, size = 12, style }: { children: ReactNode
 
 function Serif({ children, color = INK, size = 16, italic = false, style }: { children: ReactNode; color?: string; size?: number; italic?: boolean; style?: CSSProperties }) {
   return (
-    <p style={{ fontFamily: SERIF, fontWeight: 500, fontStyle: italic ? "italic" : undefined, fontSize: `max(16px, ${v(size)})`, lineHeight: 1.4, color, ...style }}>
+    <p style={{ fontFamily: SERIF, fontWeight: 500, fontStyle: italic ? "italic" : undefined, fontSize: `max(16px, ${v(size)})`, lineHeight: 1.4, color, textWrap: "balance", ...style }}>
       {children}
     </p>
   );
 }
 
 function Script({ children, color = INK, size = 26, style }: { children: ReactNode; color?: string; size?: number; style?: CSSProperties }) {
-  return <p style={{ fontFamily: SCRIPT, fontSize: v(size), lineHeight: 1.2, color, ...style }}>{children}</p>;
+  return <p style={{ fontFamily: SCRIPT, fontSize: v(size), lineHeight: 1.2, color, textWrap: "balance", ...style }}>{children}</p>;
 }
 
 const longDate = (iso?: string) => {
@@ -109,7 +109,7 @@ function Countdown({ target }: { target?: string }) {
       {parts.map(([n, label], i) => (
         <div key={label} className="flex items-start">
           {i ? <span style={{ fontFamily: SERIF, fontSize: v(36), lineHeight: 1, padding: `0 ${v(5)}` }}>:</span> : null}
-          <div className="flex flex-col items-center" style={{ minWidth: v(i ? 44 : 62) }}>
+          <div className="flex flex-col items-center" style={{ minWidth: v(46) }}>
             <span style={{ fontFamily: SERIF, fontWeight: 500, fontSize: v(40), lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{i ? String(n).padStart(2, "0") : n}</span>
             <span style={{ fontFamily: CAPS, fontSize: `max(10px, ${v(9)})`, letterSpacing: "0.12em", marginTop: v(6) }}>{label}</span>
           </div>
@@ -411,12 +411,21 @@ export function VelvetTemplate({
                   <span aria-hidden style={{ color: CREAM, fontSize: v(8) }}>●</span>
                 </Rise>
                 <div className="relative" style={{ marginTop: v(30) }}>
-                  {/* the rail the stops hang on */}
-                  <div aria-hidden className="absolute" style={{ left: v(14), top: v(40), bottom: v(40), width: 1, background: "rgba(241,230,220,0.5)" }} />
+                  {/* the rail the stops hang on, when there's more than one */}
+                  {events.length > 1 ? (
+                    <div aria-hidden className="absolute" style={{ left: v(14), top: v(40), bottom: v(40), width: 1, background: "rgba(241,230,220,0.5)" }} />
+                  ) : null}
                   <div className="flex flex-col" style={{ gap: v(22) }}>
                     {events.map((ev, i) => (
-                      <Rise key={ev.id} delay={0.06 * i} className="relative flex items-center" style={{ gap: v(16), paddingLeft: v(36) }}>
-                        <span aria-hidden className="absolute rounded-full" style={{ left: v(10.5), width: v(8), height: v(8), background: CREAM }} />
+                      <Rise
+                        key={ev.id}
+                        delay={0.06 * i}
+                        className={`relative flex items-center ${events.length > 1 ? "" : "justify-center"}`}
+                        style={{ gap: v(16), paddingLeft: events.length > 1 ? v(36) : 0 }}
+                      >
+                        {events.length > 1 ? (
+                          <span aria-hidden className="absolute rounded-full" style={{ left: v(10.5), width: v(8), height: v(8), background: CREAM }} />
+                        ) : null}
                         <Medallion icon={iconFor(ev.name, i)} />
                         <div className="min-w-0 text-left">
                           {ev.time ? (
