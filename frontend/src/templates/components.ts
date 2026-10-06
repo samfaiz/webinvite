@@ -11,6 +11,7 @@ import { EmeraldTemplate } from "./emerald/EmeraldTemplate";
 import { VelvetTemplate } from "./velvet/VelvetTemplate";
 import { CherubTemplate } from "./cherub/CherubTemplate";
 import { HeartlineTemplate } from "./heartline/HeartlineTemplate";
+import { ForestTemplate } from "./forest/ForestTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
@@ -45,6 +46,7 @@ const components: Record<string, TemplateComponent> = {
   "velvet-lily": VelvetTemplate,
   "cherub-garden": CherubTemplate,
   "heartline": HeartlineTemplate,
+  "forest-letter": ForestTemplate,
   custom: CustomTemplate,
 };
 

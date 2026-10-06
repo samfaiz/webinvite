@@ -92,6 +92,19 @@ export const templates: TemplateMeta[] = [
     themeIds: ["hydrangea-blue"],
   },
   {
+    id: "forest-letter",
+    name: "Forest Letter",
+    description:
+      "White pages and forest-green pages torn from one another, with calligraphy headings: the names over a still-life photograph, the whole month with the day in a heart, the venue with a live map, the day's timeline with a drawing for each stop, the dress code in circles of satin, and the reply on the page. No photos of the couple.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "forest-letter",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["forest-letter"],
+    // until its photographs and satin are in
+    draft: true,
+  },
+  {
     id: "heartline",
     name: "Heartline",
     description:

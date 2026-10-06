@@ -309,10 +309,11 @@ export function iconFor(name: string | undefined, i: number): IconKey {
   if (/greet|welcome|arriv|invit/.test(n)) return "envelope";
   if (/ring|engage|betroth|manasamm?a(th|d)h?am|nis?c?h?ayam|nichayam|othu ?kalyanam|mothiram/.test(n)) return "rings";
   if (/church|mass\b|holy|matrimony|kurbana|qurbana|nikk?ah|muhur|thali|thaali|minnu|mantrakodi|temple/.test(n)) return "arch";
+  // the end of anything ("End of the banquet"), and getting there, is the car
+  if (/\bend\b|farewell|send|depart|good ?bye|vid(a|aa)i|griha|close|transfer|shuttle|\bbus\b|pick ?up/.test(n)) return "car";
   if (/dinner|lunch|feast|banquet|recep|meal|sadh?ya|valima|walima|break/.test(n)) return "dinner";
   if (/toast|dance|party|cocktail|sangeet|music|haldi|mehn?di|mehendi|henna|m[ay]i?lan(ch|j)i|chan[td]h?am|madhuram|celebrat|get ?together/.test(n)) return "glasses";
   if (/ceremon|wedding|vow|blessing|marriage|kalyanam|vivah|mangalya/.test(n)) return "arch";
-  if (/\bend\b|farewell|send|depart|good ?bye|vid(a|aa)i|griha|close/.test(n)) return "car";
   const order: IconKey[] = ["envelope", "arch", "rings", "glasses", "dinner", "car"];
   return order[i % order.length];
 }

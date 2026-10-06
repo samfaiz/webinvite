@@ -149,6 +149,17 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Forest Letter template: white and forest green. */
+  "forest-letter": make(
+    "forest-letter",
+    "Forest & White",
+    {
+      bg: "#fbfaf7", surface: "#f1f0ea", primary: "#2f3d2c", secondary: "#6f7f63",
+      accent: "#6f7f63", text: "#2b2b28", muted: "#6b6b66",
+      gradientFrom: "#fbfaf7", gradientTo: "#2f3d2c",
+    },
+    { type: "none", color: "#fbfaf7" }
+  ),
   /* Pairs with the Heartline template: ivory paper and dark brown ink. */
   "heartline-ivory": make(
     "heartline-ivory",
