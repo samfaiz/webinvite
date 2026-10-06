@@ -27,6 +27,19 @@ const cormorant = localFont({
   adjustFontFallback: "Times New Roman",
 });
 
+// Cormorant's true italic, as a face of its own so that pages using plain
+// Cormorant (synthesised italic included) are exactly as they were. Cherub
+// Garden's body text is set in it. Not preloaded: only that design uses it.
+const cormorantItalic = localFont({
+  variable: "--font-cormorant-italic",
+  src: [
+    { path: "./files/cormorant-400-italic.woff2", weight: "400", style: "italic" },
+    { path: "./files/cormorant-600-italic.woff2", weight: "600", style: "italic" },
+  ],
+  adjustFontFallback: "Times New Roman",
+  preload: false,
+});
+
 const greatvibes = localFont({
   variable: "--font-greatvibes",
   src: [
@@ -145,7 +158,7 @@ const bodoni = localFont({
 
 /** Every font's CSS variable, for the <html> element. */
 export const fontVars = [
-  cinzel, cormorant, greatvibes, jost, playfair, marcellus, ebgaramond, dancing, parisienne, inter, karla, spaceGrotesk, spaceMono, bodoni,
+  cinzel, cormorant, cormorantItalic, greatvibes, jost, playfair, marcellus, ebgaramond, dancing, parisienne, inter, karla, spaceGrotesk, spaceMono, bodoni,
 ]
   .map((f) => f.variable)
   .join(" ");

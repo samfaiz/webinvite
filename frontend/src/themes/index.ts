@@ -149,6 +149,17 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Cherub Garden template: cream, blush and warm beige. */
+  "cherub-blush": make(
+    "cherub-blush",
+    "Blush & Beige",
+    {
+      bg: "#fdf8f3", surface: "#f3e6dc", primary: "#8a6552", secondary: "#c9ae9d",
+      accent: "#b8957f", text: "#4f362b", muted: "#7a5e50",
+      gradientFrom: "#fdf8f3", gradientTo: "#c9ae9d",
+    },
+    { type: "none", color: "#fdf8f3" }
+  ),
   /* Pairs with the Velvet Lily template: burgundy velvet and cream paper. */
   "velvet-burgundy": make(
     "velvet-burgundy",

@@ -92,6 +92,19 @@ export const templates: TemplateMeta[] = [
     themeIds: ["hydrangea-blue"],
   },
   {
+    id: "cherub-garden",
+    name: "Cherub Garden",
+    description:
+      "A romantic painted garden in peach, blush and sage: 'Wedding Day' over the garden with the invitation on a scooped cream card, cherubs and doves drifting beside it, the program, a love story on warm beige, the reply under an arch of roses, and 'With love' over a rose path. No photos of the couple.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "cherub-blush",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["cherub-blush"],
+    // until its paintings, cherubs, dove and garland are in
+    draft: true,
+  },
+  {
     id: "velvet-lily",
     name: "Velvet Lily",
     description:

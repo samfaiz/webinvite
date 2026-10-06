@@ -9,6 +9,7 @@ import { GardenKeralaTemplate, GardenTemplate } from "./garden/GardenTemplate";
 import { HydrangeaTemplate } from "./hydrangea/HydrangeaTemplate";
 import { EmeraldTemplate } from "./emerald/EmeraldTemplate";
 import { VelvetTemplate } from "./velvet/VelvetTemplate";
+import { CherubTemplate } from "./cherub/CherubTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
@@ -41,6 +42,7 @@ const components: Record<string, TemplateComponent> = {
   "hydrangea-blush": HydrangeaTemplate,
   "emerald-rose": EmeraldTemplate,
   "velvet-lily": VelvetTemplate,
+  "cherub-garden": CherubTemplate,
   custom: CustomTemplate,
 };
 
