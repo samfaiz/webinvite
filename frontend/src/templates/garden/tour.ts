@@ -7,7 +7,9 @@ import type { RefObject } from "react";
  * The invitation playing itself: page after page, every page to the end.
  *
  * Each section is a stop (a section taller than the screen is two: its top,
- * then its foot). The reply page is held longer. A touch, a scroll or a key
+ * then its foot), held five seconds; the reply page is held longer. `start`
+ * can hold the first stop for less, when the guest has already been looking
+ * at it. A touch, a scroll or a key
  * pauses the tour at once — the guest is reading, or tapping something — and
  * after a while with no touching it picks up again from wherever they are.
  * It never resumes while they're typing, or while `hold()` says so (a photo
@@ -16,10 +18,10 @@ import type { RefObject } from "react";
 export function useTour(
   root: RefObject<HTMLElement | null>,
   {
-    dwell = 7000,
-    longDwell = 12000,
+    dwell = 5000,
+    longDwell = 9000,
     longIds = ["frame-rsvp"],
-    idle = 12000,
+    idle = 8000,
     hold,
   }: { dwell?: number; longDwell?: number; longIds?: string[]; idle?: number; hold?: () => boolean } = {},
 ) {
@@ -31,6 +33,7 @@ export function useTour(
   useEffect(() => {
     holdRef.current = hold;
   });
+  const firstRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (!running) return;
@@ -64,9 +67,9 @@ export function useTour(
     let timer = 0;
     let wake = 0;
     let isPaused = false;
-    const hold = (k: number) => {
-      setStop({ n: k, ms: stops[k].ms });
-      timer = window.setTimeout(next, stops[k].ms);
+    const hold = (k: number, ms = stops[k].ms) => {
+      setStop({ n: k, ms });
+      timer = window.setTimeout(next, ms);
     };
     const next = () => {
       i += 1;
@@ -87,7 +90,8 @@ export function useTour(
       isPaused = false;
       setPaused(false);
       i = nearest();
-      hold(i);
+      // they've been looking at this page all the while: move on soon
+      hold(i, 2000);
     };
     const pause = () => {
       window.clearTimeout(timer);
@@ -99,7 +103,7 @@ export function useTour(
       wake = window.setTimeout(resume, idle);
     };
 
-    hold(i);
+    hold(i, firstRef.current);
     const kinds = ["pointerdown", "wheel", "touchstart", "keydown"] as const;
     // (the tap that started the tour is over before these begin to listen)
     const arm = window.setTimeout(() => kinds.forEach((k) => window.addEventListener(k, pause, { passive: true, capture: true })), 300);
@@ -113,5 +117,13 @@ export function useTour(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  return { running, paused, stop, start: () => setRunning(true) };
+  return {
+    running,
+    paused,
+    stop,
+    start: (firstMs?: number) => {
+      firstRef.current = firstMs;
+      setRunning(true);
+    },
+  };
 }

@@ -18,6 +18,7 @@ import { initialOf } from "@/lib/initials";
 import { ActionButton, CountdownTiles, Icon, PenReveal, PhotoOval, PhotoViewer, Rise, SCRIPT, SERIF, actionStyle } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
+import { useAutoBegin, useFirstTapMusic } from "@/templates/garden/autostart";
 import { BLUE, BLUSH, Flower, FlowerBand, OrnateFrame, Swatches, WeekStrip, laceStyle, v } from "./parts";
 
 /**
@@ -244,8 +245,8 @@ export function HydrangeaTemplate({
   /* "Tap here to begin" starts the music and the invitation plays itself,
      page by page to the end, holding the reply page longer; a touch pauses it
      and it picks up again after a while (useTour). If nobody taps, it begins
-     by itself after twelve seconds (without music — a browser won't play
-     sound before a tap). */
+     by itself after four seconds, and the music starts with their first tap
+     anywhere (a browser won't play sound before one). */
   const viewerOpen = useRef(false);
   useEffect(() => {
     viewerOpen.current = viewer !== null;
@@ -261,24 +262,11 @@ export function HydrangeaTemplate({
         /* no window */
       }
     }
-    if (!reduce) tour.start();
+    if (!reduce) tour.start(1500);
   };
-  const beginRef = useRef(begin);
-  useEffect(() => {
-    beginRef.current = begin;
-  });
-  useEffect(() => {
-    if (begun) return;
-    const t = window.setTimeout(() => beginRef.current(false), 12000);
-    const stop = () => window.clearTimeout(t);
-    window.addEventListener("pointerdown", stop, { once: true });
-    window.addEventListener("wheel", stop, { once: true });
-    return () => {
-      stop();
-      window.removeEventListener("pointerdown", stop);
-      window.removeEventListener("wheel", stop);
-    };
-  }, [begun]);
+  // it begins by itself in a few seconds; the music starts on the first tap
+  useAutoBegin(begun, begin);
+  useFirstTapMusic();
 
   const family = (p?: (typeof couple)["partner1"]) => {
     if (!p?.name) return null;

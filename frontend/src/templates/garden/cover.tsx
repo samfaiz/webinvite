@@ -48,7 +48,7 @@ const HANDOFF_AT = 7.6;
 
 /** If nobody taps, the envelope opens by itself after this long (ms), so a
  *  guest who doesn't think to tap still sees it. */
-const AUTO_OPEN = 12000;
+const AUTO_OPEN = 5000;
 
 type Stage = "sealed" | "opening" | "written";
 

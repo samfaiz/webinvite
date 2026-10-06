@@ -186,12 +186,14 @@ function Corner({ color, size, turn, style }: { color: string; size: string; tur
   );
 }
 
-/** A picture or a card in a fine double frame with engraved corners. */
+/** A picture or a card in a fine double frame with engraved corners; `round`
+ *  makes it a soft-cornered card with a fine inner line instead. */
 export function OrnateFrame({
   children,
   color = INK,
   corner = 26,
   pad = 7,
+  round = false,
   style,
   className = "",
 }: {
@@ -199,11 +201,20 @@ export function OrnateFrame({
   color?: string;
   corner?: number;
   pad?: number;
+  round?: boolean;
   style?: CSSProperties;
   className?: string;
 }) {
   const c = v(corner);
   const o = v(-3);
+  if (round) {
+    return (
+      <div className={`relative ${className}`} style={{ padding: v(pad), borderRadius: v(26), boxShadow: "0 10px 30px rgba(10,0,3,0.45)", ...style }}>
+        <div aria-hidden className="pointer-events-none absolute" style={{ inset: v(7), borderRadius: v(20), border: `1px solid ${color}`, opacity: 0.4 }} />
+        {children}
+      </div>
+    );
+  }
   return (
     <div className={`relative ${className}`} style={{ padding: v(pad), ...style }}>
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ border: `1px solid ${color}`, opacity: 0.55 }} />

@@ -20,6 +20,7 @@ import { FlowPlate, Plate, Zone, u } from "./stage";
 import type { Slices } from "./stage";
 import { Cover } from "./cover";
 import { useTour } from "./tour";
+import { useFirstTapMusic } from "./autostart";
 import { ReplyForm } from "./reply";
 import {
   ActionButton,
@@ -343,6 +344,8 @@ export function GardenTemplate({
     viewerOpen.current = viewer !== null;
   }, [viewer]);
   const tour = useTour(pages, { hold: () => viewerOpen.current });
+  // a cover that opened by itself had no tap to start the music: the first one does
+  useFirstTapMusic();
 
   const { couple, families, hero, schedule, countdown, rsvp, story, map, dateReveal } = content;
   const names = [couple.partner1?.name, couple.partner2?.name].filter(Boolean);

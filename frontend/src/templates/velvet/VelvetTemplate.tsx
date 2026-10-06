@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
@@ -17,6 +17,7 @@ import { calendarEvent, downloadIcs } from "@/lib/calendar";
 import { ActionButton, Icon, Rise, useTicking } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
+import { useAutoBegin, useFirstTapMusic } from "@/templates/garden/autostart";
 import {
   ART,
   CAPS,
@@ -184,7 +185,7 @@ export function VelvetTemplate({
 
   /* "Tap here to begin" plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
-     after twelve seconds, without music. */
+     after four seconds, and the music starts with their first tap anywhere. */
   const tour = useTour(main);
   const begin = (withSound: boolean) => {
     if (begun) return;
@@ -196,24 +197,11 @@ export function VelvetTemplate({
         /* no window */
       }
     }
-    if (!reduce) tour.start();
+    if (!reduce) tour.start(1500);
   };
-  const beginRef = useRef(begin);
-  useEffect(() => {
-    beginRef.current = begin;
-  });
-  useEffect(() => {
-    if (begun) return;
-    const t = window.setTimeout(() => beginRef.current(false), 12000);
-    const stop = () => window.clearTimeout(t);
-    window.addEventListener("pointerdown", stop, { once: true });
-    window.addEventListener("wheel", stop, { once: true });
-    return () => {
-      stop();
-      window.removeEventListener("pointerdown", stop);
-      window.removeEventListener("wheel", stop);
-    };
-  }, [begun]);
+  // it begins by itself in a few seconds; the music starts on the first tap
+  useAutoBegin(begun, begin);
+  useFirstTapMusic();
 
   const parents = (p?: typeof couple.partner1) =>
     !hidden.includes("families") && p && [p.father, p.mother].filter((x) => x?.trim()).length
@@ -508,7 +496,7 @@ export function VelvetTemplate({
                   </span>
                 </Rise>
                 <Rise className="w-full" style={{ marginTop: v(16), maxWidth: 440 }}>
-                  <OrnateFrame corner={30} pad={14} style={{ ...paper }}>
+                  <OrnateFrame round pad={20} style={{ ...paper }}>
                     <Caps size={15} style={{ letterSpacing: "0.16em", textAlign: "center", marginBottom: v(4) }}>
                       You&rsquo;re invited
                     </Caps>

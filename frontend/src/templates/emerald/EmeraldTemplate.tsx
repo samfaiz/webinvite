@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
@@ -17,6 +17,7 @@ import { calendarEvent, downloadIcs } from "@/lib/calendar";
 import { ActionButton, Icon, Rise, actionStyle } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
+import { useAutoBegin, useFirstTapMusic } from "@/templates/garden/autostart";
 import { ART, DARK, DISPLAY, Dots, INK, MIST, RoseBand, RoseCascade, SAGE, SANS, STONE, Tear, v } from "./parts";
 
 /**
@@ -124,7 +125,7 @@ export function EmeraldTemplate({
 
   /* "Tap here to begin" plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
-     after twelve seconds, without music. */
+     after four seconds, and the music starts with their first tap anywhere. */
   const tour = useTour(main);
   const begin = (withSound: boolean) => {
     if (begun) return;
@@ -136,24 +137,11 @@ export function EmeraldTemplate({
         /* no window */
       }
     }
-    if (!reduce) tour.start();
+    if (!reduce) tour.start(1500);
   };
-  const beginRef = useRef(begin);
-  useEffect(() => {
-    beginRef.current = begin;
-  });
-  useEffect(() => {
-    if (begun) return;
-    const t = window.setTimeout(() => beginRef.current(false), 12000);
-    const stop = () => window.clearTimeout(t);
-    window.addEventListener("pointerdown", stop, { once: true });
-    window.addEventListener("wheel", stop, { once: true });
-    return () => {
-      stop();
-      window.removeEventListener("pointerdown", stop);
-      window.removeEventListener("wheel", stop);
-    };
-  }, [begun]);
+  // it begins by itself in a few seconds; the music starts on the first tap
+  useAutoBegin(begun, begin);
+  useFirstTapMusic();
 
   return (
     <PreviewContext.Provider value={{ compact, editing }}>
