@@ -149,6 +149,17 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Heartline template: ivory paper and dark brown ink. */
+  "heartline-ivory": make(
+    "heartline-ivory",
+    "Ivory & Ink",
+    {
+      bg: "#f3eee6", surface: "#ebe4d9", primary: "#3b2f2a", secondary: "#7a2e22",
+      accent: "#7a2e22", text: "#3b2f2a", muted: "#6e625a",
+      gradientFrom: "#f3eee6", gradientTo: "#3a2b24",
+    },
+    { type: "none", color: "#f3eee6" }
+  ),
   /* Pairs with the Cherub Garden template: cream, blush and warm beige. */
   "cherub-blush": make(
     "cherub-blush",

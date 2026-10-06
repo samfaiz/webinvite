@@ -40,6 +40,17 @@ const cormorantItalic = localFont({
   preload: false,
 });
 
+// Caveat — the light handwritten capitals of the Heartline design's headings.
+// Not preloaded: only that design uses it.
+const caveat = localFont({
+  variable: "--font-caveat",
+  src: [
+    { path: "./files/caveat-400.woff2", weight: "400", style: "normal" },
+    { path: "./files/caveat-600.woff2", weight: "600", style: "normal" },
+  ],
+  preload: false,
+});
+
 const greatvibes = localFont({
   variable: "--font-greatvibes",
   src: [
@@ -158,7 +169,7 @@ const bodoni = localFont({
 
 /** Every font's CSS variable, for the <html> element. */
 export const fontVars = [
-  cinzel, cormorant, cormorantItalic, greatvibes, jost, playfair, marcellus, ebgaramond, dancing, parisienne, inter, karla, spaceGrotesk, spaceMono, bodoni,
+  cinzel, cormorant, cormorantItalic, caveat, greatvibes, jost, playfair, marcellus, ebgaramond, dancing, parisienne, inter, karla, spaceGrotesk, spaceMono, bodoni,
 ]
   .map((f) => f.variable)
   .join(" ");

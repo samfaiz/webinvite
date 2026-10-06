@@ -92,6 +92,19 @@ export const templates: TemplateMeta[] = [
     themeIds: ["hydrangea-blue"],
   },
   {
+    id: "heartline",
+    name: "Heartline",
+    description:
+      "Ivory paper and dark brown ink held together by one hand-drawn line that loops into a heart: the names over a still-life photograph, the week of the wedding with the day in a heart, a timeline winding down the page, the venue as a pen sketch, the dress code as bows in the couple's colours, and the reply on a dark wavy band. No photos of the couple.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "heartline-ivory",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["heartline-ivory"],
+    // until its photographs, sketches and bow are in
+    draft: true,
+  },
+  {
     id: "cherub-garden",
     name: "Cherub Garden",
     description:
