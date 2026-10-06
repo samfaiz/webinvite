@@ -92,6 +92,19 @@ export const templates: TemplateMeta[] = [
     themeIds: ["hydrangea-blue"],
   },
   {
+    id: "velvet-lily",
+    name: "Velvet Lily",
+    description:
+      "Cream paper torn over burgundy velvet with ink-drawn lilies: the names, a candlelit hall and a live countdown, the venue as an old engraving sealed in wax, a timeline in cream ovals, and the reply card on the page. No photos of the couple.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "velvet-burgundy",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["velvet-burgundy"],
+    // until its generated line art and photographs are in
+    draft: true,
+  },
+  {
     id: "emerald-rose",
     name: "Emerald Rose",
     description:

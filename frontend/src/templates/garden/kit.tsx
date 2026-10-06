@@ -599,7 +599,7 @@ export function PhotoOval({ photos, onOpen }: { photos: string[]; onOpen?: (inde
 
 /* ------------------------------ countdown ------------------------------ */
 
-function useTicking(target?: string) {
+export function useTicking(target?: string) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     if (!target) return;

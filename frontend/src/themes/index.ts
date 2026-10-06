@@ -149,6 +149,17 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Velvet Lily template: burgundy velvet and cream paper. */
+  "velvet-burgundy": make(
+    "velvet-burgundy",
+    "Velvet & Ivory",
+    {
+      bg: "#ede3d5", surface: "#e6dacb", primary: "#5a1a24", secondary: "#a87e74",
+      accent: "#a87e74", text: "#3b1219", muted: "#7d5d58",
+      gradientFrom: "#ede3d5", gradientTo: "#3a0d16",
+    },
+    { type: "none", color: "#ede3d5" }
+  ),
   /* Pairs with the Emerald Rose template: near-black emerald and warm stone. */
   "emerald-stone": make(
     "emerald-stone",
