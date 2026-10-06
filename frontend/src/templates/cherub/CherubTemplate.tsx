@@ -181,7 +181,7 @@ export function CherubTemplate({
               </motion.div>
 
               <div className="relative z-[2]" style={{ marginTop: v(26) }}>
-                <Floaty src={ART.cupidRight} width={104} style={{ left: v(-30), top: v(36) }} />
+                <Floaty src={ART.cupidRight} width={100} style={{ left: v(-46), top: v(-38) }} />
                 <Floaty src={ART.cupidLeft} width={96} delay={1.2} style={{ right: v(-30), bottom: v(120) }} />
                 <Cartouche>
                   <div className="flex flex-col items-center text-center" style={{ padding: `${v(10)} ${v(8)}` }}>
@@ -281,6 +281,17 @@ export function CherubTemplate({
             {/* ---------------------------- love story ---------------------------- */}
             {hidden.includes("story") ? null : (
               <section id="frame-story" className="relative flex flex-col items-center text-center" style={{ padding: `${v(36)} ${v(34)} ${v(40)}` }}>
+                {ART.doves ? (
+                  <motion.div
+                    aria-hidden
+                    style={{ width: v(150), marginBottom: v(6) }}
+                    animate={reduce ? undefined : { y: [0, -6, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ART.doves} alt="" className="block w-full" />
+                  </motion.div>
+                ) : null}
                 <Rise>
                   <p style={{ fontFamily: ITALIC, fontStyle: "italic", fontSize: v(26), letterSpacing: "0.16em", textTransform: "uppercase", color: ON_BEIGE }}>
                     {story?.heading?.trim() && !/^our story$/i.test(story.heading.trim()) ? story.heading : "A love story…"}

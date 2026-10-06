@@ -99,10 +99,8 @@ export const templates: TemplateMeta[] = [
     supportedCommunities: ALL_COMMUNITIES,
     defaultThemeId: "cherub-blush",
     defaultMotifId: "secular",
-    preview: "/assets/templates/garden/01-cover.jpg",
+    preview: "/assets/templates/cherub/preview.jpg",
     themeIds: ["cherub-blush"],
-    // until its paintings, cherubs, dove and garland are in
-    draft: true,
   },
   {
     id: "velvet-lily",

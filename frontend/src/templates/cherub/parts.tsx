@@ -25,15 +25,18 @@ export const ART: {
   cupidLeft: string | null;
   cherubs: string | null;
   dove: string | null;
+  /** two doves carrying a ribbon and a few roses, over the love story */
+  doves: string | null;
   garland: string | null;
 } = {
-  garden: null,
-  path: null,
-  cupidRight: null,
-  cupidLeft: null,
-  cherubs: null,
-  dove: null,
-  garland: null,
+  garden: A("garden.webp"),
+  path: A("path.webp"),
+  cupidRight: A("cupid-right.webp"),
+  cupidLeft: A("cupid-left.webp"),
+  cherubs: A("cherubs.webp"),
+  dove: A("dove.webp"),
+  doves: A("doves.webp"),
+  garland: A("garland.webp"),
 };
 
 export const CARD = "#fdf8f3";
