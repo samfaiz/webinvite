@@ -14,6 +14,7 @@ import { DirectionsLink } from "@/components/DirectionsLink";
 import { hasDressCode } from "@/blocks/DressCode";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { calendarEvent, downloadIcs } from "@/lib/calendar";
+import { keepTitles } from "@/lib/titles";
 import { ActionButton, Icon, Rise } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
@@ -55,6 +56,18 @@ function Body({ children, color = INK, size = 17, style }: { children: ReactNode
     <p style={{ fontFamily: ITALIC, fontStyle: "italic", fontWeight: 400, fontSize: `max(16px, ${v(size)})`, lineHeight: 1.45, color, textWrap: "balance", ...style }}>
       {children}
     </p>
+  );
+}
+
+/** "Rejin & Dr. Jessin": if it has to break, it breaks before the "&",
+ *  and a title stays with its name. */
+function Couple({ p1, p2 }: { p1?: string; p2?: string }) {
+  if (!p1 || !p2) return <>{keepTitles(p1 || p2 || "")}</>;
+  return (
+    <>
+      <span style={{ whiteSpace: "nowrap" }}>{keepTitles(p1)}</span>{" "}
+      <span style={{ whiteSpace: "nowrap" }}>&amp; {keepTitles(p2)}</span>
+    </>
   );
 }
 
@@ -137,7 +150,7 @@ export function CherubTemplate({
     const names = [p?.father, p?.mother].filter((x) => x?.trim()).join(" & ");
     if (hidden.includes("families") || !p || !names) return "";
     const prefix = p.parentsPrefix?.trim();
-    return `${p.name ?? ""}${prefix ? `, ${prefix.charAt(0).toLowerCase()}${prefix.slice(1)} ` : ": "}${names}`;
+    return keepTitles(`${p.name ?? ""}${prefix ? `, ${prefix.charAt(0).toLowerCase()}${prefix.slice(1)} ` : ": "}${names}`);
   };
   const longNames = `${p1 ?? ""}${p2 ?? ""}`.length > 16;
 
@@ -185,12 +198,12 @@ export function CherubTemplate({
 
               <div className="relative z-[2]" style={{ marginTop: v(26) }}>
                 <Floaty src={ART.cupidRight} width={100} style={{ left: v(-46), top: v(-38) }} />
-                <Floaty src={ART.cupidLeft} width={96} delay={1.2} style={{ right: v(-30), bottom: v(120) }} />
+                <Floaty src={ART.cupidLeft} width={96} delay={1.2} style={{ right: v(-50), bottom: v(30) }} />
                 <Cartouche>
                   <div className="flex flex-col items-center text-center" style={{ padding: `${v(10)} ${v(8)}` }}>
                     <Rise>
                       <p style={{ fontFamily: SCRIPT, fontSize: v(longNames ? 38 : 46), lineHeight: 1.15, color: INK, textWrap: "balance" }}>
-                        {[p1, p2].filter(Boolean).join(" & ")}
+                        <Couple p1={p1} p2={p2} />
                       </p>
                     </Rise>
                     {parents(couple.partner1) || parents(couple.partner2) ? (
@@ -411,7 +424,7 @@ export function CherubTemplate({
               <Rise className="relative">
                 <p style={{ fontFamily: SCRIPT, fontSize: v(46), lineHeight: 1.1, color: "#5b4034", textShadow: GLOW }}>With love</p>
                 <p style={{ fontFamily: SCRIPT, fontSize: v(longNames ? 38 : 44), lineHeight: 1.15, color: "#5b4034", textShadow: GLOW, marginTop: v(6), textWrap: "balance" }}>
-                  {[p1, p2].filter(Boolean).join(" & ")}
+                  <Couple p1={p1} p2={p2} />
                 </p>
                 {hero?.closingLine?.trim() ? (
                   <Body color="#5b4034" size={17} style={{ marginTop: v(10), textShadow: GLOW }}>

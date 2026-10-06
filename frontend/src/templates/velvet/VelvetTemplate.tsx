@@ -14,6 +14,7 @@ import { DirectionsLink } from "@/components/DirectionsLink";
 import { hasDressCode } from "@/blocks/DressCode";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { calendarEvent, downloadIcs } from "@/lib/calendar";
+import { keepTitles } from "@/lib/titles";
 import { ActionButton, Icon, Rise, useTicking } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
@@ -205,7 +206,7 @@ export function VelvetTemplate({
 
   const parents = (p?: typeof couple.partner1) =>
     !hidden.includes("families") && p && [p.father, p.mother].filter((x) => x?.trim()).length
-      ? `${p.parentsPrefix?.trim() ? `${p.parentsPrefix} ` : ""}${[p.father, p.mother].filter((x) => x?.trim()).join(" & ")}`
+      ? keepTitles(`${p.parentsPrefix?.trim() ? `${p.parentsPrefix} ` : ""}${[p.father, p.mother].filter((x) => x?.trim()).join(" & ")}`)
       : "";
 
   const nameStyle: CSSProperties = { fontFamily: CAPS, fontWeight: 600, fontSize: v(longNames ? 28 : 34), lineHeight: 1.1, letterSpacing: "0.03em", color: INK };
