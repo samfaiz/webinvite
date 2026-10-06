@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
  * between sections, the rows and cascades of white and emerald roses, the
  * colour dots.
  *
- * The roses and the two photographs are generated art (see ART). Until a
+ * The roses and the two pictures are generated art (see ART). Until a
  * piece is in, a drawn stand-in takes its place at the same size.
  */
 
@@ -19,12 +19,12 @@ export const ART: {
   band: string | null;
   cascade: string | null;
   dressBg: string | null;
-  coverNoPhoto: string | null;
+  cover: string | null;
 } = {
   band: null,
   cascade: null,
   dressBg: null,
-  coverNoPhoto: null,
+  cover: null,
 };
 export const artPath = A;
 

@@ -14,7 +14,7 @@ import { DirectionsLink } from "@/components/DirectionsLink";
 import { hasDressCode } from "@/blocks/DressCode";
 import { hasMapTarget, targetFromEvent } from "@/lib/maps";
 import { calendarEvent, downloadIcs } from "@/lib/calendar";
-import { ActionButton, Icon, PhotoViewer, Rise, actionStyle } from "@/templates/garden/kit";
+import { ActionButton, Icon, Rise, actionStyle } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
 import { ART, DARK, DISPLAY, Dots, INK, MIST, RoseBand, RoseCascade, SAGE, SANS, STONE, Tear, v } from "./parts";
@@ -23,19 +23,22 @@ import { ART, DARK, DISPLAY, Dots, INK, MIST, RoseBand, RoseCascade, SAGE, SANS,
  * "Emerald Rose" — near-black emerald and warm stone, white and emerald
  * roses, torn and brushed edges between the sections.
  *
- * One long card: the couple's photograph with their names across it; a row
+ * One long card: their names over white and emerald roses; a row
  * of roses into the dark green welcome; a torn edge into the stone timing,
  * roses trailing down its sides; the dress code over a dark banquet hall;
  * the location and its photograph; the details; roses again into the
  * questionnaire; and "We await you". Drawn here, apart from the roses and
- * two photographs (ART in parts.tsx; stand-ins until they're in).
+ * two pictures (ART in parts.tsx; stand-ins until they're in).
+ *
+ * No pictures of the couple anywhere: they'd rather not be shown, so the
+ * cover is always the roses.
  *
  * For every guest: large type and buttons, "Tap here to begin" plays the
  * music and walks them through, and the reply form opens on the page.
  */
 
 const PALETTE = {
-  // the shared pieces (buttons, the reply form, the photo viewer) draw in
+  // the shared pieces (buttons, the reply form) draw in
   // these three: deep emerald buttons on a warm cream card
   "--g-ink": "#173a2e",
   "--g-cream": "#efe9dd",
@@ -98,17 +101,13 @@ export function EmeraldTemplate({
   const guided = intro && !compact && !editing;
   const main = useRef<HTMLElement | null>(null);
   const [begun, setBegun] = useState(!guided);
-  const [viewer, setViewer] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
-  const { couple, families, schedule, countdown, rsvp, story, map, hero } = content;
+  const { couple, families, schedule, countdown, rsvp, map, hero } = content;
   const hidden = content.hiddenSections ?? [];
   const p1 = couple.partner1?.name;
   const p2 = couple.partner2?.name;
-  const photos = hidden.includes("story") ? [] : (story?.items ?? []).map((s) => s.photo).filter((p): p is string => Boolean(p));
-  // the cover wants a photograph; couples who'd rather not show one get the roses
-  const noPhotos = (content.frameFill && content.frameFill !== "photos") || !photos.length;
-  const coverImage = noPhotos ? ART.coverNoPhoto : photos[0];
+  const coverImage = ART.cover;
   const events = (schedule?.events ?? []).slice(0, 8);
   const firstEv = events[0];
   const dress = content.dressCode;
@@ -126,11 +125,7 @@ export function EmeraldTemplate({
   /* "Tap here to begin" plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
      after twelve seconds, without music. */
-  const viewerOpen = useRef(false);
-  useEffect(() => {
-    viewerOpen.current = viewer !== null;
-  }, [viewer]);
-  const tour = useTour(main, { hold: () => viewerOpen.current });
+  const tour = useTour(main);
   const begin = (withSound: boolean) => {
     if (begun) return;
     setBegun(true);
@@ -180,12 +175,11 @@ export function EmeraldTemplate({
                     initial={compact || editing ? false : { scale: 1.08, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 2.4, ease: "easeOut" }}
-                    onClick={!noPhotos && !compact && !editing ? () => setViewer(0) : undefined}
                   />
                 ) : (
                   <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 50% 35%, #1d3a30, #0e1817 70%)" }} />
                 )}
-                {/* the photograph darkens into the green, so the names sit on it */}
+                {/* the picture darkens into the green, so the names sit on it */}
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(14,24,23,0) 40%, rgba(14,24,23,0.65) 72%, ${DARK} 100%)` }} />
                 <motion.div
                   className="absolute inset-x-0 flex flex-col items-center text-center"
@@ -465,9 +459,6 @@ export function EmeraldTemplate({
             <div style={{ height: v(40), background: DARK }} />
           </main>
 
-          <AnimatePresence>
-            {viewer !== null ? <PhotoViewer key="viewer" photos={photos} start={viewer} onClose={() => setViewer(null)} /> : null}
-          </AnimatePresence>
           {tour.running && !tour.paused ? (
             <motion.div
               key={tour.stop.n}

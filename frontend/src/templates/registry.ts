@@ -95,7 +95,7 @@ export const templates: TemplateMeta[] = [
     id: "emerald-rose",
     name: "Emerald Rose",
     description:
-      "Near-black emerald and warm stone with white and emerald roses: the couple's photograph with their names across it, torn and brushed edges, a timing with roses down its sides, a dress code over a candlelit hall, and the reply on the page.",
+      "Near-black emerald and warm stone with white and emerald roses: their names over a bouquet (no photos of the couple), torn and brushed edges, a timing with roses down its sides, a dress code over a candlelit hall, and the reply on the page.",
     supportedCommunities: ALL_COMMUNITIES,
     defaultThemeId: "emerald-stone",
     defaultMotifId: "secular",
