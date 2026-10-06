@@ -149,6 +149,17 @@ export const themes: Record<string, Theme> = {
     },
     { type: "none", color: "#f1eada" }
   ),
+  /* Pairs with the Emerald Rose template: near-black emerald and warm stone. */
+  "emerald-stone": make(
+    "emerald-stone",
+    "Emerald & Stone",
+    {
+      bg: "#efe9dd", surface: "#cbc6ba", primary: "#173a2e", secondary: "#7d8a78",
+      accent: "#7d8a78", text: "#26241e", muted: "#5b5a50",
+      gradientFrom: "#cbc6ba", gradientTo: "#0e1817",
+    },
+    { type: "none", color: "#efe9dd" }
+  ),
   /* Pairs with the Blue Hydrangea template: dusty blue and blush, the two
      grounds its pages alternate between. */
   "hydrangea-blue": make(

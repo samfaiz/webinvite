@@ -13,6 +13,7 @@ import {
   Karla,
   Space_Grotesk,
   Space_Mono,
+  Bodoni_Moda,
 } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
@@ -72,10 +73,19 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["30
 const karla = Karla({ variable: "--font-karla", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 const spaceMono = Space_Mono({ variable: "--font-space-mono", subsets: ["latin"], weight: ["400", "700"] });
+// Bodoni Moda — the high-contrast display face of the Emerald Rose design.
+// Not preloaded: only that design's pages use it, so others don't pay for it.
+const bodoni = Bodoni_Moda({
+  variable: "--font-bodoni",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  preload: false,
+});
 
 const fontVars = [
   cinzel, cormorant, greatVibes, jost, playfair, marcellus, ebGaramond, dancing, parisienne,
-  inter, karla, spaceGrotesk, spaceMono,
+  inter, karla, spaceGrotesk, spaceMono, bodoni,
 ]
   .map((f) => f.variable)
   .join(" ");

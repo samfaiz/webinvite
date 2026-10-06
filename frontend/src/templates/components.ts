@@ -7,6 +7,7 @@ import { VoyageTemplate } from "./voyage/VoyageTemplate";
 import { ToileTemplate } from "./toile/ToileTemplate";
 import { GardenKeralaTemplate, GardenTemplate } from "./garden/GardenTemplate";
 import { HydrangeaTemplate } from "./hydrangea/HydrangeaTemplate";
+import { EmeraldTemplate } from "./emerald/EmeraldTemplate";
 import { CustomTemplate } from "@/custom/CustomTemplate";
 
 /**
@@ -37,6 +38,7 @@ const components: Record<string, TemplateComponent> = {
   "garden-olive": GardenTemplate,
   "garden-kerala": GardenKeralaTemplate,
   "hydrangea-blush": HydrangeaTemplate,
+  "emerald-rose": EmeraldTemplate,
   custom: CustomTemplate,
 };
 

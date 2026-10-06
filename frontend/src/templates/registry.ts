@@ -92,6 +92,19 @@ export const templates: TemplateMeta[] = [
     themeIds: ["hydrangea-blue"],
   },
   {
+    id: "emerald-rose",
+    name: "Emerald Rose",
+    description:
+      "Near-black emerald and warm stone with white and emerald roses: the couple's photograph with their names across it, torn and brushed edges, a timing with roses down its sides, a dress code over a candlelit hall, and the reply on the page.",
+    supportedCommunities: ALL_COMMUNITIES,
+    defaultThemeId: "emerald-stone",
+    defaultMotifId: "secular",
+    preview: "/assets/templates/garden/01-cover.jpg",
+    themeIds: ["emerald-stone"],
+    // until its generated roses and photographs are in
+    draft: true,
+  },
+  {
     id: "garden-kerala",
     name: "Kerala Garden",
     description:
