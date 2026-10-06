@@ -287,15 +287,21 @@ export function Seal({ style }: { style?: CSSProperties }) {
 
 /* ------------------------------ timeline ------------------------------ */
 
-/** Which drawing suits an event, by the words in its name. */
+/**
+ * Which drawing suits an event, by the words in its name, Kerala ceremonies
+ * included in their usual spellings. The church, nikah or muhurtham wins
+ * over a meal ("Holy Mass and lunch"), a meal over a plain "wedding"
+ * ("Wedding reception").
+ */
 export function iconFor(name: string | undefined, i: number): IconKey {
   const n = (name ?? "").toLowerCase();
   if (/greet|welcome|arriv|invit/.test(n)) return "envelope";
-  if (/ring|engage|betroth|manasammatham/.test(n)) return "rings";
-  if (/church|ceremon|wedding|vow|nikah|muhur|mass|blessing|marriage|holy/.test(n)) return "arch";
-  if (/toast|dance|party|cocktail|sangeet|music|haldi|mehndi|mehendi|celebrat/.test(n)) return "glasses";
-  if (/dinner|lunch|feast|banquet|recep|meal|sadya|break/.test(n)) return "dinner";
-  if (/end|farewell|send|depart|good ?bye|vidaai|close/.test(n)) return "car";
+  if (/ring|engage|betroth|manasamm?a(th|d)h?am|nis?c?h?ayam|nichayam|othu ?kalyanam|mothiram/.test(n)) return "rings";
+  if (/church|mass\b|holy|matrimony|kurbana|qurbana|nikk?ah|muhur|thali|thaali|minnu|mantrakodi|temple/.test(n)) return "arch";
+  if (/dinner|lunch|feast|banquet|recep|meal|sadh?ya|valima|walima|break/.test(n)) return "dinner";
+  if (/toast|dance|party|cocktail|sangeet|music|haldi|mehn?di|mehendi|henna|m[ay]i?lan(ch|j)i|chan[td]h?am|madhuram|celebrat|get ?together/.test(n)) return "glasses";
+  if (/ceremon|wedding|vow|blessing|marriage|kalyanam|vivah|mangalya/.test(n)) return "arch";
+  if (/\bend\b|farewell|send|depart|good ?bye|vid(a|aa)i|griha|close/.test(n)) return "car";
   const order: IconKey[] = ["envelope", "arch", "rings", "glasses", "dinner", "car"];
   return order[i % order.length];
 }
