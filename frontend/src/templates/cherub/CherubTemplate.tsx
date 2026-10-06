@@ -45,6 +45,9 @@ const PALETTE = {
   "--chrome-ring": "rgba(255,250,245,0.7)",
 } as CSSProperties;
 
+/** A soft cream glow behind brown words laid over the paintings. */
+const GLOW = "0 0 10px rgba(255,248,240,0.95), 0 0 22px rgba(255,248,240,0.8)";
+
 /* -------------------------------- type -------------------------------- */
 
 function Body({ children, color = INK, size = 17, style }: { children: ReactNode; color?: string; size?: number; style?: CSSProperties }) {
@@ -394,24 +397,24 @@ export function CherubTemplate({
             )}
 
             {/* ------------------------------ closing ------------------------------ */}
-            <section className="relative flex flex-col items-center overflow-hidden text-center" style={{ minHeight: v(470), padding: `${v(150)} ${v(24)} ${v(60)}` }}>
+            {/* the words sit in the painting's calm, hazy sky, in the cards' warm
+                brown with a cream glow, and the rose path rises up to them */}
+            <section className="relative flex flex-col items-center overflow-hidden text-center" style={{ minHeight: v(600), padding: `${v(70)} ${v(24)} ${v(330)}` }}>
               {ART.path ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={ART.path} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 70%" }} />
+                <img src={ART.path} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 0%" }} />
               ) : (
                 <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, #e8d3c6 0%, #e9c3b8 45%, #d9a59c 75%, #b9a3c4 100%)" }} />
               )}
               {/* the beige of the page above melts into the painting */}
-              <div aria-hidden className="absolute inset-x-0 top-0" style={{ height: v(130), background: `linear-gradient(${BEIGE}, rgba(201,174,157,0))` }} />
+              <div aria-hidden className="absolute inset-x-0 top-0" style={{ height: v(110), background: `linear-gradient(${BEIGE}, rgba(201,174,157,0))` }} />
               <Rise className="relative">
-                <p style={{ fontFamily: SCRIPT, fontSize: v(44), lineHeight: 1.1, color: "#fffaf5", textShadow: "0 2px 14px rgba(92,60,40,0.55)" }}>With love</p>
-                <p
-                  style={{ fontFamily: SCRIPT, fontSize: v(longNames ? 36 : 42), lineHeight: 1.15, color: "#fffaf5", textShadow: "0 2px 14px rgba(92,60,40,0.55)", marginTop: v(6), textWrap: "balance" }}
-                >
+                <p style={{ fontFamily: SCRIPT, fontSize: v(46), lineHeight: 1.1, color: "#5b4034", textShadow: GLOW }}>With love</p>
+                <p style={{ fontFamily: SCRIPT, fontSize: v(longNames ? 38 : 44), lineHeight: 1.15, color: "#5b4034", textShadow: GLOW, marginTop: v(6), textWrap: "balance" }}>
                   {[p1, p2].filter(Boolean).join(" & ")}
                 </p>
                 {hero?.closingLine?.trim() ? (
-                  <Body color="#fffaf5" size={16} style={{ marginTop: v(10), textShadow: "0 1px 8px rgba(92,60,40,0.6)" }}>
+                  <Body color="#5b4034" size={17} style={{ marginTop: v(10), textShadow: GLOW }}>
                     {hero.closingLine}
                   </Body>
                 ) : null}
