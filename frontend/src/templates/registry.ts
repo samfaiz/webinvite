@@ -99,10 +99,8 @@ export const templates: TemplateMeta[] = [
     supportedCommunities: ALL_COMMUNITIES,
     defaultThemeId: "heartline-ivory",
     defaultMotifId: "secular",
-    preview: "/assets/templates/garden/01-cover.jpg",
+    preview: "/assets/templates/heartline/preview.jpg",
     themeIds: ["heartline-ivory"],
-    // until its photographs, sketches and bow are in
-    draft: true,
   },
   {
     id: "cherub-garden",

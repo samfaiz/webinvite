@@ -25,10 +25,10 @@ export const ART: {
   venues: Record<VenueKind, string | null>;
   bow: string | null;
 } = {
-  cover: null,
-  closing: null,
-  venues: { house: null, church: null, hall: null },
-  bow: null,
+  cover: A("cover.webp"),
+  closing: A("closing.webp"),
+  venues: { house: A("venue-house.webp"), church: A("venue-church.webp"), hall: A("venue-hall.webp") },
+  bow: A("bow.webp"),
 };
 
 export const PAPER = "#f3eee6";

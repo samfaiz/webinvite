@@ -325,10 +325,22 @@ export function HeartlineTemplate({
                         key={ev.id}
                         delay={0.05 * i}
                         className="absolute flex flex-col items-center text-center"
-                        style={{ top: v(line.dots[i].y - 34), left: left ? v(10) : v(246), width: v(136) }}
+                        style={{ top: v(line.dots[i].y - 34), left: left ? v(4) : v(240), width: v(148) }}
                       >
                         {ev.time ? <p style={{ fontFamily: HAND, fontSize: v(28), lineHeight: 1, color: INK }}>{ev.time}</p> : null}
-                        <p style={{ fontFamily: SERIF, fontSize: `max(13px, ${v(13)})`, letterSpacing: "0.12em", textTransform: "uppercase", color: INK, marginTop: v(4), lineHeight: 1.3 }}>
+                        <p
+                          style={{
+                            fontFamily: SERIF,
+                            fontSize: `max(13px, ${v(13)})`,
+                            // a long single word (a Kerala ceremony) keeps within its column
+                            letterSpacing: /\S{12,}/.test(ev.name ?? "") ? "0.03em" : "0.12em",
+                            overflowWrap: "anywhere",
+                            textTransform: "uppercase",
+                            color: INK,
+                            marginTop: v(4),
+                            lineHeight: 1.3,
+                          }}
+                        >
                           {ev.name}
                         </p>
                         {manyVenues && ev.venue?.trim() ? (
