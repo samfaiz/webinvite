@@ -27,7 +27,6 @@ import {
   Divider,
   INK,
   INK_SOFT,
-  Letter,
   LineArt,
   Medallion,
   OrnateFrame,
@@ -68,6 +67,32 @@ const PALETTE = {
   "--chrome-ring": "rgba(246,239,230,0.55)",
 } as CSSProperties;
 
+/** Writing that runs up the velvet margin beside the torn paper, like the
+ *  spine of a printed card: the names on the first page, the date on the
+ *  second. */
+function Spine({ children, top = "6%", bottom = "6%" }: { children: ReactNode; top?: string; bottom?: string }) {
+  return (
+    <div className="pointer-events-none absolute left-0 z-[1] flex items-center justify-center" style={{ top, bottom, width: v(STRIP * 0.62) }}>
+      <span
+        style={{
+          writingMode: "vertical-rl",
+          transform: "rotate(180deg)",
+          whiteSpace: "nowrap",
+          fontFamily: CAPS,
+          fontWeight: 600,
+          fontSize: v(19),
+          letterSpacing: "0.32em",
+          textTransform: "uppercase",
+          color: CREAM,
+          opacity: 0.92,
+        }}
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
+
 /** A faint glow of paper behind writing laid over a photograph. */
 const PAPER_GLOW = "0 0 6px rgba(237,227,213,0.95), 0 0 14px rgba(237,227,213,0.85)";
 
@@ -93,6 +118,13 @@ function Serif({ children, color = INK, size = 16, italic = false, style }: { ch
 function Script({ children, color = INK, size = 26, style }: { children: ReactNode; color?: string; size?: number; style?: CSSProperties }) {
   return <p style={{ fontFamily: SCRIPT, fontSize: v(size), lineHeight: 1.2, color, textWrap: "balance", ...style }}>{children}</p>;
 }
+
+const dotDate = (iso?: string) => {
+  const d = new Date(iso ?? "");
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(d.getDate())} · ${p(d.getMonth() + 1)} · ${d.getFullYear()}`;
+};
 
 const longDate = (iso?: string) => {
   const d = new Date(iso ?? "");
@@ -190,7 +222,7 @@ export function VelvetTemplate({
 
   /* Touching the seal plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
-     after four seconds, and the music starts with their first tap anywhere. */
+     after seven seconds, and the music starts with their first tap anywhere. */
   const tour = useTour(main);
   const begin = (withSound: boolean) => {
     if (begun) return;
@@ -205,7 +237,7 @@ export function VelvetTemplate({
     if (!reduce) tour.start(1500);
   };
   // it begins by itself in a few seconds; the music starts on the first tap
-  useAutoBegin(begun, begin);
+  useAutoBegin(begun, begin, 7000);
   useFirstTapMusic();
 
   const parents = (p?: typeof couple.partner1) =>
@@ -248,8 +280,10 @@ export function VelvetTemplate({
             {/* ------------------------------ page 1: the names ------------------------------ */}
             {/* the paper's torn edge runs on down page 2, and sweeps out at its foot */}
             <section id="frame-couple" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, minHeight: pageH }}>
-              <Letter style={{ left: v(-30), top: v(10), width: v(220), height: "90%" }} />
               <TornPaper strip={STRIP} seed={5} page={0} pages={2} sweep={false} />
+              <Spine>
+                {[p1, p2].filter(Boolean).map((n) => keepTitles(n!)).join("  ✦  ")}
+              </Spine>
               <LineArt src={ART.lilyCorner} style={{ right: 0, top: 0, width: v(150) }} />
               <LineArt src={ART.lilyStem} style={{ left: v(40), bottom: v(10), height: v(240), opacity: 0.85 }} />
               {/* a photograph laid faintly into the paper behind the names, like a
@@ -300,6 +334,8 @@ export function VelvetTemplate({
                       className="block h-full w-full"
                       animate={guided && !begun ? { scale: [1, 1.06, 1] } : { scale: 1 }}
                       transition={{ duration: 1.8, repeat: guided && !begun ? Infinity : 0, ease: "easeInOut" }}
+                      // touched: a little press, and the card opens
+                      whileTap={{ scale: 0.9 }}
                     >
                       {ART.seal ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -317,12 +353,23 @@ export function VelvetTemplate({
                   </div>
                   <AnimatePresence>
                     {guided && !begun ? (
-                      <motion.p
-                        exit={{ opacity: 0 }}
-                        style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: `max(14px, ${v(14)})`, color: INK_SOFT, marginTop: v(6) }}
-                      >
-                        touch the seal to open
-                      </motion.p>
+                      <motion.div exit={{ opacity: 0, height: 0 }} className="flex flex-col items-center" style={{ marginTop: v(10), gap: v(2) }}>
+                        <motion.span
+                          aria-hidden
+                          style={{ color: INK, display: "inline-flex" }}
+                          animate={{ y: [0, -5, 0] }}
+                          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Icon name="hand" size={24} />
+                        </motion.span>
+                        <button
+                          type="button"
+                          onClick={() => begin(true)}
+                          style={{ fontFamily: SERIF, fontWeight: 600, fontSize: `max(17px, ${v(17)})`, color: INK, minHeight: 44 }}
+                        >
+                          Tap the seal to open
+                        </button>
+                      </motion.div>
                     ) : null}
                   </AnimatePresence>
                 </div>
@@ -351,6 +398,11 @@ export function VelvetTemplate({
             {/* ------------------------------ page 2: the day ------------------------------ */}
             <section id="frame-date" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, minHeight: pageH }}>
               <TornPaper strip={STRIP} seed={5} page={1} pages={2} />
+              {dotDate(countdown?.targetDate) ? (
+                <Spine top="4%" bottom="46%">
+                  {dotDate(countdown?.targetDate)}
+                </Spine>
+              ) : null}
               <LineArt src={ART.lilyStem} style={{ left: v(40), top: v(-10), height: v(200), opacity: 0.85 }} />
               <Polaroid src={ART.polaroids[0]} turn={-9} style={{ left: v(-8), bottom: v(170) }} />
               <Polaroid src={ART.polaroids[1]} turn={6} style={{ left: v(14), bottom: v(72) }} />
