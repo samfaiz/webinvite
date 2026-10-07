@@ -63,8 +63,8 @@ function Body({ children, color = INK, size = 17, style }: { children: ReactNode
 }
 
 /** A Velvet Lily line drawing for an event, in white on the green or dark on white. */
-function Drawing({ name, i, onGreen = true, size = 46 }: { name?: string; i: number; onGreen?: boolean; size?: number }) {
-  const src = VELVET.icons[iconFor(name, i)];
+function Drawing({ name, i, all, onGreen = true, size = 46 }: { name?: string; i: number; all?: string[]; onGreen?: boolean; size?: number }) {
+  const src = VELVET.icons[iconFor(name, i, all)];
   if (!src) return <span style={{ width: v(size), height: v(size) }} />;
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -304,7 +304,7 @@ export function ForestTemplate({
               {events.map((ev, i) => (
                 <Rise key={ev.id} delay={0.05 * i} className="relative flex items-start text-left" style={{ gap: v(16) }}>
                   <span className="flex shrink-0 items-center justify-center" style={{ width: v(56), height: v(50) }}>
-                    <Drawing name={ev.name} i={i} />
+                    <Drawing name={ev.name} i={i} all={events.map((e) => e.name)} />
                   </span>
                   <span aria-hidden className="absolute rounded-full" style={{ left: v(70.5), top: v(20), width: v(8), height: v(8), background: ON_GREEN }} />
                   <div className="min-w-0" style={{ paddingLeft: v(14) }}>

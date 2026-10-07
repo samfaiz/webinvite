@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
 import { PreviewContext } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -18,6 +18,7 @@ import { keepTitles } from "@/lib/titles";
 import { ActionButton, Icon, Rise, useTicking } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
+import { ART as SKETCH } from "@/templates/heartline/parts";
 import { useAutoBegin, useFirstTapMusic } from "@/templates/garden/autostart";
 import {
   ART,
@@ -66,6 +67,9 @@ const PALETTE = {
   "--chrome-fg": "#f6efe6",
   "--chrome-ring": "rgba(246,239,230,0.55)",
 } as CSSProperties;
+
+/** A faint glow of paper behind writing laid over a photograph. */
+const PAPER_GLOW = "0 0 6px rgba(237,227,213,0.95), 0 0 14px rgba(237,227,213,0.85)";
 
 /** The paper's left margin, where the velvet shows through the tear. */
 const STRIP = 84;
@@ -184,7 +188,7 @@ export function VelvetTemplate({
   }
   if (map?.directionsUrl?.trim()) target.url = map.directionsUrl.trim();
 
-  /* "Tap here to begin" plays the music and the card walks itself through,
+  /* Touching the seal plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
      after four seconds, and the music starts with their first tap anywhere. */
   const tour = useTour(main);
@@ -209,7 +213,29 @@ export function VelvetTemplate({
       ? keepTitles(`${p.parentsPrefix?.trim() ? `${p.parentsPrefix} ` : ""}${[p.father, p.mother].filter((x) => x?.trim()).join(" & ")}`)
       : "";
 
-  const nameStyle: CSSProperties = { fontFamily: CAPS, fontWeight: 600, fontSize: v(longNames ? 28 : 34), lineHeight: 1.1, letterSpacing: "0.03em", color: INK };
+  const nameStyle: CSSProperties = { fontFamily: CAPS, fontWeight: 600, fontSize: v(longNames ? 30 : 36), lineHeight: 1.1, letterSpacing: "0.03em", color: INK };
+  // the parents in brackets, upright and plain, a little larger and darker
+  const parentStyle: CSSProperties = { fontFamily: SERIF, fontWeight: 600, fontSize: `max(15px, ${v(16)})`, lineHeight: 1.35, color: INK, opacity: 0.88, marginTop: v(6), textWrap: "balance" };
+
+  // each page at least a screen tall, its contents in the middle: the card
+  // reads, and plays, one page at a time (not in the Studio's small preview)
+  const pageH = compact ? undefined : "100svh";
+  const manyVenues = new Set(events.map((e) => e.venue?.trim()).filter(Boolean)).size > 1;
+  // the couple's own words for the bouquet page, when there's nothing else on it
+  const storyHeading = hidden.includes("story") ? "" : content.story?.heading?.trim() ?? "";
+  const storyLine = hidden.includes("story") ? "" : content.story?.subtext?.trim() ?? "";
+
+  // a photograph of the couple only if they've added one themselves
+  const couplePhoto = hidden.includes("story") ? undefined : (content.story?.items ?? []).find((s) => s.photo)?.photo;
+  const watermark = couplePhoto || ART.hall;
+
+  // the venue as a pen sketch that suits it: a church, a hall, else the palace
+  const venueName = `${firstEv?.venue ?? ""} ${content.venueArt ?? ""}`;
+  const venueSketch = /church|chapel|cathedral|basilica|forane|parish/i.test(venueName)
+    ? SKETCH.venues.church
+    : /hall|cent(re|er)|convention|auditorium|banquet|arena|club|hotel|resort/i.test(venueName)
+      ? SKETCH.venues.hall
+      : ART.palace;
 
   return (
     <PreviewContext.Provider value={{ compact, editing }}>
@@ -219,85 +245,145 @@ export function VelvetTemplate({
           <TextOffsets offsets={content.offsets} />
 
           <main ref={main} className="relative" style={{ width: compact ? "100%" : "min(100%, 480px)", containerType: "inline-size", ...velvet }}>
-            {/* ------------------------------ cover ------------------------------ */}
-            <section id="frame-couple" className="relative overflow-hidden" style={velvet}>
-              <Letter style={{ left: v(-30), top: v(10), width: v(220), height: "70%" }} />
-              <TornPaper strip={STRIP} seed={5} />
+            {/* ------------------------------ page 1: the names ------------------------------ */}
+            {/* the paper's torn edge runs on down page 2, and sweeps out at its foot */}
+            <section id="frame-couple" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, minHeight: pageH }}>
+              <Letter style={{ left: v(-30), top: v(10), width: v(220), height: "90%" }} />
+              <TornPaper strip={STRIP} seed={5} page={0} pages={2} sweep={false} />
               <LineArt src={ART.lilyCorner} style={{ right: 0, top: 0, width: v(150) }} />
-              <LineArt src={ART.lilyStem} style={{ left: v(40), top: "38%", height: v(250), opacity: 0.85 }} />
-              <Polaroid src={ART.polaroids[0]} turn={-9} style={{ left: v(-8), bottom: v(150) }} />
-              <Polaroid src={ART.polaroids[1]} turn={6} style={{ left: v(14), bottom: v(52) }} />
-
-              {guided && !begun ? (
-                <div className="absolute inset-x-0 z-[3] flex justify-center" style={{ top: v(20), paddingLeft: v(STRIP - 20) }}>
-                  <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-                    <ActionButton icon="hand" onClick={() => begin(true)}>
-                      Tap here to begin
-                    </ActionButton>
-                  </motion.div>
-                </div>
+              <LineArt src={ART.lilyStem} style={{ left: v(40), bottom: v(10), height: v(240), opacity: 0.85 }} />
+              {/* a photograph laid faintly into the paper behind the names, like a
+                  watermark: theirs if they've added one, else the hall */}
+              {watermark ? (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute"
+                  style={{
+                    left: v(STRIP + 2),
+                    right: 0,
+                    top: "22%",
+                    bottom: "6%",
+                    backgroundImage: `url("${watermark}")`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "50% 30%",
+                    opacity: couplePhoto ? 0.24 : 0.2,
+                    filter: "grayscale(1) sepia(0.55) contrast(1.05)",
+                    mixBlendMode: "multiply",
+                    maskImage: "radial-gradient(ellipse 62% 58% at 50% 50%, #000 30%, transparent 100%)",
+                    WebkitMaskImage: "radial-gradient(ellipse 62% 58% at 50% 50%, #000 30%, transparent 100%)",
+                  }}
+                />
               ) : null}
 
-              <div className="relative z-[2] flex flex-col items-center text-center" style={{ padding: `${v(96)} ${v(20)} ${v(64)} ${v(STRIP + 4)}` }}>
-                <Rise>
-                  <Serif size={16} italic>
+              <div className="relative z-[2] flex flex-col items-center text-center" style={{ padding: `${v(26)} ${v(20)} ${v(60)} ${v(STRIP + 4)}`, textShadow: watermark ? PAPER_GLOW : undefined }}>
+                {/* the wax seal and "Wedding Invitation": tapping the seal opens
+                    the card with music (it opens by itself in a few seconds too) */}
+                <div className="flex flex-col items-center">
+                  <button
+                    type="button"
+                    aria-label="Open the invitation"
+                    onClick={() => begin(true)}
+                    disabled={!guided || begun}
+                    className="relative flex items-center justify-center rounded-full"
+                    style={{ width: v(78), height: v(78), cursor: guided && !begun ? "pointer" : "default" }}
+                  >
+                    {guided && !begun ? (
+                      <motion.span
+                        aria-hidden
+                        className="absolute inset-0 rounded-full"
+                        style={{ boxShadow: `0 0 0 2px ${INK}` }}
+                        animate={{ scale: [1, 1.35], opacity: [0.55, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+                      />
+                    ) : null}
+                    <motion.span
+                      className="block h-full w-full"
+                      animate={guided && !begun ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+                      transition={{ duration: 1.8, repeat: guided && !begun ? Infinity : 0, ease: "easeInOut" }}
+                    >
+                      {ART.seal ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={ART.seal} alt="" className="block h-full w-full" />
+                      ) : (
+                        <span className="block h-full w-full rounded-full" style={{ background: "radial-gradient(circle at 38% 32%, #9a3344, #6b1a28 55%, #4a0f1b)" }} />
+                      )}
+                    </motion.span>
+                  </button>
+                  <Caps size={15} style={{ marginTop: v(12), letterSpacing: "0.3em", fontWeight: 600 }}>
+                    Wedding Invitation
+                  </Caps>
+                  <div style={{ marginTop: v(8) }}>
+                    <Divider width={150} />
+                  </div>
+                  <AnimatePresence>
+                    {guided && !begun ? (
+                      <motion.p
+                        exit={{ opacity: 0 }}
+                        style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: `max(14px, ${v(14)})`, color: INK_SOFT, marginTop: v(6) }}
+                      >
+                        touch the seal to open
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+
+                <Rise style={{ marginTop: v(30) }}>
+                  <Serif size={17} italic>
                     The wedding of
                   </Serif>
                 </Rise>
                 <Rise delay={0.1} className="flex flex-col items-center" style={{ marginTop: v(10) }}>
-                  <p style={nameStyle}>{p1}</p>
-                  {parents(couple.partner1) ? (
-                    <Serif size={13} italic color={INK_SOFT} style={{ marginTop: v(2) }}>
-                      {parents(couple.partner1)}
-                    </Serif>
-                  ) : null}
-                  <p style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: v(28), lineHeight: 1.1, color: INK, margin: `${v(4)} 0` }}>&amp;</p>
-                  <p style={nameStyle}>{p2}</p>
-                  {parents(couple.partner2) ? (
-                    <Serif size={13} italic color={INK_SOFT} style={{ marginTop: v(2) }}>
-                      {parents(couple.partner2)}
-                    </Serif>
-                  ) : null}
+                  <p style={nameStyle}>{keepTitles(p1 ?? "")}</p>
+                  {parents(couple.partner1) ? <p style={parentStyle}>({parents(couple.partner1)})</p> : null}
+                  <p style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: v(30), lineHeight: 1.1, color: INK, margin: `${v(8)} 0 ${v(4)}` }}>&amp;</p>
+                  <p style={nameStyle}>{keepTitles(p2 ?? "")}</p>
+                  {parents(couple.partner2) ? <p style={parentStyle}>({parents(couple.partner2)})</p> : null}
                 </Rise>
-                <Rise delay={0.2} className="flex flex-col items-center" style={{ marginTop: v(12), gap: v(10) }}>
-                  <Caps size={10} style={{ letterSpacing: "0.34em" }}>
+                <Rise delay={0.2} className="flex flex-col items-center" style={{ marginTop: v(18), gap: v(10) }}>
+                  <Caps size={11} style={{ letterSpacing: "0.34em" }}>
                     {hero?.tagline?.trim() || "Forever & Always"}
                   </Caps>
                   <Divider />
                 </Rise>
+              </div>
+            </section>
 
-                <Rise style={{ marginTop: v(22), width: v(176) }}>
-                  <OrnateFrame>
-                    <Picture src={ART.hall} ratio="1 / 1" />
-                  </OrnateFrame>
-                </Rise>
+            {/* ------------------------------ page 2: the day ------------------------------ */}
+            <section id="frame-date" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, minHeight: pageH }}>
+              <TornPaper strip={STRIP} seed={5} page={1} pages={2} />
+              <LineArt src={ART.lilyStem} style={{ left: v(40), top: v(-10), height: v(200), opacity: 0.85 }} />
+              <Polaroid src={ART.polaroids[0]} turn={-9} style={{ left: v(-8), bottom: v(170) }} />
+              <Polaroid src={ART.polaroids[1]} turn={6} style={{ left: v(14), bottom: v(72) }} />
 
-                <Rise style={{ marginTop: v(24) }}>
-                  <Caps size={11}>{hero?.marriageText?.trim() || "We are getting married"}</Caps>
+              <div className="relative z-[2] flex flex-col items-center text-center" style={{ padding: `${v(40)} ${v(20)} ${v(90)} ${v(STRIP + 4)}` }}>
+                <Rise>
+                  <Caps size={13} style={{ fontWeight: 600 }}>
+                    {hero?.marriageText?.trim() || "We are getting married"}
+                  </Caps>
                   {longDate(countdown?.targetDate) ? (
-                    <Serif size={19} style={{ marginTop: v(8), fontWeight: 600 }}>
+                    <Serif size={22} style={{ marginTop: v(12), fontWeight: 600 }}>
                       {longDate(countdown?.targetDate)}
                     </Serif>
                   ) : null}
                   {firstEv?.time ? (
-                    <Serif size={16} italic>
+                    <Serif size={19} italic style={{ marginTop: v(2) }}>
                       at {firstEv.time}
                     </Serif>
                   ) : null}
                 </Rise>
-                <Rise style={{ marginTop: v(16) }}>
+                <Rise style={{ marginTop: v(26) }}>
                   <Countdown target={countdown?.targetDate} />
                 </Rise>
-                <Rise className="flex flex-col items-center" style={{ marginTop: v(18), gap: v(12) }}>
-                  <Serif size={15} italic color={INK_SOFT}>
+                <Rise className="flex flex-col items-center" style={{ marginTop: v(26), gap: v(14) }}>
+                  <Serif size={17} italic color={INK_SOFT}>
                     Two hearts, one promise,
                     <br />a lifetime together
                   </Serif>
                   <Divider width={90} />
-                  <Script size={25}>You are a special part of our day</Script>
+                  <Script size={27}>You are a special part of our day</Script>
                 </Rise>
                 {cal ? (
-                  <Rise style={{ marginTop: v(20) }}>
+                  <Rise style={{ marginTop: v(24) }}>
                     <ActionButton icon="calendar" onClick={() => downloadIcs(cal, "invitation.ics")}>
                       Add to my calendar
                     </ActionButton>
@@ -309,11 +395,12 @@ export function VelvetTemplate({
             {/* ------------------------------ venue ------------------------------ */}
             <section
               id="frame-venue"
-              className="relative flex flex-col items-center text-center"
+              className="relative flex flex-col items-center justify-center text-center"
               style={{
                 ...paper,
                 backgroundImage: `${paper.backgroundImage}, linear-gradient(to bottom, ${PAPER}, #ead6cf 30%, #ead8d0 60%, ${PAPER})`,
                 padding: `${v(30)} ${v(24)} ${v(96)}`,
+                minHeight: pageH,
               }}
             >
               <Rise>
@@ -338,9 +425,9 @@ export function VelvetTemplate({
                   <OrnateFrame style={{ width: "86%", margin: "0 auto" }}>
                     <Picture src={content.venuePhoto} ratio="4 / 3" />
                   </OrnateFrame>
-                ) : ART.palace ? (
+                ) : venueSketch ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ART.palace} alt="" aria-hidden className="mx-auto block" style={{ width: "92%", mixBlendMode: "multiply" }} />
+                  <img src={venueSketch} alt="" aria-hidden className="mx-auto block" style={{ width: "92%", mixBlendMode: "multiply" }} />
                 ) : (
                   <div aria-hidden style={{ height: v(190) }} />
                 )}
@@ -389,7 +476,7 @@ export function VelvetTemplate({
 
             {/* ----------------------------- timeline ----------------------------- */}
             {hidden.includes("schedule") || !events.length ? null : (
-              <section id="frame-schedule" className="relative overflow-hidden" style={{ ...velvet, padding: `${v(56)} ${v(34)} ${v(40)}` }}>
+              <section id="frame-schedule" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, padding: `${v(56)} ${v(34)} ${v(40)}`, minHeight: pageH }}>
                 <VelvetFrame top />
                 <LineArt src={ART.lilyStem} onVelvet style={{ right: v(-30), top: v(40), height: "80%" }} />
                 <Rise className="flex items-center justify-center" style={{ gap: v(12) }}>
@@ -415,14 +502,15 @@ export function VelvetTemplate({
                         {events.length > 1 ? (
                           <span aria-hidden className="absolute rounded-full" style={{ left: v(10.5), width: v(8), height: v(8), background: CREAM }} />
                         ) : null}
-                        <Medallion icon={iconFor(ev.name, i)} />
+                        <Medallion icon={iconFor(ev.name, i, events.map((e) => e.name))} />
                         <div className="min-w-0 text-left">
+                          {/* the time first and strongest: upright, bold, full cream */}
                           {ev.time ? (
-                            <p style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: `max(15px, ${v(16)})`, color: CREAM, opacity: 0.85 }}>{ev.time}</p>
+                            <p style={{ fontFamily: SERIF, fontWeight: 700, fontSize: `max(19px, ${v(21)})`, lineHeight: 1.2, letterSpacing: "0.03em", color: "#fff7ef" }}>{ev.time}</p>
                           ) : null}
-                          <p style={{ fontFamily: SCRIPT, fontSize: v(28), lineHeight: 1.15, color: CREAM }}>{ev.name}</p>
-                          {ev.venue?.trim() ? (
-                            <p style={{ fontFamily: SERIF, fontSize: `max(14px, ${v(14)})`, lineHeight: 1.3, color: CREAM, opacity: 0.7 }}>{ev.venue}</p>
+                          <p style={{ fontFamily: SCRIPT, fontSize: v(29), lineHeight: 1.15, color: CREAM }}>{ev.name}</p>
+                          {manyVenues && ev.venue?.trim() ? (
+                            <p style={{ fontFamily: SERIF, fontSize: `max(15px, ${v(15)})`, lineHeight: 1.3, color: CREAM, opacity: 0.85 }}>{ev.venue}</p>
                           ) : null}
                         </div>
                       </Rise>
@@ -433,13 +521,23 @@ export function VelvetTemplate({
             )}
 
             {/* ------------------------- bouquet, dress, wishes ------------------------- */}
-            <section id="frame-details" className="relative flex flex-col items-center text-center" style={{ ...velvet, padding: `${v(20)} ${v(40)} ${v(30)}` }}>
+            <section id="frame-details" className="relative flex flex-col items-center justify-center text-center" style={{ ...velvet, padding: `${v(20)} ${v(40)} ${v(30)}`, minHeight: pageH }}>
               <VelvetFrame />
               <Rise style={{ width: "100%" }}>
                 <OrnateFrame color="rgba(241,230,220,0.8)">
                   <Picture src={ART.bouquet} ratio="4 / 3" tone="wine" />
                 </OrnateFrame>
               </Rise>
+              {storyHeading || storyLine ? (
+                <Rise className="flex flex-col items-center" style={{ marginTop: v(30), gap: v(10) }}>
+                  {storyHeading && !/^our story$/i.test(storyHeading) ? (
+                    <Caps color={CREAM} size={14} style={{ letterSpacing: "0.3em", fontWeight: 600 }}>
+                      {storyHeading}
+                    </Caps>
+                  ) : null}
+                  {storyLine ? <Script color={CREAM} size={28}>{storyLine}</Script> : null}
+                </Rise>
+              ) : null}
               {!hidden.includes("dresscode") && hasDressCode(content) ? (
                 <Rise className="flex flex-col items-center" style={{ marginTop: v(34) }}>
                   <Caps color={CREAM} size={13}>
@@ -486,7 +584,7 @@ export function VelvetTemplate({
 
             {/* ------------------------------- reply ------------------------------- */}
             {hidden.includes("rsvp") ? null : (
-              <section id="frame-rsvp" className="relative flex flex-col items-center text-center" style={{ ...velvet, padding: `${v(20)} ${v(30)} ${v(24)}` }}>
+              <section id="frame-rsvp" className="relative flex flex-col items-center justify-center text-center" style={{ ...velvet, padding: `${v(20)} ${v(30)} ${v(24)}`, minHeight: pageH }}>
                 <VelvetFrame />
                 <Rise className="flex flex-col items-center">
                   <Script color={CREAM} size={32}>
@@ -529,12 +627,17 @@ export function VelvetTemplate({
             )}
 
             {/* ------------------------------ closing ------------------------------ */}
-            <section className="relative flex flex-col items-center overflow-hidden text-center" style={{ ...velvet, padding: `${v(24)} ${v(30)} ${v(64)}` }}>
+            <section className="relative flex flex-col items-center justify-center overflow-hidden text-center" style={{ ...velvet, padding: `${v(24)} ${v(30)} ${v(64)}`, minHeight: pageH }}>
               <VelvetFrame bottom />
+              <LineArt src={ART.lilyCorner} onVelvet style={{ right: 0, top: 0, width: v(170) }} />
               <Rise className="flex flex-col items-center" style={{ gap: v(12) }}>
+                {ART.seal ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={ART.seal} alt="" aria-hidden style={{ width: v(64), height: v(64), marginBottom: v(6) }} />
+                ) : null}
                 <Divider color={CREAM} width={110} />
-                <p style={{ fontFamily: CAPS, fontWeight: 600, fontSize: v(24), letterSpacing: "0.06em", color: CREAM }}>
-                  {[p1, p2].filter(Boolean).join(" & ")}
+                <p style={{ fontFamily: CAPS, fontWeight: 600, fontSize: v(24), letterSpacing: "0.06em", color: CREAM, textWrap: "balance" }}>
+                  {[p1, p2].filter(Boolean).map((n) => keepTitles(n!)).join(" & ")}
                 </p>
                 <Serif color={CREAM} size={15} italic style={{ opacity: 0.85 }}>
                   {hero?.closingLine?.trim() || "Thank you for being a part of our special day."}

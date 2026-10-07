@@ -112,34 +112,38 @@ function rng(seed: number) {
 }
 
 /** The paper's torn left edge, x in 0–100 of the strip, down 0–1000. It
- *  wanders near the right of the strip, then sweeps out to the left at the
- *  foot, where the paper runs the full width. */
-function tornPath(seed: number, inset: number): string {
+ *  wanders near the right of the strip, then (with `sweep`) sweeps out to the
+ *  left at the foot, where the paper runs the full width. One tear can run
+ *  down several pages: each draws its own `page` of `pages`, and the wave
+ *  meets itself where they join. */
+function tornPath(seed: number, inset: number, page = 0, pages = 1, sweep = true): string {
   const r = rng(seed);
-  const knots = Array.from({ length: 14 }, () => r());
+  const knots = Array.from({ length: 13 * pages + 1 }, () => r());
+  const fr = page ? rng(seed + page * 101) : r;
   const wave = (y: number) => {
-    const t = (y / 1000) * (knots.length - 1);
+    const t = ((page + y / 1000) / pages) * (knots.length - 1);
     const i = Math.min(Math.floor(t), knots.length - 2);
     const f = t - i;
     const e = f * f * (3 - 2 * f);
     return knots[i] + (knots[i + 1] - knots[i]) * e;
   };
-  const sweep = (y: number) => {
+  const out = (y: number) => {
+    if (!sweep) return 0;
     const f = Math.min(Math.max((y - 840) / 160, 0), 1);
     return f * f * (3 - 2 * f);
   };
-  const xAt = (y: number) => (58 + wave(y) * 26) * (1 - sweep(y)) - 12 * sweep(y);
+  const xAt = (y: number) => (58 + wave(y) * 26) * (1 - out(y)) - 12 * out(y);
   let d = `M100 0 L${(xAt(0) - inset).toFixed(1)} 0`;
-  for (let y = 4; y <= 1000; y += 3 + r() * 5) {
-    const fray = (r() - 0.5) * 7 + (r() < 0.08 ? -r() * 9 : 0);
+  for (let y = 4; y <= 1000; y += 3 + fr() * 5) {
+    const fray = (fr() - 0.5) * 7 + (fr() < 0.08 ? -fr() * 9 : 0);
     d += ` L${(xAt(y) + fray - inset).toFixed(1)} ${y.toFixed(1)}`;
   }
-  return `${d} L-20 1000 L100 1000 Z`;
+  return sweep ? `${d} L-20 1000 L100 1000 Z` : `${d} L${(xAt(1000) - inset).toFixed(1)} 1000 L100 1000 Z`;
 }
 
 /** The torn shape as a mask, so the strip wears the paper's own grain. */
-function tornMask(seed: number, inset: number): CSSProperties {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'><path d='${tornPath(seed, inset)}'/></svg>`;
+function tornMask(seed: number, inset: number, page = 0, pages = 1, sweep = true): CSSProperties {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'><path d='${tornPath(seed, inset, page, pages, sweep)}'/></svg>`;
   const url = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
   return { maskImage: url, WebkitMaskImage: url, maskSize: "100% 100%", WebkitMaskSize: "100% 100%", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat" };
 }
@@ -148,11 +152,25 @@ function tornMask(seed: number, inset: number): CSSProperties {
  * The paper laid over the velvet with its left edge torn: a pale fibrous
  * rim under the paper's own edge, and a soft shadow on the velvet.
  */
-export function TornPaper({ strip, seed = 5 }: { strip: number; seed?: number }) {
+export function TornPaper({
+  strip,
+  seed = 5,
+  page = 0,
+  pages = 1,
+  sweep = true,
+}: {
+  strip: number;
+  seed?: number;
+  /** which page of a tear that runs down `pages` pages */
+  page?: number;
+  pages?: number;
+  /** sweep out to the full width at the foot */
+  sweep?: boolean;
+}) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0" style={{ filter: "drop-shadow(-3px 2px 7px rgba(10,0,3,0.55))" }}>
-      <div className="absolute left-0 top-0 h-full" style={{ width: v(strip), background: "#f8f2e8", ...tornMask(seed, 3) }} />
-      <div className="absolute left-0 top-0 h-full" style={{ width: v(strip), ...paper, ...tornMask(seed, 0) }} />
+      <div className="absolute left-0 top-0 h-full" style={{ width: v(strip), background: "#f8f2e8", ...tornMask(seed, 3, page, pages, sweep) }} />
+      <div className="absolute left-0 top-0 h-full" style={{ width: v(strip), ...paper, ...tornMask(seed, 0, page, pages, sweep) }} />
       <div className="absolute inset-y-0 right-0" style={{ left: `calc(${v(strip)} - 1px)`, ...paper }} />
     </div>
   );
@@ -304,13 +322,16 @@ export function Seal({ style }: { style?: CSSProperties }) {
  * over a meal ("Holy Mass and lunch"), a meal over a plain "wedding"
  * ("Wedding reception").
  */
-export function iconFor(name: string | undefined, i: number): IconKey {
+export function iconFor(name: string | undefined, i: number, all: (string | undefined)[] = []): IconKey {
   const n = (name ?? "").toLowerCase();
+  const meal = /dinner|lunch|feast|banquet|meal|sadh?ya|valima|walima|break/;
   if (/greet|welcome|arriv|invit/.test(n)) return "envelope";
   if (/ring|engage|betroth|manasamm?a(th|d)h?am|nis?c?h?ayam|nichayam|othu ?kalyanam|mothiram/.test(n)) return "rings";
   if (/church|mass\b|holy|matrimony|kurbana|qurbana|nikk?ah|muhur|thali|thaali|minnu|mantrakodi|temple/.test(n)) return "arch";
   // the end of anything ("End of the banquet"), and getting there, is the car
   if (/\bend\b|farewell|send|depart|good ?bye|vid(a|aa)i|griha|close|transfer|shuttle|\bbus\b|pick ?up/.test(n)) return "car";
+  // "Reception" beside a separate "Lunch": the reception is the toast, the lunch the table
+  if (/recep/.test(n) && !meal.test(n) && all.some((m) => m !== name && meal.test((m ?? "").toLowerCase()))) return "glasses";
   if (/dinner|lunch|feast|banquet|recep|meal|sadh?ya|valima|walima|break/.test(n)) return "dinner";
   if (/toast|dance|party|cocktail|sangeet|music|haldi|mehn?di|mehendi|henna|m[ay]i?lan(ch|j)i|chan[td]h?am|madhuram|celebrat|get ?together/.test(n)) return "glasses";
   if (/ceremon|wedding|vow|blessing|marriage|kalyanam|vivah|mangalya/.test(n)) return "arch";
