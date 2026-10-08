@@ -277,3 +277,21 @@ model PageView {
   @@index([createdAt])
   @@index([path])
 }
+
+/// A copy of an invitation taken before every change made through the agent
+/// API (and, before a delete, its RSVPs too), so any change can be undone.
+/// Deliberately not a relation: a revision has to outlive a deleted invitation.
+model InvitationRevision {
+  id           String   @id @default(cuid())
+  invitationId String
+  slug         String?
+  /// "update" | "replace" | "publish" | "unpublish" | "delete" | "restore"
+  action       String
+  note         String?
+  /// the invitation row as it was before the change (with `rsvps` on delete)
+  snapshotJson String
+  createdAt    DateTime @default(now())
+
+  @@index([invitationId])
+  @@index([slug])
+}

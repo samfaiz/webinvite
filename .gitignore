@@ -54,3 +54,6 @@ Template generateion/
 # design handoff bundle (reference, not source)
 Next generation Web invite RSVP UI/
 Next generation Web invite RSVP UI.zip
+
+# agent API key for tools/invite.mjs (never commit)
+.agent-key

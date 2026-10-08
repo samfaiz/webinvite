@@ -22,6 +22,7 @@ import { SiteSettingsModule } from './site-settings/site-settings.module';
 import { ContactModule } from './contact/contact.module';
 import { SeoAlgorithmModule } from './seo-algorithm/seo-algorithm.module';
 import { ExpiryService } from './tasks/expiry.service';
+import { AgentModule } from './agent/agent.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ExpiryService } from './tasks/expiry.service';
     SiteSettingsModule,
     ContactModule,
     SeoAlgorithmModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [ExpiryService],
