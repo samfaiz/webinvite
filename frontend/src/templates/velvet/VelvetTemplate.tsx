@@ -387,9 +387,17 @@ export function VelvetTemplate({
                   {parents(couple.partner2) ? <p style={parentStyle}>({parents(couple.partner2)})</p> : null}
                 </Rise>
                 <Rise delay={0.2} className="flex flex-col items-center" style={{ marginTop: v(18), gap: v(10) }}>
-                  <Caps size={11} style={{ letterSpacing: "0.34em" }}>
-                    {hero?.tagline?.trim() || "Forever & Always"}
-                  </Caps>
+                  {/* the line under the names: "Forever & Always" until the couple
+                      write their own; one they've cleared stays empty */}
+                  {hero?.tagline === undefined || hero.tagline === null ? (
+                    <Caps size={11} style={{ letterSpacing: "0.34em" }}>
+                      Forever &amp; Always
+                    </Caps>
+                  ) : hero.tagline.trim() ? (
+                    <Caps size={11} style={{ letterSpacing: "0.34em" }}>
+                      {hero.tagline.trim()}
+                    </Caps>
+                  ) : null}
                   <Divider />
                 </Rise>
               </div>
