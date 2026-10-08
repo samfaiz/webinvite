@@ -340,14 +340,14 @@ export function iconFor(name: string | undefined, i: number, all: (string | unde
 }
 
 /** A cream oval with the event's drawing in it. */
-export function Medallion({ icon }: { icon: IconKey }) {
+export function Medallion({ icon, size = 64 }: { icon: IconKey; size?: number }) {
   const src = ART.icons[icon];
   return (
     <div
-      className="flex shrink-0 items-center justify-center"
+      className="relative z-[1] flex shrink-0 items-center justify-center"
       style={{
-        width: v(64),
-        height: v(80),
+        width: v(size),
+        height: v(size * 1.25),
         borderRadius: "50%",
         background: OVAL,
         boxShadow: `inset 0 0 0 ${v(3)} ${OVAL}, inset 0 0 0 ${v(4)} rgba(90,26,36,0.35), 0 4px 12px rgba(10,0,3,0.4)`,

@@ -96,6 +96,9 @@ function Spine({ children, top = "6%", bottom = "6%" }: { children: ReactNode; t
 /** A faint glow of paper behind writing laid over a photograph. */
 const PAPER_GLOW = "0 0 6px rgba(237,227,213,0.95), 0 0 14px rgba(237,227,213,0.85)";
 
+/** The timeline's ovals, in design pixels across. */
+const TL_OVAL = 78;
+
 /** The paper's left margin, where the velvet shows through the tear. */
 const STRIP = 84;
 
@@ -535,48 +538,62 @@ export function VelvetTemplate({
             </section>
 
             {/* ----------------------------- timeline ----------------------------- */}
+            {/* the ovals sit on one line down the page, spread over the whole
+                screen, each stop's time and name beside its oval */}
             {hidden.includes("schedule") || !events.length ? null : (
-              <section id="frame-schedule" className="relative flex flex-col justify-center overflow-hidden" style={{ ...velvet, padding: `${v(56)} ${v(34)} ${v(40)}`, minHeight: pageH }}>
+              <section id="frame-schedule" className="relative flex flex-col overflow-hidden" style={{ ...velvet, padding: `${v(64)} ${v(30)} ${v(48)}`, minHeight: pageH }}>
                 <VelvetFrame top />
                 <LineArt src={ART.lilyStem} onVelvet style={{ right: v(-30), top: v(40), height: "80%" }} />
-                <Rise className="flex items-center justify-center" style={{ gap: v(12) }}>
-                  <span aria-hidden style={{ color: CREAM, fontSize: v(8) }}>●</span>
-                  <Caps color={CREAM} size={13} style={{ letterSpacing: "0.32em" }}>
-                    Wedding timeline
-                  </Caps>
-                  <span aria-hidden style={{ color: CREAM, fontSize: v(8) }}>●</span>
-                </Rise>
-                <div className="relative" style={{ marginTop: v(30) }}>
-                  {/* the rail the stops hang on, when there's more than one */}
-                  {events.length > 1 ? (
-                    <div aria-hidden className="absolute" style={{ left: v(14), top: v(40), bottom: v(40), width: 1, background: "rgba(241,230,220,0.5)" }} />
-                  ) : null}
-                  <div className="flex flex-col" style={{ gap: v(22) }}>
-                    {events.map((ev, i) => (
-                      <Rise
-                        key={ev.id}
-                        delay={0.06 * i}
-                        className={`relative flex items-center ${events.length > 1 ? "" : "justify-center"}`}
-                        style={{ gap: v(16), paddingLeft: events.length > 1 ? v(36) : 0 }}
-                      >
-                        {events.length > 1 ? (
-                          <span aria-hidden className="absolute rounded-full" style={{ left: v(10.5), width: v(8), height: v(8), background: CREAM }} />
-                        ) : null}
-                        <Medallion icon={iconFor(ev.name, i, events.map((e) => e.name))} />
-                        <div className="min-w-0 text-left">
-                          {/* the time first and strongest: upright, bold, full cream */}
-                          {ev.time ? (
-                            <p style={{ fontFamily: SERIF, fontWeight: 700, fontSize: `max(19px, ${v(21)})`, lineHeight: 1.2, letterSpacing: "0.03em", color: "#fff7ef" }}>{ev.time}</p>
-                          ) : null}
-                          <p style={{ fontFamily: SCRIPT, fontSize: v(29), lineHeight: 1.15, color: CREAM }}>{ev.name}</p>
-                          {manyVenues && ev.venue?.trim() ? (
-                            <p style={{ fontFamily: SERIF, fontSize: `max(15px, ${v(15)})`, lineHeight: 1.3, color: CREAM, opacity: 0.85 }}>{ev.venue}</p>
-                          ) : null}
-                        </div>
-                      </Rise>
-                    ))}
+                <Rise className="flex flex-col items-center" style={{ gap: v(10) }}>
+                  <div className="flex items-center justify-center" style={{ gap: v(12) }}>
+                    <span aria-hidden style={{ color: CREAM, fontSize: v(8) }}>●</span>
+                    <Caps color={CREAM} size={15} style={{ letterSpacing: "0.32em", fontWeight: 600 }}>
+                      Wedding timeline
+                    </Caps>
+                    <span aria-hidden style={{ color: CREAM, fontSize: v(8) }}>●</span>
                   </div>
+                  <Divider color={CREAM} width={110} />
+                </Rise>
+                <div className="relative flex flex-1 flex-col justify-evenly" style={{ marginTop: v(18), minHeight: v(Math.min(events.length, 6) * 132) }}>
+                  {/* the line the ovals hang on, fading out at both ends */}
+                  {events.length > 1 ? (
+                    <div
+                      aria-hidden
+                      className="absolute"
+                      style={{
+                        left: `calc(${v(TL_OVAL / 2)} - 0.5px)`,
+                        top: "4%",
+                        bottom: "4%",
+                        width: 1,
+                        background: "linear-gradient(rgba(241,230,220,0), rgba(241,230,220,0.6) 12%, rgba(241,230,220,0.6) 88%, rgba(241,230,220,0))",
+                      }}
+                    />
+                  ) : null}
+                  {events.map((ev, i) => (
+                    <Rise key={ev.id} delay={0.08 * i} className="relative flex items-center" style={{ gap: v(22) }}>
+                      <Medallion icon={iconFor(ev.name, i, events.map((e) => e.name))} size={TL_OVAL} />
+                      <div className="min-w-0 flex-1 text-left">
+                        {/* the time first and strongest: upright, bold, full cream */}
+                        {ev.time ? (
+                          <p style={{ fontFamily: SERIF, fontWeight: 700, fontSize: `max(20px, ${v(23)})`, lineHeight: 1.15, letterSpacing: "0.04em", color: "#fff7ef" }}>{ev.time}</p>
+                        ) : null}
+                        <p style={{ fontFamily: SCRIPT, fontSize: v(33), lineHeight: 1.12, color: CREAM, marginTop: v(2), textWrap: "balance" }}>{ev.name}</p>
+                        {manyVenues && ev.venue?.trim() ? (
+                          <p style={{ fontFamily: SERIF, fontSize: `max(15px, ${v(15)})`, lineHeight: 1.3, color: CREAM, opacity: 0.85, marginTop: v(4) }}>{ev.venue}</p>
+                        ) : null}
+                      </div>
+                    </Rise>
+                  ))}
                 </div>
+                {/* all in one place: say where once, at the foot */}
+                {!manyVenues && firstEv?.venue?.trim() ? (
+                  <Rise className="flex flex-col items-center text-center" style={{ marginTop: v(18), gap: v(8) }}>
+                    <Divider color={CREAM} width={90} />
+                    <Serif color={CREAM} size={16} italic style={{ opacity: 0.9 }}>
+                      All at {firstEv.venue.trim()}
+                    </Serif>
+                  </Rise>
+                ) : null}
               </section>
             )}
 
