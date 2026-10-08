@@ -40,9 +40,10 @@ function key() {
   fail("No agent key: set AGENT_API_KEY or put it in .agent-key at the repo root.");
 }
 
+// thrown, not process.exit(): exiting with a fetch still open crashes Node on Windows
+class Fail extends Error {}
 function fail(msg) {
-  console.error(`✗ ${msg}`);
-  process.exit(1);
+  throw new Fail(msg);
 }
 
 async function call(method, path, body) {
@@ -104,6 +105,7 @@ const patch = async (op, path, v) => {
   summarise(await call("PATCH", `/invitations/${enc(ref)}`, { ops: [o], note, dryRun }));
 };
 
+try {
 switch (cmd) {
   case "list": {
     const rows = await call("GET", `/invitations${ref ? `?q=${enc(ref)}` : ""}`);
@@ -172,4 +174,8 @@ switch (cmd) {
   }
   default:
     console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("*/")[0].replace(/^#!.*\n\/\*\*?/, "").replace(/^ \* ?/gm, ""));
+}
+} catch (e) {
+  console.error(`✗ ${e instanceof Fail ? e.message : e?.message ?? e}`);
+  process.exitCode = 1;
 }
