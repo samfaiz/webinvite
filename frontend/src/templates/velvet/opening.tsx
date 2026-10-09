@@ -56,7 +56,8 @@ export function VelvetOpening({
 }) {
   const reduce = useReducedMotion();
   const [stage, setStage] = useState<Stage>("sealed");
-  // only in the browser: the opening is drawn over the page, in <body>
+  // drawn in place by the server (so the sealed envelope is the first thing
+  // seen, before the page's script has loaded), then over the page in <body>
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -123,8 +124,6 @@ export function VelvetOpening({
     return () => window.clearTimeout(t);
   }, [stage]);
 
-  if (!mounted) return null;
-
   const fade = (on: boolean, ms = 450): CSSProperties => ({ opacity: on ? 1 : 0, transition: `opacity ${ms}ms ease` });
   const showFilm = stage === "film" || stage === "closer";
   const showCard = stage === "closer" || stage === "card" || stage === "leaving";
@@ -134,7 +133,7 @@ export function VelvetOpening({
     transition: { duration: reduce ? 0 : 1.1, delay: reduce ? 0 : delay, ease: [0.45, 0, 0.25, 1] as const },
   });
 
-  return createPortal(
+  const tree = (
     <motion.div
       className="fixed inset-0 z-[90] flex justify-center"
       style={{ background: "#12040a" }}
@@ -256,7 +255,7 @@ export function VelvetOpening({
           </AnimatePresence>
         </div>
       </div>
-    </motion.div>,
-    document.body,
+    </motion.div>
   );
+  return mounted ? createPortal(tree, document.body) : tree;
 }
