@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { RenderProps } from "@/engine/types";
 import { PreviewContext } from "@/components/PreviewContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -19,7 +19,9 @@ import { ActionButton, Icon, Rise, useTicking } from "@/templates/garden/kit";
 import { ReplyForm } from "@/templates/garden/reply";
 import { useTour } from "@/templates/garden/tour";
 import { ART as SKETCH } from "@/templates/heartline/parts";
-import { useAutoBegin, useFirstTapMusic } from "@/templates/garden/autostart";
+import { useFirstTapMusic } from "@/templates/garden/autostart";
+import { initialOf } from "@/lib/initials";
+import { VelvetOpening } from "./opening";
 import {
   ART,
   CAPS,
@@ -240,8 +242,11 @@ export function VelvetTemplate({
     if (!reduce) tour.start(1500);
   };
   // it begins by itself in a few seconds; the music starts on the first tap
-  useAutoBegin(begun, begin, 7000);
+  // the sealed envelope opens the card (by itself after a few seconds, too);
+  // the music starts with the first tap anywhere
+  const [opened, setOpened] = useState(!guided);
   useFirstTapMusic();
+  const initials = content.envelope?.seal?.trim() || [initialOf(p1), initialOf(p2)].filter(Boolean).join(" ");
 
   const parents = (p?: typeof couple.partner1) =>
     !hidden.includes("families") && p && [p.father, p.mother].filter((x) => x?.trim()).length
@@ -313,68 +318,21 @@ export function VelvetTemplate({
               ) : null}
 
               <div className="relative z-[2] flex flex-col items-center text-center" style={{ padding: `${v(26)} ${v(20)} ${v(60)} ${v(STRIP + 4)}`, textShadow: watermark ? PAPER_GLOW : undefined }}>
-                {/* the wax seal and "Wedding Invitation": tapping the seal opens
-                    the card with music (it opens by itself in a few seconds too) */}
+                {/* the wax seal and "Wedding Invitation" head the card (the
+                    sealed envelope that opens it is VelvetOpening) */}
                 <div className="flex flex-col items-center">
-                  <button
-                    type="button"
-                    aria-label="Open the invitation"
-                    onClick={() => begin(true)}
-                    disabled={!guided || begun}
-                    className="relative flex items-center justify-center rounded-full"
-                    style={{ width: v(78), height: v(78), cursor: guided && !begun ? "pointer" : "default" }}
-                  >
-                    {guided && !begun ? (
-                      <motion.span
-                        aria-hidden
-                        className="absolute inset-0 rounded-full"
-                        style={{ boxShadow: `0 0 0 2px ${INK}` }}
-                        animate={{ scale: [1, 1.35], opacity: [0.55, 0] }}
-                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-                      />
-                    ) : null}
-                    <motion.span
-                      className="block h-full w-full"
-                      animate={guided && !begun ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-                      transition={{ duration: 1.8, repeat: guided && !begun ? Infinity : 0, ease: "easeInOut" }}
-                      // touched: a little press, and the card opens
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      {ART.seal ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={ART.seal} alt="" className="block h-full w-full" />
-                      ) : (
-                        <span className="block h-full w-full rounded-full" style={{ background: "radial-gradient(circle at 38% 32%, #9a3344, #6b1a28 55%, #4a0f1b)" }} />
-                      )}
-                    </motion.span>
-                  </button>
+                  {ART.seal ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={ART.seal} alt="" aria-hidden className="block" style={{ width: v(78), height: v(78) }} />
+                  ) : (
+                    <span aria-hidden className="block rounded-full" style={{ width: v(78), height: v(78), background: "radial-gradient(circle at 38% 32%, #9a3344, #6b1a28 55%, #4a0f1b)" }} />
+                  )}
                   <Caps size={15} style={{ marginTop: v(12), letterSpacing: "0.3em", fontWeight: 600 }}>
                     Wedding Invitation
                   </Caps>
                   <div style={{ marginTop: v(8) }}>
                     <Divider width={150} />
                   </div>
-                  <AnimatePresence>
-                    {guided && !begun ? (
-                      <motion.div exit={{ opacity: 0, height: 0 }} className="flex flex-col items-center" style={{ marginTop: v(10), gap: v(2) }}>
-                        <motion.span
-                          aria-hidden
-                          style={{ color: INK, display: "inline-flex" }}
-                          animate={{ y: [0, -5, 0] }}
-                          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <Icon name="hand" size={24} />
-                        </motion.span>
-                        <button
-                          type="button"
-                          onClick={() => begin(true)}
-                          style={{ fontFamily: SERIF, fontWeight: 600, fontSize: `max(17px, ${v(17)})`, color: INK, minHeight: 44 }}
-                        >
-                          Tap the seal to open
-                        </button>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
                 </div>
 
                 <Rise style={{ marginTop: v(30) }}>
@@ -750,6 +708,26 @@ export function VelvetTemplate({
           ) : null}
           <MusicToggle trackUrl={content.music?.trackUrl} />
           {begun ? <ScrollGuide active hasMusic={!!content.music?.trackUrl} /> : null}
+          {guided && !opened ? (
+            <VelvetOpening
+              initials={initials}
+              p1={p1}
+              p2={p2}
+              date={dotDate(countdown?.targetDate)}
+              onOpen={(withSound) => {
+                if (!withSound) return;
+                try {
+                  window.dispatchEvent(new Event("invite:open"));
+                } catch {
+                  /* no window */
+                }
+              }}
+              onDone={() => {
+                setOpened(true);
+                begin(false);
+              }}
+            />
+          ) : null}
         </div>
       </ThemeProvider>
     </PreviewContext.Provider>
