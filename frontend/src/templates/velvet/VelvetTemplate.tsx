@@ -598,12 +598,26 @@ export function VelvetTemplate({
             )}
 
             {/* ------------------------- bouquet, dress, wishes ------------------------- */}
-            <section id="frame-details" className="relative flex flex-col items-center justify-center text-center" style={{ ...velvet, padding: `${v(20)} ${v(40)} ${v(30)}`, minHeight: pageH }}>
+            <section id="frame-details" className="relative flex flex-col items-center justify-center overflow-hidden text-center" style={{ ...velvet, padding: `${v(30)} ${v(40)} ${v(36)}`, minHeight: pageH }}>
               <VelvetFrame />
-              <Rise style={{ width: "100%" }}>
-                <OrnateFrame color="rgba(241,230,220,0.8)">
-                  <Picture src={ART.bouquet} ratio="4 / 3" tone="wine" />
-                </OrnateFrame>
+              {/* faint lilies in two corners, so the velvet isn't bare */}
+              <LineArt src={ART.lilyCorner} onVelvet style={{ right: 0, top: 0, width: v(150) }} />
+              <LineArt src={ART.lilyCorner} onVelvet style={{ left: 0, bottom: 0, width: v(150), transform: "rotate(180deg)" }} />
+              {/* two photographs laid like keepsakes: the bouquet, and the
+                  candlelit hall tucked over its corner */}
+              <Rise className="relative w-full" style={{ marginBottom: ART.hall ? v(58) : 0 }}>
+                <div style={{ width: ART.hall ? "88%" : "100%", transform: ART.hall ? "rotate(-2.5deg)" : undefined, boxShadow: "0 10px 26px rgba(10,0,3,0.5)" }}>
+                  <OrnateFrame color="rgba(241,230,220,0.8)" style={{ background: "#2a0a10" }}>
+                    <Picture src={ART.bouquet} ratio="4 / 3" tone="wine" />
+                  </OrnateFrame>
+                </div>
+                {ART.hall ? (
+                  <div className="absolute" style={{ right: v(-14), bottom: v(-66), width: "48%", transform: "rotate(4deg)", boxShadow: "0 10px 26px rgba(10,0,3,0.55)" }}>
+                    <OrnateFrame color="rgba(241,230,220,0.8)" corner={20} pad={6} style={{ background: "#2a0a10" }}>
+                      <Picture src={ART.hall} ratio="1 / 1" />
+                    </OrnateFrame>
+                  </div>
+                ) : null}
               </Rise>
               {storyHeading || storyLine ? (
                 <Rise className="flex flex-col items-center" style={{ marginTop: v(30), gap: v(10) }}>
