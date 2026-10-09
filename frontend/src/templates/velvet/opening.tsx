@@ -267,6 +267,8 @@ export function VelvetOpening({
           <img
             src={SEALED}
             alt=""
+            // the first thing a guest sees: fetched before anything else
+            fetchPriority="high"
             className="pointer-events-none absolute inset-0 h-full w-full"
             style={{ opacity: stage === "sealed" ? 1 : 0, transition: "opacity 450ms ease" }}
           />
