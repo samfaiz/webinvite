@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ExcelService } from './excel.service';
 import { MailService } from '../mail/mail.service';
 import type { Invitation, User } from '@prisma/client';
+import { alertRecipients } from '../mail/owner-email';
+
 
 type InvWithUser = Invitation & { user?: User | null };
 
@@ -68,7 +70,7 @@ export class ExportService {
         });
     if (!inv) throw new NotFoundException('Invitation not found');
 
-    const recipient = inv.ownerEmail || inv.user?.email;
+    const recipient = alertRecipients(inv.ownerEmail, inv.user?.email).join(', ');
     if (!recipient)
       throw new BadRequestException('No recipient email set for this invitation');
 

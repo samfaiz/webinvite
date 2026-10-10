@@ -9,6 +9,7 @@ import type { Invitation } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { buildGuestEmail } from '../mail/guest-email';
+import { alertRecipients, buildOwnerAlert } from '../mail/owner-email';
 import { CreateRsvpDto } from './rsvp.dto';
 
 /** how the meal keys read in the couple's notification email */
@@ -111,7 +112,7 @@ export class RsvpService {
       subject: built.subject,
       text: built.text,
       html: built.html,
-      replyTo: inv.ownerEmail || owner?.email || undefined,
+      replyTo: alertRecipients(inv.ownerEmail, owner?.email).join(', ') || undefined,
     });
     // stamp only real deliveries (dev/jsonTransport sends report sent=false)
     if (result.sent) {
@@ -128,15 +129,15 @@ export class RsvpService {
     return true;
   }
 
-  /** Email the couple the moment a guest responds: who, coming or not, and
-   *  the running totals. Goes to the invitation's notification address,
-   *  falling back to the owner's account email. */
+  /** Email the couple the moment a guest responds: everything the guest gave
+   *  and the running totals. Goes to the invitation's "Your email" (one or
+   *  more addresses), falling back to the owner's account email. */
   private async notifyOwner(inv: Invitation, dto: CreateRsvpDto) {
     const owner = await this.prisma.user.findUnique({ where: { id: inv.userId } });
-    const to = inv.ownerEmail || owner?.email;
-    if (!to) return;
+    const to = alertRecipients(inv.ownerEmail, owner?.email);
+    if (!to.length) return;
 
-    let names = inv.slug;
+    let names = inv.slug ?? 'your invitation';
     try {
       const c = JSON.parse(inv.contentJson)?.couple;
       if (c?.partner1?.name && c?.partner2?.name) names = `${c.partner1.name} & ${c.partner2.name}`;
@@ -144,33 +145,40 @@ export class RsvpService {
       /* keep slug */
     }
 
-    const [rsvps, headcount] = await Promise.all([
-      this.prisma.rsvp.findMany({ where: { invitationId: inv.id }, select: { attending: true } }),
-      this.prisma.rsvp.aggregate({
-        where: { invitationId: inv.id, attending: 'accept' },
-        _sum: { guests: true },
-      }),
-    ]);
-    const accepted = rsvps.filter((x) => x.attending === 'accept').length;
-    const declined = rsvps.length - accepted;
+    const accepting = await this.prisma.rsvp.findMany({
+      where: { invitationId: inv.id, attending: 'accept' },
+      select: { guests: true, meal: true },
+    });
+    const declined = await this.prisma.rsvp.count({ where: { invitationId: inv.id, attending: { not: 'accept' } } });
 
-    const coming = dto.attending === 'accept';
-    const lines = [
-      `${dto.guestName} just responded to your invitation (${names}):`,
-      '',
-      coming ? '✔ Joyfully accepts' : "✖ Regretfully declines",
-      dto.guests && dto.guests > 1 ? `Party of ${dto.guests}` : undefined,
-      coming && dto.meal ? `Meal: ${MEAL_LABELS[dto.meal] ?? dto.meal}` : undefined,
-      dto.message ? `Message: “${dto.message}”` : undefined,
-      '',
-      `Totals so far — coming: ${accepted} (headcount ${headcount._sum.guests ?? 0}), not coming: ${declined}.`,
-      `Invitation: /i/${inv.slug}`,
-    ].filter((l): l is string => l !== undefined);
+    const built = buildOwnerAlert({
+      names,
+      guestName: dto.guestName,
+      attending: dto.attending as 'accept' | 'decline',
+      guests: dto.guests,
+      meal: dto.meal ? (MEAL_LABELS[dto.meal] ?? dto.meal) : undefined,
+      message: dto.message?.trim() || undefined,
+      email: dto.email?.trim() || undefined,
+      totals: {
+        accepted: accepting.length,
+        declined,
+        headcount: accepting.reduce((n, r) => n + r.guests, 0),
+        meals: Object.entries(MEAL_LABELS).map(([key, label]) => ({
+          label,
+          count: accepting.filter((r) => r.meal === key).length,
+        })),
+      },
+      inviteUrl: inv.slug ? `${this.origin()}/i/${inv.slug}` : undefined,
+      dashboardUrl: `${this.origin()}/dashboard`,
+    });
 
     await this.mail.send({
-      to,
-      subject: `RSVP: ${dto.guestName} ${coming ? 'is coming 🎉' : "can't make it"} — ${names}`,
-      text: lines.join('\n'),
+      to: to.join(', '),
+      subject: built.subject,
+      text: built.text,
+      html: built.html,
+      // a reply goes straight to the guest, when they left an email
+      replyTo: dto.email?.trim() || undefined,
     });
   }
 

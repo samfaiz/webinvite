@@ -2143,8 +2143,8 @@ export function SettingsPanel({ draft, update }: PanelProps) {
 
   return (
     <div>
-      <Field label="Your email" hint="We’ll email you the RSVP attendee list (Excel) for this invite.">
-        <TextInput type="email" value={draft.ownerEmail} placeholder="you@example.com" onChange={(e) => update((d) => { d.ownerEmail = e.target.value; })} />
+      <Field label="Your email (RSVP alerts)" hint="Every time a guest accepts or declines, we email you their name, answer, guests, meal and message — plus the attendee list (Excel). Add a second email after a comma so you both get them.">
+        <TextInput type="email" multiple value={draft.ownerEmail} placeholder="you@example.com, partner@example.com" onChange={(e) => update((d) => { d.ownerEmail = e.target.value; })} />
       </Field>
 
       <Field label="URL slug" hint="Your invite will live at /i/<slug>">

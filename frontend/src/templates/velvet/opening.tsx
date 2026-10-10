@@ -245,10 +245,12 @@ export function VelvetOpening({
             <div className="pointer-events-none absolute inset-0" style={{ opacity: 0, transition: "opacity 400ms ease" }}>
               <div
                 ref={writing}
-                className="absolute flex flex-col items-center text-center"
+                className="absolute flex flex-col items-center justify-center text-center"
                 style={{ left: "6.6%", top: "15%", width: "86.8%", height: "74.6%", containerType: "inline-size", color: CREAM }}
               >
-                <div className="flex w-full flex-col items-center" style={{ marginTop: "19cqw" }}>
+                {/* in the middle of the card (a touch above, where the eye
+                    puts the middle) */}
+                <div className="flex w-full flex-col items-center" style={{ marginBottom: "4cqw" }}>
                   <p style={{ fontFamily: CAPS, fontWeight: 600, fontSize: "5cqw", letterSpacing: "0.28em", lineHeight: 1.2 }}>Wedding Invitation</p>
                   <span aria-hidden style={{ display: "block", width: "34cqw", height: 1, background: "rgba(244,230,212,0.75)", margin: "4cqw 0 6cqw" }} />
                   <p style={{ fontFamily: SCRIPT, fontSize: "15cqw", lineHeight: 1.05, whiteSpace: "nowrap" }}>{keepTitles(p1 ?? "")}</p>
