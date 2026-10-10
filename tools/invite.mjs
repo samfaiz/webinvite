@@ -15,7 +15,7 @@
  *   node tools/invite.mjs merge <ref> <path> <json> [--dry]
  *   node tools/invite.mjs ops <ref> <ops.json> [--dry] [--note "…"]
  *   node tools/invite.mjs replace <ref> <parts.json> [--dry]
- *   node tools/invite.mjs create <draft.json>
+ *   node tools/invite.mjs create <draft.json>     {"copyFrom": ref, "slug"?, "account"?: email, …parts}
  *   node tools/invite.mjs publish|unpublish <ref>
  *   node tools/invite.mjs delete <ref> --confirm <slug>
  *   node tools/invite.mjs revisions <ref>

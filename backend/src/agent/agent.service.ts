@@ -348,24 +348,39 @@ export class AgentService {
 
   /** A new draft for an existing account: copied from another invitation
    *  (`copyFrom`), or from the parts given. Publish it separately. */
+  /** An account by email, whatever the capitals ("Rejin@…" or "rejin@…"). */
+  private async accountByEmail(email: string) {
+    const exact = await this.prisma.user.findUnique({ where: { email } });
+    if (exact) return exact;
+    const rows = await this.prisma.$queryRaw<
+      { id: string }[]
+    >`SELECT "id" FROM "User" WHERE lower("email") = lower(${email}) LIMIT 1`;
+    return rows[0]
+      ? this.prisma.user.findUnique({ where: { id: rows[0].id } })
+      : null;
+  }
+
   async create(body: Record<string, any>) {
-    const email = String(body?.ownerEmail ?? '')
-      .trim()
-      .toLowerCase();
-    if (!email)
-      throw new BadRequestException(
-        '"ownerEmail" (an existing account) is required',
+    // the account: the one named by `account` (an email, any capitals), else
+    // the account of the invitation it's copied from
+    const source = body?.copyFrom
+      ? await this.resolve(String(body.copyFrom))
+      : null;
+    const email = String(body?.account ?? '').trim();
+    const user = email
+      ? await this.accountByEmail(email)
+      : source
+        ? await this.prisma.user.findUnique({ where: { id: source.userId } })
+        : null;
+    if (!user) {
+      throw new (email ? NotFoundException : BadRequestException)(
+        email
+          ? `No account with the email ${email}`
+          : 'Say whose it is: "account" (an email), or "copyFrom" an invitation',
       );
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user)
-      throw new NotFoundException(`No account with the email ${email}`);
-    const base = body.copyFrom
-      ? this.doc(await this.resolve(String(body.copyFrom)))
-      : {};
-    const doc: Record<string, unknown> = { ...base };
+    }
+    const doc: Record<string, unknown> = source ? this.doc(source) : {};
     for (const k of ROOTS) if (k in (body ?? {})) doc[k] = body[k];
-    doc.ownerEmail =
-      typeof doc.ownerEmail === 'string' ? doc.ownerEmail : email;
     if (isObject(doc.content)) {
       const meta = doc.content.meta;
       doc.content = {
@@ -381,7 +396,7 @@ export class AgentService {
       data: { userId: user.id, status: 'draft', ...data },
     });
     this.logger.log(
-      `create draft ${created.id} for ${email}${body.copyFrom ? ` from ${body.copyFrom}` : ''}`,
+      `create draft ${created.id} for ${user.email}${body.copyFrom ? ` from ${body.copyFrom}` : ''}`,
     );
     return this.shape(created);
   }
