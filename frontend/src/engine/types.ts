@@ -342,6 +342,11 @@ export interface InvitationContent {
     trackUrl?: string;
     autoplay?: boolean;
   };
+  /** the invitation scrolling itself page by page: how long each page stays
+   *  (default eight seconds) */
+  autoScroll?: {
+    seconds?: number;
+  };
   /** auto-set in the builder to eventDate + 1 day; gates the public page */
   expiry: {
     expiresAt: string; // ISO date

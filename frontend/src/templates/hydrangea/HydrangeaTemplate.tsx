@@ -251,7 +251,7 @@ export function HydrangeaTemplate({
   useEffect(() => {
     viewerOpen.current = viewer !== null;
   }, [viewer]);
-  const tour = useTour(main, { hold: () => viewerOpen.current });
+  const tour = useTour(main, { seconds: content.autoScroll?.seconds, hold: () => viewerOpen.current });
   const begin = (withSound: boolean) => {
     if (begun) return;
     setBegun(true);

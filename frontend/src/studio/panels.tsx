@@ -13,6 +13,7 @@ import { orderedSections, type SectionKey, type TextStyle } from "@/engine/types
 import { CustomBuilder } from "@/custom/CustomBuilder";
 import { starterSections } from "@/custom/registry";
 import { api, type Track } from "@/lib/api";
+import { TOUR_SECONDS } from "@/templates/garden/tour";
 import { ImageEditorModal, urlToDataUrl } from "@/components/ImageEditorModal";
 
 export type PanelProps = {
@@ -602,7 +603,29 @@ export function CoverFields({ draft, update }: PanelProps) {
       <div className="mt-5 border-t border-slate-100 pt-5">
         <MusicFields draft={draft} update={update} />
       </div>
+      <div className="mt-5 border-t border-slate-100 pt-5">
+        <AutoScrollFields draft={draft} update={update} />
+      </div>
     </div>
+  );
+}
+
+const PAGE_SECONDS = [5, 6, 8, 10, 12, 15];
+
+/** How long the invitation stays on each page as it scrolls itself. Older
+ *  guests read slowly, so the default is generous. */
+export function AutoScrollFields({ draft, update }: PanelProps) {
+  const seconds = draft.content.autoScroll?.seconds ?? TOUR_SECONDS;
+  const label = (n: number) =>
+    `${n} seconds a page${n === TOUR_SECONDS ? " (recommended)" : n >= 10 ? " (relaxed)" : n <= 5 ? " (quick)" : ""}`;
+  return (
+    <Field label="Auto-scroll speed" hint="The invitation turns its own pages. Guests can still scroll or tap anytime; it waits while they read.">
+      <Select
+        value={String(seconds)}
+        onChange={(v) => update((d) => { d.content.autoScroll = { ...d.content.autoScroll, seconds: Number(v) }; })}
+        options={(PAGE_SECONDS.includes(seconds) ? PAGE_SECONDS : [...PAGE_SECONDS, seconds].sort((a, b) => a - b)).map((n) => ({ value: String(n), label: label(n) }))}
+      />
+    </Field>
   );
 }
 
@@ -1834,6 +1857,7 @@ export function ContentPanel({ draft, update }: PanelProps) {
       <Group title="RSVP" frame="frame-rsvp" action={<SectionTogglePill draft={draft} update={update} section="rsvp" />}><RsvpFields draft={draft} update={update} /></Group>
       <Group title="Guest emails" frame="frame-rsvp"><GuestEmailFields draft={draft} update={update} /></Group>
       <Group title="Music"><MusicFields draft={draft} update={update} /></Group>
+      <Group title="Auto-scroll speed"><AutoScrollFields draft={draft} update={update} /></Group>
     </div>
   );
 }

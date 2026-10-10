@@ -7,7 +7,8 @@ import type { RefObject } from "react";
  * The invitation playing itself: page after page, every page to the end.
  *
  * Each section is a stop (a section taller than the screen is two: its top,
- * then its foot), held five seconds; the reply page is held longer. `start`
+ * then its foot), held `seconds` (eight unless the couple chose otherwise —
+ * time enough for older guests to read); the reply page is held longer. `start`
  * can hold the first stop for less, when the guest has already been looking
  * at it. A touch, a scroll or a key
  * pauses the tour at once — the guest is reading, or tapping something — and
@@ -15,16 +16,19 @@ import type { RefObject } from "react";
  * It never resumes while they're typing, or while `hold()` says so (a photo
  * viewer open, say).
  */
+export const TOUR_SECONDS = 8;
+
 export function useTour(
   root: RefObject<HTMLElement | null>,
   {
-    dwell = 5000,
-    longDwell = 9000,
+    seconds,
     longIds = ["frame-rsvp"],
     idle = 8000,
     hold,
-  }: { dwell?: number; longDwell?: number; longIds?: string[]; idle?: number; hold?: () => boolean } = {},
+  }: { seconds?: number; longIds?: string[]; idle?: number; hold?: () => boolean } = {},
 ) {
+  const dwell = Math.round((seconds && seconds >= 3 && seconds <= 30 ? seconds : TOUR_SECONDS) * 1000);
+  const longDwell = dwell + 4000;
   const [running, setRunning] = useState(false);
   const [paused, setPaused] = useState(false);
   // what the progress line shows: the stop being held and for how long

@@ -343,7 +343,7 @@ export function GardenTemplate({
   useEffect(() => {
     viewerOpen.current = viewer !== null;
   }, [viewer]);
-  const tour = useTour(pages, { hold: () => viewerOpen.current });
+  const tour = useTour(pages, { seconds: content.autoScroll?.seconds, hold: () => viewerOpen.current });
   // a cover that opened by itself had no tap to start the music: the first one does
   useFirstTapMusic();
 

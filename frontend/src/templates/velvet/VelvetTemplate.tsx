@@ -228,7 +228,7 @@ export function VelvetTemplate({
   /* Touching the seal plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
      after seven seconds, and the music starts with their first tap anywhere. */
-  const tour = useTour(main);
+  const tour = useTour(main, { seconds: content.autoScroll?.seconds });
   const begin = (withSound: boolean) => {
     if (begun) return;
     setBegun(true);
@@ -239,7 +239,8 @@ export function VelvetTemplate({
         /* no window */
       }
     }
-    if (!reduce) tour.start(1500);
+    // the envelope showed only the names: page 1's families get a full stop
+    if (!reduce) tour.start();
   };
   // it begins by itself in a few seconds; the music starts on the first tap
   // the sealed envelope opens the card (by itself after a few seconds, too);

@@ -126,7 +126,7 @@ export function EmeraldTemplate({
   /* "Tap here to begin" plays the music and the card walks itself through,
      page by page to the end (useTour). If nobody taps, it begins by itself
      after four seconds, and the music starts with their first tap anywhere. */
-  const tour = useTour(main);
+  const tour = useTour(main, { seconds: content.autoScroll?.seconds });
   const begin = (withSound: boolean) => {
     if (begun) return;
     setBegun(true);
