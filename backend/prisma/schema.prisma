@@ -230,6 +230,7 @@ model ContactMessage {
   createdAt DateTime @default(now())
   readAt    DateTime?
   repliedAt DateTime?
+  replyText String? // the reply sent from the admin inbox, if any
 
   @@index([status, createdAt])
 }

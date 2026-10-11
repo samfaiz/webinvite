@@ -335,6 +335,9 @@ export const api = {
     request<ContactMessage>(`/admin/contact/messages/${id}/read`, { method: "POST" }, true),
   adminMarkContactReplied: (id: string) =>
     request<ContactMessage>(`/admin/contact/messages/${id}/replied`, { method: "POST" }, true),
+  /** sends the reply through the site's own email, then marks it replied */
+  adminReplyContact: (id: string, body: { subject?: string; message: string }) =>
+    request<ContactMessage>(`/admin/contact/messages/${id}/reply`, { method: "POST", body: JSON.stringify(body) }, true),
   adminDeleteContactMessage: (id: string) =>
     request<{ ok: true }>(`/admin/contact/messages/${id}`, { method: "DELETE" }, true),
 
@@ -506,6 +509,8 @@ export interface ContactMessage {
   createdAt: string;
   readAt?: string | null;
   repliedAt?: string | null;
+  /** the reply sent from the admin inbox */
+  replyText?: string | null;
 }
 
 export type ContactMessageInput = {

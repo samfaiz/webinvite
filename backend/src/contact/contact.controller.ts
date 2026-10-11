@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { ContactService } from './contact.service';
-import { SubmitContactMessageDto } from './contact.dto';
+import { ReplyContactMessageDto, SubmitContactMessageDto } from './contact.dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/auth.decorators';
 
@@ -49,6 +49,14 @@ export class ContactController {
   @Post('admin/contact/messages/:id/replied')
   markReplied(@Param('id') id: string) {
     return this.svc.markReplied(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Post('admin/contact/messages/:id/reply')
+  @HttpCode(200)
+  reply(@Param('id') id: string, @Body() dto: ReplyContactMessageDto) {
+    return this.svc.reply(id, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

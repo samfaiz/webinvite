@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SubmitContactMessageDto } from './contact.dto';
+import { MailService } from '../mail/mail.service';
+import { ReplyContactMessageDto, SubmitContactMessageDto } from './contact.dto';
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 @Injectable()
 export class ContactService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   /** Rough IP anonymisation — trims to /24 for IPv4, /48 for IPv6, so we still
    *  see roughly-where without storing anyone's exact address. */
@@ -68,6 +75,44 @@ export class ContactService {
     return this.prisma.contactMessage.update({
       where: { id },
       data: { status: 'replied', repliedAt: new Date(), readAt: row.readAt ?? new Date() },
+    });
+  }
+
+  /** Answer a message from the admin inbox: sent through the site's own email
+   *  (Admin → Email settings), so no mail app is needed on the admin's computer.
+   *  Their original message is quoted under the reply. */
+  async reply(id: string, dto: ReplyContactMessageDto) {
+    const row = await this.prisma.contactMessage.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException('Message not found');
+    const body = dto.message.trim();
+    if (!body) throw new BadRequestException('Please write a reply first.');
+    const subject = dto.subject?.trim() || (row.subject ? `Re: ${row.subject}` : 'Re: your message');
+    const when = row.createdAt.toUTCString().replace(/ GMT$/, ' UTC');
+    const br = (t: string) => esc(t).replace(/\r?\n/g, '<br />');
+
+    let sent = false;
+    try {
+      const result = await this.mail.send({
+        to: row.email,
+        subject,
+        text: `${body}\n\n—\nOn ${when}, ${row.name} wrote:\n> ${row.message.replace(/\r?\n/g, '\n> ')}`,
+        html:
+          `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#2b2b2b;">${br(body)}</div>` +
+          `<div style="margin-top:24px;padding-left:12px;border-left:3px solid #ddd;font-family:Arial,sans-serif;font-size:13px;line-height:1.5;color:#777;">` +
+          `On ${esc(when)}, ${esc(row.name)} wrote:<br />${br(row.message)}</div>`,
+      });
+      sent = result.sent;
+    } catch (e) {
+      throw new BadRequestException(`The email could not be sent: ${(e as Error).message}`);
+    }
+    if (!sent)
+      throw new BadRequestException(
+        'Email sending is switched off. Set it up in Admin → Email settings, then send again.',
+      );
+
+    return this.prisma.contactMessage.update({
+      where: { id },
+      data: { status: 'replied', repliedAt: new Date(), readAt: row.readAt ?? new Date(), replyText: body },
     });
   }
 

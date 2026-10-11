@@ -31,3 +31,16 @@ export class SubmitContactMessageDto {
   @MaxLength(40)
   source?: string;
 }
+
+/** Admin inbox — a reply sent to the person through the site's own email. */
+export class ReplyContactMessageDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  subject?: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(10000)
+  message!: string;
+}
